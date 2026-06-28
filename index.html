@@ -630,9 +630,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,sans-serif;b
       </div>
     </div>
     <div class="stats">
-      <div class="st"><div class="st-n">30</div><div class="st-l">Stops</div></div>
-      <div class="st"><div class="st-n">16</div><div class="st-l">Verified</div></div>
-      <div class="st"><div class="st-n gold">14</div><div class="st-l">Pending</div></div>
+      <div class="st"><div class="st-n">43</div><div class="st-l">Stops</div></div>
+      <div class="st"><div class="st-n">24</div><div class="st-l">Verified</div></div>
+      <div class="st"><div class="st-n gold">19</div><div class="st-l">Pending</div></div>
       <div class="st"><div class="st-n blue">6</div><div class="st-l">Areas</div></div>
     </div>
   </div>
@@ -646,8 +646,8 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,sans-serif;b
       </div>
     </div>
     <div class="tabs" id="tabs">
-      <button class="tab active" data-f="all">All <span class="tcnt">30</span></button>
-      <button class="tab" data-f="Malaz">Malaz <span class="tcnt">10</span></button>
+      <button class="tab active" data-f="all">All <span class="tcnt">43</span></button>
+      <button class="tab" data-f="Malaz">Malaz <span class="tcnt">23</span></button>
       <button class="tab" data-f="Sulaimaniya">Sulaimaniya <span class="tcnt">5</span></button>
       <button class="tab" data-f="Olaya">Olaya <span class="tcnt">8</span></button>
       <button class="tab" data-f="Exit 4">Exit 4 <span class="tcnt">2</span></button>
@@ -725,36 +725,49 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,sans-serif;b
 
 <script>
 var CUSTS=[
-  {n:1,name:"Almas Family Restaurant",ph:"+966571795093",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Almas+Family+Restaurant+Malaz+Riyadh"},
-  {n:2,name:"Kailash Parbat",ph:"+966538829777",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Kailash+Parbat+Malaz+Riyadh"},
-  {n:3,name:"Indian Corner",ph:"+966530412988",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Indian+Corner+Malaz+Riyadh"},
-  {n:4,name:"MALAZ Family Restaurants",ph:"+966112061109",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Malaz+Family+Restaurants+Riyadh"},
-  {n:5,name:"Grand Lucky Indian Multi Cuisine",ph:"+966506337430",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Grand+Lucky+Indian+Multi+Cuisine+Riyadh"},
-  {n:6,name:"Minha Restaurant",ph:"",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Minha+Restaurant+Malaz+Riyadh"},
-  {n:7,name:"Shahi Bawarchi",ph:"",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Shahi+Bawarchi+Malaz+Riyadh"},
-  {n:8,name:"Chennai Spice Kitchen",ph:"",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Chennai+Spice+Kitchen+Malaz+Riyadh"},
-  {n:9,name:"Cherries Restaurant",ph:"",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Cherries+Restaurant+Malaz+Riyadh"},
-  {n:10,name:"Malabar Paris Restaurant",ph:"",area:"Malaz",ak:0,maps:"https://maps.google.com/?q=Malabar+Paris+Restaurant+Malaz+Riyadh"},
-  {n:11,name:"TAHERA Kerala Fast Food",ph:"+966541263672",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Tahera+Kerala+Fast+Food+Sulaimaniya+Riyadh"},
-  {n:12,name:"Grand Al Mas Multicuisine",ph:"+966536802686",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Grand+Al+Mas+Multicuisine+Riyadh"},
-  {n:13,name:"Malaz Restaurant Olaya Road",ph:"",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Malaz+Restaurant+Sulimaniyah+Riyadh"},
-  {n:14,name:"Hyderabad House",ph:"",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Hyderabad+House+Sulimaniyah+Riyadh"},
-  {n:15,name:"Paradise Biryani",ph:"",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Paradise+Biryani+Sulimaniyah+Riyadh"},
-  {n:16,name:"The CANTEEN",ph:"+966562444787",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=The+Canteen+Olaya+Riyadh"},
-  {n:17,name:"Taste of Dilli",ph:"+966114158877",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Taste+of+Dilli+Olaya+Riyadh"},
-  {n:18,name:"Taj Mahal Restaurant",ph:"+966539977857",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Taj+Mahal+Restaurant+Olaya+Riyadh"},
-  {n:19,name:"Paradise Indian Restaurant",ph:"+966552005913",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Paradise+Indian+Restaurant+Olaya+Riyadh"},
-  {n:20,name:"Chola Restaurant",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Chola+Restaurant+Olaya+Riyadh"},
-  {n:21,name:"BBQ Nation",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=BBQ+Nation+Olaya+Riyadh"},
-  {n:22,name:"Village Lasani",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Village+Lasani+Olaya+Riyadh"},
-  {n:23,name:"Koyla Restaurant",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Koyla+Restaurant+Olaya+Riyadh"},
-  {n:24,name:"Kerala Fast Food",ph:"",area:"Exit 4 (Muruj)",ak:3,maps:"https://maps.google.com/?q=Kerala+Fast+Food+Muruj+Riyadh"},
-  {n:25,name:"Kerala Spicy (Sagar Restaurant)",ph:"",area:"Exit 4",ak:3,maps:"https://maps.google.com/?q=Kerala+Spicy+Sagar+Restaurant+Riyadh"},
-  {n:26,name:"Shahrukh Khan Restaurant",ph:"+966559333697",area:"Exit 5 (Rabi)",ak:4,maps:"https://maps.google.com/?q=Shahrukh+Khan+Restaurant+Riyadh"},
-  {n:27,name:"Kerala Fast Food",ph:"",area:"Exit 5 (Al Wadi)",ak:4,maps:"https://maps.google.com/?q=Kerala+Fast+Food+Al+Wadi+Riyadh"},
-  {n:28,name:"Calicut Taste Restaurant",ph:"+966559570099",area:"Exit 5 (Ghirnatah)",ak:4,maps:"https://maps.google.com/?q=Calicut+Taste+Restaurant+Riyadh"},
-  {n:29,name:"Indian Island Restaurant",ph:"+966538528987",area:"Exit 5 Corridor",ak:4,maps:"https://maps.google.com/?q=Indian+Island+Restaurant+Riyadh"},
-  {n:30,name:"Biryani Points",ph:"",area:"Exit 5 Corridor",ak:4,maps:"https://maps.google.com/?q=Biryani+Points+Riyadh"}
+  {n:1,name:"Almas Restaurent",ph:"+966568065187",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/4fRhFar2z1EqDEti7"},
+  {n:2,name:"Cherries Restaurant",ph:"+966556209757",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/yB7ZxntDK8mxf4D19"},
+  {n:3,name:"Chilly Master",ph:"+966594355511",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/sFGu7tfCuB13SSuS8"},
+  {n:4,name:"Ghazi Restaurent",ph:"+966561473963",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/VVd598tzxXziAzBcA"},
+  {n:5,name:"Spicy Club",ph:"+966537366920",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/e6sBYtHAgyYd8E9N7"},
+  {n:6,name:"Kailash Parbat",ph:"+966538829777",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/SkS9x1xgzJYzM9cg9"},
+  {n:7,name:"Tanoor Indian Restaurant",ph:"+966530394456",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/x2iskaQ9DWiS9bup9"},
+  {n:8,name:"Hotel Rayan",ph:"+966538678756",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/NVSPX2rKaRjfScbz6"},
+  {n:9,name:"Malaz Restaurent",ph:"+966566107335",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/hMFHQDaX4czZSBGU6"},
+  {n:10,name:"Grand Lucky Indian Multi Cuisine",ph:"+966506337430",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/Ba38S5q9ggGsxzHm7"},
+  {n:11,name:"Sagar Indian Restaurent",ph:"+966570024126",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/Ez2dJogPZrWxFFfc9"},
+  {n:12,name:"Chennai Spice",ph:"+966581185878",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/wKwy357cAiyDZwvq7"},
+  {n:13,name:"Indian and Arabic Restaurent",ph:"+966583461916",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/1ZevTGXfqaogW7Ga8"},
+  {n:14,name:"Honey Chilly",ph:"+966593026036",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/mSFUoVEVZpfhkAzG8"},
+  {n:15,name:"Palakkad Restaurent",ph:"+966574700972",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/myLxX3itGRhf2oah6"},
+  {n:16,name:"Bangalore Dosa Bhavan",ph:"+966509975670",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/oP96dgRyBZEu6LZY8"},
+  {n:17,name:"LuLu Restaurent",ph:"+966536463852",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/XjQqNvZxvBg3PRjp8"},
+  {n:18,name:"Rifayi Restaurent",ph:"+966507746829",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/XjQqNvZxvBg3PRjp8"},
+  {n:19,name:"Machali Kingdom Restaurent",ph:"+966544435133",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/ZBXfhJWSeyTkxiw79"},
+  {n:20,name:"Kerala Hotel",ph:"+966558828146",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/X1Y8tXU6bxZc9raF8"},
+  {n:21,name:"Moon Light Family Restaurent",ph:"+966556823632",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/NSxAhDTziGEAth8f7"},
+  {n:22,name:"Malabar Paris",ph:"+966534280387",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/bqBohncpb9RHigkT7"},
+  {n:23,name:"Nanma Kitchen",ph:"+966506475396",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/gcdudA5QBrYrrsq26"},
+  {n:24,name:"TAHERA Kerala Fast Food",ph:"+966541263672",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Tahera+Kerala+Fast+Food+Sulaimaniya+Riyadh"},
+  {n:25,name:"Grand Al Mas Multicuisine",ph:"+966536802686",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Grand+Al+Mas+Multicuisine+Riyadh"},
+  {n:26,name:"Malaz Restaurant Olaya Road",ph:"",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Malaz+Restaurant+Sulimaniyah+Riyadh"},
+  {n:27,name:"Hyderabad House",ph:"",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Hyderabad+House+Sulimaniyah+Riyadh"},
+  {n:28,name:"Paradise Biryani",ph:"",area:"Sulaimaniya",ak:1,maps:"https://maps.google.com/?q=Paradise+Biryani+Sulimaniyah+Riyadh"},
+  {n:29,name:"The CANTEEN",ph:"+966562444787",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=The+Canteen+Olaya+Riyadh"},
+  {n:30,name:"Taste of Dilli",ph:"+966114158877",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Taste+of+Dilli+Olaya+Riyadh"},
+  {n:31,name:"Taj Mahal Restaurant",ph:"+966539977857",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Taj+Mahal+Restaurant+Olaya+Riyadh"},
+  {n:32,name:"Paradise Indian Restaurant",ph:"+966552005913",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Paradise+Indian+Restaurant+Olaya+Riyadh"},
+  {n:33,name:"Chola Restaurant",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Chola+Restaurant+Olaya+Riyadh"},
+  {n:34,name:"BBQ Nation",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=BBQ+Nation+Olaya+Riyadh"},
+  {n:35,name:"Village Lasani",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Village+Lasani+Olaya+Riyadh"},
+  {n:36,name:"Koyla Restaurant",ph:"",area:"Olaya",ak:2,maps:"https://maps.google.com/?q=Koyla+Restaurant+Olaya+Riyadh"},
+  {n:37,name:"Kerala Fast Food",ph:"",area:"Exit 4 (Muruj)",ak:3,maps:"https://maps.google.com/?q=Kerala+Fast+Food+Muruj+Riyadh"},
+  {n:38,name:"Kerala Spicy (Sagar Restaurant)",ph:"",area:"Exit 4",ak:3,maps:"https://maps.google.com/?q=Kerala+Spicy+Sagar+Restaurant+Riyadh"},
+  {n:39,name:"Shahrukh Khan Restaurant",ph:"+966559333697",area:"Exit 5 (Rabi)",ak:4,maps:"https://maps.google.com/?q=Shahrukh+Khan+Restaurant+Riyadh"},
+  {n:40,name:"Kerala Fast Food",ph:"",area:"Exit 5 (Al Wadi)",ak:4,maps:"https://maps.google.com/?q=Kerala+Fast+Food+Al+Wadi+Riyadh"},
+  {n:41,name:"Calicut Taste Restaurant",ph:"+966559570099",area:"Exit 5 (Ghirnatah)",ak:4,maps:"https://maps.google.com/?q=Calicut+Taste+Restaurant+Riyadh"},
+  {n:42,name:"Indian Island Restaurant",ph:"+966538528987",area:"Exit 5 Corridor",ak:4,maps:"https://maps.google.com/?q=Indian+Island+Restaurant+Riyadh"},
+  {n:43,name:"Biryani Points",ph:"",area:"Exit 5 Corridor",ak:4,maps:"https://maps.google.com/?q=Biryani+Points+Riyadh"}
 ];
 
 var ANAMES=["Malaz","Sulaimaniya","Olaya","Exit 4","Exit 5"];
@@ -835,7 +848,7 @@ function openDetail(c){
   document.getElementById("ds-name").textContent=c.name;
   document.getElementById("ds-area").textContent=c.area;
   document.getElementById("ds-area2").textContent=c.area;
-  document.getElementById("ds-sno").textContent="#"+c.n+" of 30";
+  document.getElementById("ds-sno").textContent="#"+c.n+" of 43";
   document.getElementById("ds-phone").textContent=c.ph||"Not yet verified";
   document.getElementById("ds-mlink").href=c.maps;
   document.getElementById("ds-nav").href=c.maps;
