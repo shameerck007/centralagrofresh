@@ -1507,6 +1507,66 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .vp-mini-act.visit{background:rgba(100,110,130,0.1);color:var(--muted)}
 .vp-mini-act.visit.done{background:linear-gradient(135deg,var(--gr2),var(--gr3));color:#fff}
 
+
+/* Visits & comments live only in the Planner now */
+.vsec{display:none !important}
+
+
+/* Report tab retired: visits now live in the Planner (renamed Customer Visit) */
+#nb-report{display:none !important}
+
+
+/* ===== LIVE TRACKING (admin) ===== */
+.trk-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:15px;
+  padding:13px 14px;margin-bottom:10px;box-shadow:var(--sh1);
+}
+.trk-top{display:flex;align-items:center;gap:11px}
+.trk-ava{
+  width:42px;height:42px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gr1),var(--gr3));color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:900;
+  position:relative;
+}
+.trk-dot{
+  position:absolute;bottom:-2px;right:-2px;width:13px;height:13px;border-radius:50%;
+  border:2.5px solid var(--card);background:#9aa3b2;
+}
+.trk-dot.live{background:#18a95c}
+.trk-dot.idle{background:#e0a12f}
+.trk-body{flex:1;min-width:0}
+.trk-name{font-size:13.5px;font-weight:800;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.trk-meta{font-size:11px;color:var(--muted);font-weight:600;margin-top:2px}
+.trk-pill{
+  font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.7px;
+  border-radius:999px;padding:4px 10px;flex-shrink:0;
+}
+.trk-pill.live{background:rgba(24,169,92,0.12);color:#128a4a}
+.trk-pill.idle{background:rgba(224,161,47,0.14);color:#b07c14}
+.trk-pill.off{background:rgba(120,130,145,0.13);color:var(--muted)}
+.trk-pill.blocked{background:rgba(214,69,69,0.12);color:#c23434}
+.trk-acts{display:flex;gap:7px;margin-top:11px}
+.trk-btn{
+  flex:1;padding:10px;border-radius:11px;border:1.5px solid var(--border);
+  background:var(--bg);color:var(--text);font-size:12px;font-weight:800;cursor:pointer;
+  font-family:inherit;display:flex;align-items:center;justify-content:center;gap:6px;
+  text-decoration:none;
+}
+.trk-btn i{font-size:14px}
+.trk-btn.primary{background:linear-gradient(135deg,var(--gr2),var(--gr3));color:#fff;border-color:transparent}
+.trk-map{
+  margin-top:11px;border-radius:13px;overflow:hidden;border:1.5px solid var(--border);
+  display:none;
+}
+.trk-map.open{display:block}
+.trk-map iframe{width:100%;height:230px;border:0;display:block}
+.trk-note{
+  margin:0 16px 12px;padding:11px 13px;border-radius:12px;
+  background:rgba(0,102,255,0.06);color:var(--muted);font-size:11.5px;font-weight:600;line-height:1.5;
+  display:flex;gap:8px;align-items:flex-start;
+}
+.trk-note i{color:var(--ab1);font-size:14px;flex-shrink:0;margin-top:1px}
+
 </style>
 </head>
 <body>
@@ -1672,7 +1732,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       <div class="areas-hero">
         <div class="areas-hero-pattern"></div>
         <div class="areas-eyebrow"><i class="ti ti-calendar-time"></i> Plan Ahead</div>
-        <div class="areas-title">Visit Planner</div>
+        <div class="areas-title">Customer Visits</div>
         <div class="areas-sub">Pick a date, select customers, and save your visit plan</div>
       </div>
 
@@ -1753,6 +1813,19 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       </div>
     </div>
   </div>
+  <!-- ===== LIVE TRACKING VIEW (admin) ===== -->
+  <div class="view" id="v-track">
+    <div class="areas-scroll">
+      <div class="areas-hero">
+        <div class="areas-hero-pattern"></div>
+        <div class="areas-eyebrow"><i class="ti ti-live-view"></i> Field Team</div>
+        <div class="areas-title">Live Tracking</div>
+        <div class="areas-sub">See where your sales team is right now</div>
+      </div>
+      <div class="trk-note"><i class="ti ti-info-circle"></i><span>Locations update while a rep has the app open and location permission allowed. Positions stop updating when the app is closed.</span></div>
+      <div class="areas-list" id="trk-list"></div>
+    </div>
+  </div>
 </div>
 
   <!-- ===== BOTTOM NAV (mobile only) ===== -->
@@ -1771,7 +1844,14 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <button class="nbtn" id="nb-planner">
       <i class="ti ti-calendar-time"></i>
       <div class="nbtn-indicator"></div>
-      <span>Planner</span>
+      <span class="nbtn-label-short">Visits</span>
+      <span class="nbtn-label-full">Customer Visit</span>
+    </button>
+    <button class="nbtn admin-only-nav" id="nb-track" style="display:none">
+      <i class="ti ti-live-view"></i>
+      <div class="nbtn-indicator"></div>
+      <span class="nbtn-label-short">Track</span>
+      <span class="nbtn-label-full">Tracking</span>
     </button>
     <button class="nbtn admin-only-nav" id="nb-areas" style="display:none">
       <i class="ti ti-map-pin-cog"></i>
@@ -2679,15 +2759,14 @@ function renderList(){
     var noPhone=!c.ph;
     var visits=getVisits(c.n);
     var isVisited=visits.length>0;
-    html+="<div class='ccard a0"+(noPhone?" no-phone":"")+(isVisited?" visited":"")+" ' data-sno='"+c.n+"'>";
+    html+="<div class='ccard a0"+(noPhone?" no-phone":"")+" ' data-sno='"+c.n+"'>";
     html+="<div class='sbadge'>"+c.n+"</div>";
     html+="<div class='ci'>";
     html+="<div class='cn'>"+c.name+"</div>";
-    html+="<div class='cm'><span class='apill'>"+c.area+"</span><span class='"+(noPhone?"vfy":"ok")+"'>"+( noPhone?"&#9651; Verify":"&#10003; Ready")+"</span>"+(isVisited?"<span class='visited-tag'><i class='ti ti-checks'></i> "+relTime(visits[0].ts)+"</span>":"")+"</div>";
+    html+="<div class='cm'><span class='apill'>"+c.area+"</span><span class='"+(noPhone?"vfy":"ok")+"'>"+( noPhone?"&#9651; Verify":"&#10003; Ready")+"</span>"+"</div>";
     html+="<div class='ph'><i class='ti ti-phone'></i>&nbsp;"+(c.ph||"Phone to verify")+"</div>";
     html+="</div>";
     html+="<div class='cacts'>";
-    html+="<button class='abtn abtn-visit"+(isVisited?" done":"")+" ' data-sno='"+c.n+"' title='Mark visited'><i class='ti ti-check'></i></button>";
     html+="<button class='abtn abtn-call"+(noPhone?" off":"")+" ' data-ph='"+c.ph+"'>​<i class='ti ti-phone-call'></i></button>";
     html+="<a class='abtn abtn-nav' href='"+c.maps+"' target='_blank'><i class='ti ti-navigation'></i></a>";
     html+="</div>";
@@ -2713,26 +2792,6 @@ function renderList(){
       }
       var navBtn=card.querySelector(".abtn-nav");
       if(navBtn){navBtn.addEventListener("click",function(e){e.stopPropagation();});}
-      var visitBtn=card.querySelector(".abtn-visit");
-      if(visitBtn){
-        visitBtn.addEventListener("click",function(e){
-          e.stopPropagation();
-          showConfirm({
-            title:"Mark as Visited?",
-            message:"Log a visit for "+cust.name+" right now.",
-            icon:"ti-map-pin-check",
-            iconType:"success",
-            showNote:true,
-            notePlaceholder:"Add a note (optional)...",
-            confirmLabel:"Confirm Visit",
-            onConfirm:function(note){
-              addVisit(sno,note);
-              renderList();
-              showToast("Visit logged for "+cust.name,"success","ti-circle-check");
-            }
-          });
-        });
-      }
     })(cards[j]);
   }
   updateStatsBar();
@@ -3453,6 +3512,8 @@ function updateAdminUI(){
   if(el)el.style.display=isAdmin()?"":"none";
   var ul=document.getElementById("nb-users");
   if(ul)ul.style.display=isAdmin()?"":"none";
+  var tk=document.getElementById("nb-track");
+  if(tk)tk.style.display=isAdmin()?"":"none";
 }
 
 function doLogin(){
@@ -3536,7 +3597,7 @@ document.getElementById("logout-btn").addEventListener("click",function(){
     cancelLabel:"Stay Signed In",
     onConfirm:function(){
       try{localStorage.removeItem(SESSION_KEY);}catch(e){}
-      try{if(typeof fbStopSync==="function")fbStopSync();}catch(e){}
+      try{if(typeof trkStop==="function")trkStop();}catch(e){}      try{if(typeof fbStopSync==="function")fbStopSync();}catch(e){}
       try{if(window.firebase&&firebase.auth)firebase.auth().signOut();}catch(e){}
       CURRENT_ROLE="rep";
       CURRENT_USER="";
@@ -3798,6 +3859,9 @@ function vpTsToDateStr(ts){
   var d=new Date(ts);
   return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
 }
+function vpFormatTime(ts){
+  try{return new Date(ts).toLocaleTimeString("en-SA",{hour:"numeric",minute:"2-digit"});}catch(e){return "";}
+}
 function vpVisitsOn(custNo,dateStr){
   var store=loadVisitStore();
   var arr=store[custNo]||[];
@@ -3855,7 +3919,7 @@ function openPlanDetail(dateStr){
       +"<i class='ti "+(noteTxt?"ti-message-2":"ti-message-off")+"'></i>"
       +"<span>"+(noteTxt?escapeHtml(noteTxt):(visited?"Visited — no comments added. Tap the message button to add.":"Not visited yet — tap the message button to record the visit and customer comments."))+"</span>"
       +"</div>"
-      +(visited&&latest.user?"<div class='vp-visit-user'><i class='ti ti-user'></i>"+escapeHtml(latest.user)+"</div>":"")
+      +(visited?"<div class='vp-visit-user'><i class='ti ti-clock'></i>Visited at "+vpFormatTime(latest.ts)+(latest.user?" \u2022 "+escapeHtml(latest.user):"")+"</div>":"")
       +"</div>";
     stop++;
   });
@@ -4061,7 +4125,7 @@ document.getElementById("vp-detail-pdf").addEventListener("click",function(){
     var latest=dv.length?dv[dv.length-1]:null;
     if(dv.length)visited++;
     if(latest&&latest.note)withComments++;
-    rows.push({c:c,visited:dv.length>0,note:(latest&&latest.note)||"",user:(latest&&latest.user)||""});
+    rows.push({c:c,visited:dv.length>0,note:(latest&&latest.note)||"",user:(latest&&latest.user)||"",t:(latest?latest.ts:0)});
   }
   y=vpPdfStatBoxes(doc,pageW,mx,y,[
     {l:"Planned",v:rows.length,c:[28,34,44]},
@@ -4069,37 +4133,66 @@ document.getElementById("vp-detail-pdf").addEventListener("click",function(){
     {l:"Pending",v:rows.length-visited,c:[196,130,10]},
     {l:"With comments",v:withComments,c:[0,90,210]}
   ]);
+  var cNum=mx+4,cNumW=22;
+  var cCust=cNum+cNumW,cCustW=148;
+  var cSt=cCust+cCustW,cStW=76;
+  var cCom=cSt+cStW;
+  var cComW=pageW-mx-6-cCom;
+  function dayHead(){
+    doc.setFont("helvetica","bold");doc.setFontSize(7);
+    doc.setTextColor(150,156,168);
+    doc.text("#",cNum,y);
+    doc.text("CUSTOMER",cCust,y);
+    doc.text("STATUS",cSt,y);
+    doc.text("CUSTOMER COMMENTS",cCom,y);
+    y+=6;
+    doc.setDrawColor(210,216,224);doc.setLineWidth(0.8);
+    doc.line(mx,y,pageW-mx,y);
+    y+=14;
+  }
+  dayHead();
   for(var r=0;r<rows.length;r++){
     var row=rows[r];
-    var noteLines=row.note?doc.splitTextToSize(row.note,pageW-mx*2-70):[];
-    var blockH=34+(noteLines.length?noteLines.length*10+16:0);
-    if(y+blockH>pageH-50){doc.addPage();y=48;}
-    doc.setFillColor(244,246,248);
-    doc.roundedRect(mx,y,pageW-mx*2,24,5,5,"F");
-    doc.setFont("helvetica","bold");doc.setFontSize(10);
+    var nameLines=doc.splitTextToSize(row.c.name,cCustW-10);
+    var metaTxt=(row.c.area||"")+(row.c.ph?" \u2022 "+row.c.ph:"");
+    var metaLines=metaTxt?doc.splitTextToSize(metaTxt,cCustW-10):[];
+    var noteLines=row.note?doc.splitTextToSize(row.note,cComW):[];
+    var custH=nameLines.length*11+metaLines.length*9+4;
+    var stH=(row.visited?(row.user?30:20):12);
+    var comH=(noteLines.length?noteLines.length*10:10)+4;
+    var rowH=Math.max(30,custH,stH,comH);
+    if(y+rowH>pageH-50){doc.addPage();y=48;dayHead();}
+    doc.setFont("helvetica","bold");doc.setFontSize(9);
+    doc.setTextColor(120,126,138);
+    doc.text(String(r+1),cNum,y);
     doc.setTextColor(28,34,44);
-    doc.text((r+1)+".  "+row.c.name,mx+10,y+16);
-    doc.setFont("helvetica","bold");doc.setFontSize(8);
-    if(row.visited){doc.setTextColor(13,110,58);doc.text("VISITED",pageW-mx-10,y+16,{align:"right"});}
-    else{doc.setTextColor(196,130,10);doc.text("PENDING",pageW-mx-10,y+16,{align:"right"});}
-    y+=32;
-    doc.setFont("helvetica","normal");doc.setFontSize(8);
-    doc.setTextColor(110,116,130);
-    var meta=(row.c.area||"")+(row.c.ph?"  \u2022  "+row.c.ph:"")+(row.visited&&row.user?"  \u2022  Rep: "+row.user:"");
-    doc.text(meta,mx+16,y);
-    y+=6;
-    if(noteLines.length){
-      y+=8;
-      doc.setFont("helvetica","bold");doc.setFontSize(7.5);
-      doc.setTextColor(13,110,58);
-      doc.text("CUSTOMER COMMENTS",mx+16,y);
-      y+=11;
-      doc.setFont("helvetica","normal");doc.setFontSize(9);
-      doc.setTextColor(45,52,64);
-      doc.text(noteLines,mx+16,y);
-      y+=noteLines.length*10;
+    doc.text(nameLines,cCust,y);
+    if(metaLines.length){
+      doc.setFont("helvetica","normal");doc.setFontSize(7);
+      doc.setTextColor(135,141,152);
+      doc.text(metaLines,cCust,y+nameLines.length*11);
     }
-    y+=12;
+    doc.setFont("helvetica","bold");doc.setFontSize(8);
+    if(row.visited){doc.setTextColor(13,110,58);doc.text("VISITED",cSt,y);}
+    else{doc.setTextColor(196,130,10);doc.text("PENDING",cSt,y);}
+    if(row.visited){
+      doc.setFont("helvetica","normal");doc.setFontSize(7);
+      doc.setTextColor(135,141,152);
+      doc.text(vpFormatTime(row.t),cSt,y+10);
+      if(row.user)doc.text(doc.splitTextToSize(row.user,cStW-6)[0]||"",cSt,y+19);
+    }
+    doc.setFont("helvetica","normal");doc.setFontSize(9);
+    if(noteLines.length){
+      doc.setTextColor(35,42,54);
+      doc.text(noteLines,cCom,y);
+    } else {
+      doc.setTextColor(185,190,200);
+      doc.text("\u2014",cCom,y);
+    }
+    y+=rowH;
+    doc.setDrawColor(238,241,245);doc.setLineWidth(0.5);
+    doc.line(mx,y-9,pageW-mx,y-9);
+    y+=3;
   }
   vpPdfFooter(doc,pageW,pageH,mx,"AgroFresh Sales Route Manager \u2014 Daily Visit Report");
   vpDeliverPdf(doc,"AgroFresh-Daily-Report-"+dateStr+".pdf");
@@ -4315,7 +4408,7 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
     tableHead();
     g.items.forEach(function(it){
       var lines=doc.splitTextToSize(it.note,comW);
-      var rowH=Math.max(14,lines.length*10+4);
+      var rowH=Math.max(26,lines.length*10+4);
       if(y+rowH>pageH-50){
         doc.addPage();y=48;
         tableHead();
@@ -4323,6 +4416,9 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
       doc.setFont("helvetica","normal");doc.setFontSize(8.5);
       doc.setTextColor(70,78,92);
       doc.text(formatDMY(it.ts),colDate,y);
+      doc.setFontSize(7);doc.setTextColor(150,156,168);
+      doc.text(vpFormatTime(it.ts),colDate,y+10);
+      doc.setFontSize(8.5);doc.setTextColor(70,78,92);
       doc.text(doc.splitTextToSize(it.user,colRepW-8)[0]||"",colRep,y);
       doc.setFont("helvetica","bold");
       var sc=stColor[it.st]||stColor.pending;
@@ -4607,6 +4703,8 @@ function fbAfterLogin(user){
     fbStartSync();
     fbSeedIfNeeded();
     showApp();
+    if(CURRENT_ROLE==="admin"){trkAdminListen();}
+    else{setTimeout(trkStart,1500);}
   }
   FB_DB.collection("appdata").doc("config").get().then(function(snap){
     var cfg=snap.exists?snap.data():null;
@@ -4715,6 +4813,115 @@ function fbInit(){
   }
   inp.addEventListener("input",upd);
 })();
+
+// ===== LIVE TRACKING =====
+var TRK_WATCH=null,TRK_LAST_TS=0,TRK_LAST_LAT=null,TRK_LAST_LNG=null;
+var TRK_DOCS=[],TRK_UNSUB=null,TRK_TIMER=null,TRK_OPEN_MAP=null;
+function trkDist(lat1,lon1,lat2,lon2){
+  var R=6371000,dLat=(lat2-lat1)*Math.PI/180,dLon=(lon2-lon1)*Math.PI/180;
+  var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
+  return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
+}
+function trkStart(){
+  if(!FB_READY||!FB_AUTH||!FB_AUTH.currentUser)return;
+  if(!navigator.geolocation)return;
+  if(TRK_WATCH!==null)return;
+  try{
+    TRK_WATCH=navigator.geolocation.watchPosition(function(pos){
+      var now=Date.now();
+      var lat=pos.coords.latitude,lng=pos.coords.longitude;
+      var moved=(TRK_LAST_LAT===null)?1e9:trkDist(TRK_LAST_LAT,TRK_LAST_LNG,lat,lng);
+      if(now-TRK_LAST_TS<45000&&moved<80)return;
+      TRK_LAST_TS=now;TRK_LAST_LAT=lat;TRK_LAST_LNG=lng;
+      var email=(FB_AUTH.currentUser.email||"").toLowerCase();
+      if(!email)return;
+      FB_DB.collection("tracking").doc(email).set({
+        lat:lat,lng:lng,acc:Math.round(pos.coords.accuracy||0),
+        ts:now,name:CURRENT_USER||email,denied:false
+      }).catch(function(e){});
+    },function(err){
+      try{
+        var email=(FB_AUTH.currentUser&&FB_AUTH.currentUser.email||"").toLowerCase();
+        if(email)FB_DB.collection("tracking").doc(email).set({denied:true,ts:Date.now(),name:CURRENT_USER||email},{merge:true}).catch(function(e){});
+      }catch(e){}
+    },{enableHighAccuracy:false,maximumAge:30000,timeout:20000});
+    showToast("Location sharing is active","info","ti-map-pin");
+  }catch(e){}
+}
+function trkStop(){
+  if(TRK_WATCH!==null){try{navigator.geolocation.clearWatch(TRK_WATCH);}catch(e){}TRK_WATCH=null;}
+}
+function trkAdminListen(){
+  if(TRK_UNSUB||!FB_READY)return;
+  TRK_UNSUB=FB_DB.collection("tracking").onSnapshot(function(qs){
+    TRK_DOCS=[];
+    qs.forEach(function(d){var o=d.data();o._email=d.id;TRK_DOCS.push(o);});
+    var av=document.querySelector(".view.active");
+    if(av&&av.id==="v-track")renderTracking();
+  },function(err){});
+  if(!TRK_TIMER){
+    TRK_TIMER=setInterval(function(){
+      var av=document.querySelector(".view.active");
+      if(av&&av.id==="v-track")renderTracking();
+    },60000);
+  }
+}
+function renderTracking(){
+  var el=document.getElementById("trk-list");
+  if(!el)return;
+  if(!TRK_DOCS.length){
+    el.innerHTML="<div class='areas-empty'><i class='ti ti-map-pin-off'></i><p>No location data yet</p><span style='font-size:12px'>Rep positions appear here after they log in on their phone and allow location access</span></div>";
+    return;
+  }
+  var now=Date.now();
+  var docs=TRK_DOCS.slice().sort(function(a,b){return (b.ts||0)-(a.ts||0);});
+  var html="";
+  docs.forEach(function(d){
+    var age=now-(d.ts||0);
+    var st,pill,dot;
+    if(d.denied){st="Location blocked";pill="blocked";dot="";}
+    else if(age<3*60000){st="Live";pill="live";dot="live";}
+    else if(age<30*60000){st="Idle";pill="idle";dot="idle";}
+    else{st="Offline";pill="off";dot="";}
+    var hasPos=typeof d.lat==="number"&&typeof d.lng==="number";
+    var initial=((d.name||d._email||"?").charAt(0)||"?").toUpperCase();
+    var mapOpen=TRK_OPEN_MAP===d._email&&hasPos;
+    html+="<div class='trk-card'>"
+      +"<div class='trk-top'>"
+      +"<div class='trk-ava'>"+escapeHtml(initial)+"<span class='trk-dot "+dot+"'></span></div>"
+      +"<div class='trk-body'>"
+      +"<div class='trk-name'>"+escapeHtml(d.name||d._email)+"</div>"
+      +"<div class='trk-meta'>"+escapeHtml(d._email)+(d.ts?" \u2022 "+relTime(d.ts):"")+(hasPos&&d.acc?" \u2022 \u00b1"+d.acc+"m":"")+"</div>"
+      +"</div>"
+      +"<span class='trk-pill "+pill+"'>"+st+"</span>"
+      +"</div>";
+    if(hasPos){
+      html+="<div class='trk-acts'>"
+        +"<button class='trk-btn primary trk-show' data-e='"+escapeHtml(d._email)+"'><i class='ti ti-map-2'></i>"+(mapOpen?"Hide Map":"Show Map")+"</button>"
+        +"<a class='trk-btn' href='https://maps.google.com/?q="+d.lat+","+d.lng+"' target='_blank'><i class='ti ti-brand-google-maps'></i>Google Maps</a>"
+        +"</div>";
+      if(mapOpen){
+        var dl=0.006,dla=0.004;
+        var bbox=(d.lng-dl)+","+(d.lat-dla)+","+(d.lng+dl)+","+(d.lat+dla);
+        html+="<div class='trk-map open'><iframe src='https://www.openstreetmap.org/export/embed.html?bbox="+bbox+"&layer=mapnik&marker="+d.lat+","+d.lng+"' loading='lazy'></iframe></div>";
+      }
+    }
+    html+="</div>";
+  });
+  el.innerHTML=html;
+  el.querySelectorAll(".trk-show").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var e=this.getAttribute("data-e");
+      TRK_OPEN_MAP=(TRK_OPEN_MAP===e)?null:e;
+      renderTracking();
+    });
+  });
+}
+document.getElementById("nb-track").addEventListener("click",function(){
+  switchView("track");
+  trkAdminListen();
+  renderTracking();
+});
 
 // Init
 fbInit();
