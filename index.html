@@ -1567,6 +1567,18 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 }
 .trk-note i{color:var(--ab1);font-size:14px;flex-shrink:0;margin-top:1px}
 
+
+/* Header location-sharing control (reps) */
+.loc-btn{
+  display:none;align-items:center;justify-content:center;gap:5px;
+  padding:8px 11px;border-radius:11px;border:1.5px solid var(--border);
+  background:var(--card);color:var(--muted);font-size:12px;font-weight:800;
+  cursor:pointer;font-family:inherit;
+}
+.loc-btn i{font-size:15px}
+.loc-btn.on{background:rgba(24,169,92,0.1);border-color:rgba(24,169,92,0.4);color:#128a4a}
+.loc-btn.blocked{background:rgba(214,69,69,0.08);border-color:rgba(214,69,69,0.35);color:#c23434}
+
 </style>
 </head>
 <body>
@@ -1629,6 +1641,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       </div>
       <div style="display:flex;align-items:center;gap:8px;flex-shrink:0" class="hdr-right">
       <div class="hdr-date"><i class="ti ti-calendar-event"></i><span id="hdate"></span></div>
+      <button class="loc-btn" id="loc-btn" title="Location sharing">
+        <i class="ti ti-map-pin"></i><span id="loc-btn-label">Location</span>
+      </button>
       <button class="logout-btn" id="logout-btn" title="Sign Out">
         <i class="ti ti-logout"></i><span>Out</span>
       </button>
@@ -3514,6 +3529,8 @@ function updateAdminUI(){
   if(ul)ul.style.display=isAdmin()?"":"none";
   var tk=document.getElementById("nb-track");
   if(tk)tk.style.display=isAdmin()?"":"none";
+  var lb=document.getElementById("loc-btn");
+  if(lb)lb.style.display=isAdmin()?"none":"flex";
 }
 
 function doLogin(){
@@ -4869,6 +4886,7 @@ function trkStart(){
         ts:now,name:CURRENT_USER||email,denied:false
       }).then(function(){
         if(!window.TRK_FIRST_OK){window.TRK_FIRST_OK=true;showToast("Location shared with admin \u2713","success","ti-map-pin-check");}
+        updateLocBtn("on");
       }).catch(function(e){
         if(!window.TRK_ERR_SHOWN){window.TRK_ERR_SHOWN=true;showToast("Location update failed: "+((e&&e.code)||"error"),"danger","ti-alert-triangle");}
       });
@@ -4957,6 +4975,54 @@ document.getElementById("nb-track").addEventListener("click",function(){
   trkAdminListen();
   renderTracking();
 });
+
+// ===== Header location button (reps) =====
+function updateLocBtn(state){
+  var btn=document.getElementById("loc-btn");
+  var lbl=document.getElementById("loc-btn-label");
+  if(!btn)return;
+  btn.classList.remove("on","blocked");
+  if(state==="on"){btn.classList.add("on");lbl.textContent="Sharing";btn.querySelector("i").className="ti ti-map-pin-check";}
+  else if(state==="blocked"){btn.classList.add("blocked");lbl.textContent="Blocked";btn.querySelector("i").className="ti ti-map-pin-off";}
+  else{lbl.textContent="Location";btn.querySelector("i").className="ti ti-map-pin";}
+}
+function refreshLocBtn(){
+  if(TRK_WATCH!==null&&window.TRK_FIRST_OK){updateLocBtn("on");return;}
+  if(TRK_WATCH!==null){updateLocBtn("off");}
+  try{
+    if(navigator.permissions&&navigator.permissions.query){
+      navigator.permissions.query({name:"geolocation"}).then(function(res){
+        if(res.state==="denied")updateLocBtn("blocked");
+        else if(res.state==="granted"&&TRK_WATCH!==null)updateLocBtn("on");
+      }).catch(function(){});
+    }
+  }catch(e){}
+}
+document.getElementById("loc-btn").addEventListener("click",function(){
+  if(TRK_WATCH!==null&&window.TRK_FIRST_OK){
+    showToast("Location sharing is active \u2713","success","ti-map-pin-check");
+    return;
+  }
+  function showBlockedHelp(){
+    showConfirm({
+      title:"Location is blocked",
+      message:"Your phone is blocking location for this app. To enable it: iPhone \u2014 Settings > Privacy & Security > Location Services > Safari Websites > While Using the App. Android \u2014 Chrome menu > Settings > Site settings > Location > Allow. Then come back and tap the Location button again.",
+      icon:"ti-map-pin-off",iconType:"danger",
+      confirmLabel:"OK"
+    });
+  }
+  try{
+    if(navigator.permissions&&navigator.permissions.query){
+      navigator.permissions.query({name:"geolocation"}).then(function(res){
+        if(res.state==="denied"){updateLocBtn("blocked");showBlockedHelp();}
+        else{trkAskPermission();setTimeout(refreshLocBtn,4000);}
+      }).catch(function(){trkAskPermission();setTimeout(refreshLocBtn,4000);});
+    } else {
+      trkAskPermission();setTimeout(refreshLocBtn,4000);
+    }
+  }catch(e){trkAskPermission();}
+});
+setInterval(refreshLocBtn,15000);
 
 // Init
 fbInit();
