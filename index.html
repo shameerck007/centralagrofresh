@@ -1503,6 +1503,10 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 }
 .vp-ap-export i{color:#fff}
 
+
+.vp-mini-act.visit{background:rgba(100,110,130,0.1);color:var(--muted)}
+.vp-mini-act.visit.done{background:linear-gradient(135deg,var(--gr2),var(--gr3));color:#fff}
+
 </style>
 </head>
 <body>
@@ -1547,6 +1551,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     </button>
     </form>
     <div class="login-footer">AgroFresh &copy; 2024 &mdash; Delivering Nature's Best</div>
+    <div class="login-footer" id="fb-diag" style="margin-top:8px;font-weight:700">v2.1 &bull; Checking cloud connection...</div>
   </div>
 </div>
 
@@ -1641,13 +1646,14 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
         <div class="areas-hero-pattern"></div>
         <div class="areas-eyebrow"><i class="ti ti-shield-lock"></i> Admin Only</div>
         <div class="areas-title">Manage Users</div>
-        <div class="areas-sub">Create accounts and reset passwords</div>
+        <div class="areas-sub">Create login accounts (email + password) for your team</div>
       </div>
       <div class="areas-add-box" style="flex-direction:column;align-items:stretch;gap:10px">
         <input type="text" id="user-new-name" placeholder="Full name (e.g. Khalid Rep)">
-        <input type="text" id="user-new-username" placeholder="Username" autocomplete="off">
+        <input type="email" id="user-new-username" placeholder="Login email (e.g. kasim@gmail.com)" autocomplete="off" autocapitalize="off" spellcheck="false" inputmode="email">
+        <div id="user-new-hint" style="font-size:11.5px;font-weight:600;color:var(--muted);padding:0 4px;line-height:1.4">The user will type this email + password on the login screen.</div>
         <div class="login-input-wrap" style="margin:0">
-          <input type="password" id="user-new-password" placeholder="Password" autocomplete="new-password">
+          <input type="password" id="user-new-password" placeholder="Password (min 6 characters)" autocomplete="new-password">
           <i class="ti ti-lock"></i>
           <button class="eye-btn" id="user-new-pw-eye" type="button" tabindex="-1"><i class="ti ti-eye" id="user-new-pw-eye-icon"></i></button>
         </div>
@@ -1738,6 +1744,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
             <div class="vp-detail-count" id="vp-detail-count"></div>
           </div>
           <div class="vp-detail-acts">
+            <button class="area-act-btn vp-ap-export" id="vp-detail-pdf" title="Export daily report"><i class="ti ti-file-type-pdf"></i></button>
             <button class="area-act-btn rename" id="vp-edit-plan" title="Edit plan"><i class="ti ti-edit"></i></button>
             <button class="area-act-btn delete" id="vp-delete-plan" title="Delete plan"><i class="ti ti-trash"></i></button>
           </div>
@@ -2499,7 +2506,7 @@ function exportReportPDF(range){
   }
 
   var fname="AgroFresh-Customer-Visit-"+label.replace(/\s+/g,"")+"-"+new Date().toISOString().slice(0,10)+".pdf";
-  doc.save(fname);
+  vpDeliverPdf(doc,fname);
 }
 
 function renderTabs(){
@@ -3359,6 +3366,7 @@ function findUser(username){
 function addUserAccount(u,p,role,name){
   u=(u||"").trim();
   if(!u||!p)return{ok:false,msg:"Username and password are required"};
+  if(p.length<6)return{ok:false,msg:"Password must be at least 6 characters"};
   if(findUser(u))return{ok:false,msg:"That username already exists"};
   var newUser={u:u,p:p,role:role==="admin"?"admin":"rep",name:(name||"").trim()||u};
   USERS.push(newUser);
@@ -3367,6 +3375,7 @@ function addUserAccount(u,p,role,name){
     custom.push(newUser);
     localStorage.setItem(USER_CUSTOM_KEY,JSON.stringify(custom));
   }catch(e){}
+  if(typeof fbCreateAuthUser==="function")fbCreateAuthUser(u,p);
   return{ok:true,user:newUser};
 }
 function resetUserPassword(username,newPassword){
@@ -3838,7 +3847,8 @@ function openPlanDetail(dateStr){
       +"<div class='area-card-acts'>"
       +(c.ph?"<a class='vp-mini-act call' href='tel:"+escapeHtml(c.ph)+"' title='Call'><i class='ti ti-phone'></i></a>":"")
       +(c.maps?"<a class='vp-mini-act nav' href='"+escapeHtml(c.maps)+"' target='_blank' title='Navigate'><i class='ti ti-navigation'></i></a>":"")
-      +"<button class='vp-mini-act comment"+(visited?" filled":"")+"' data-n='"+n+"' title='Visit comments'><i class='ti "+(visited?"ti-message-2":"ti-message-plus")+"'></i></button>"
+      +"<button class='vp-mini-act comment"+(visited?" filled":"")+"' data-n='"+n+"' title='Customer comments'><i class='ti "+(visited?"ti-message-2":"ti-message-plus")+"'></i></button>"
+      +"<button class='vp-mini-act visit"+(visited?" done":"")+"' data-n='"+n+"' title='"+(visited?"Visited":"Mark visited")+"'><i class='ti "+(visited?"ti-circle-check-filled":"ti-circle-check")+"'></i></button>"
       +"</div>"
       +"</div>"
       +"<div class='vp-visit-note"+(noteTxt?"":" empty")+"'>"
@@ -3856,6 +3866,11 @@ function openPlanDetail(dateStr){
   listEl.querySelectorAll(".vp-mini-act.comment").forEach(function(btn){
     btn.addEventListener("click",function(){
       vpAddComment(parseInt(this.getAttribute("data-n"),10));
+    });
+  });
+  listEl.querySelectorAll(".vp-mini-act.visit").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      vpToggleVisited(parseInt(this.getAttribute("data-n"),10));
     });
   });
   vpShowSection("detail");
@@ -3904,6 +3919,192 @@ function vpAddComment(n){
     });
   }
 }
+function vpToggleVisited(n){
+  var c=getCustomerByNumber(n);
+  if(!c||!vpDetailDate)return;
+  var dateStr=vpDetailDate;
+  var dayVisits=vpVisitsOn(n,dateStr);
+  if(!dayVisits.length){
+    showConfirm({
+      title:"Mark as visited?",
+      message:c.name+" will be recorded as visited on "+vpFormatDate(dateStr)+". You can add the customer's comments after confirming.",
+      icon:"ti-circle-check",iconType:"warn",
+      confirmLabel:"Mark Visited",
+      onConfirm:function(){
+        vpAddVisitOn(n,"",dateStr);
+        showToast("Visit recorded \u2014 tap the message button to add customer comments","success","ti-circle-check");
+        openPlanDetail(dateStr);
+        if(typeof renderList==="function")try{renderList();}catch(e){}
+      }
+    });
+  } else {
+    showConfirm({
+      title:"Remove this visit?",
+      message:"This will remove the visit record for "+c.name+" on "+vpFormatDate(dateStr)+", including any comments recorded for it. This cannot be undone.",
+      icon:"ti-alert-triangle",iconType:"danger",danger:true,
+      confirmLabel:"Remove Visit",
+      onConfirm:function(){
+        var store=loadVisitStore();
+        var arr=store[n]||[];
+        var keep=[],removedTs=[];
+        for(var i=0;i<arr.length;i++){
+          if(vpTsToDateStr(arr[i].ts)===dateStr)removedTs.push(arr[i].ts);
+          else keep.push(arr[i]);
+        }
+        if(keep.length)store[n]=keep;else delete store[n];
+        saveVisitStore(store);
+        var m=loadApStatus();
+        for(var j=0;j<removedTs.length;j++)delete m[n+"_"+removedTs[j]];
+        saveApStatus(m);
+        showToast("Visit removed","danger","ti-trash");
+        openPlanDetail(dateStr);
+        if(typeof renderList==="function")try{renderList();}catch(e){}
+      }
+    });
+  }
+}
+// ---- Daily Visit Report PDF ----
+function vpPdfHeader(doc,pageW,mx,title,subtitle){
+  doc.setFillColor(11,84,46);
+  doc.rect(0,0,pageW,64,"F");
+  doc.setTextColor(255,255,255);
+  doc.setFont("helvetica","bold");doc.setFontSize(17);
+  doc.text("AgroFresh",mx,27);
+  doc.setFont("helvetica","normal");doc.setFontSize(11);
+  doc.text(title,mx,45);
+  doc.setFontSize(8.5);
+  doc.text(subtitle,pageW-mx,27,{align:"right"});
+  doc.text("Generated "+new Date().toLocaleString("en-SA",{day:"numeric",month:"short",year:"numeric",hour:"2-digit",minute:"2-digit"}),pageW-mx,41,{align:"right"});
+}
+function vpPdfStatBoxes(doc,pageW,mx,y,stats){
+  var gap=10,bw=(pageW-mx*2-gap*(stats.length-1))/stats.length,bh=46;
+  for(var i=0;i<stats.length;i++){
+    var x=mx+i*(bw+gap);
+    doc.setFillColor(244,246,248);
+    doc.roundedRect(x,y,bw,bh,6,6,"F");
+    doc.setFont("helvetica","bold");doc.setFontSize(16);
+    doc.setTextColor(stats[i].c[0],stats[i].c[1],stats[i].c[2]);
+    doc.text(String(stats[i].v),x+12,y+21);
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);
+    doc.setTextColor(110,116,130);
+    doc.text(stats[i].l.toUpperCase(),x+12,y+35);
+  }
+  return y+bh+18;
+}
+function vpPdfFooter(doc,pageW,pageH,mx,label){
+  var pages=doc.internal.getNumberOfPages();
+  for(var p=1;p<=pages;p++){
+    doc.setPage(p);
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);
+    doc.setTextColor(150,156,168);
+    doc.text(label,mx,pageH-22);
+    doc.text("Page "+p+" of "+pages,pageW-mx,pageH-22,{align:"right"});
+  }
+}
+// ---- Mobile-friendly PDF delivery: share sheet on phones, always a way back ----
+function vpIsMobile(){
+  return /iPhone|iPad|iPod|Android/i.test(navigator.userAgent)||(navigator.maxTouchPoints>1&&/Mac/.test(navigator.userAgent));
+}
+function vpDeliverPdf(doc,filename){
+  var blob=null;
+  try{blob=doc.output("blob");}catch(e){}
+  if(!blob){try{doc.save(filename);}catch(e2){}return;}
+  if(vpIsMobile()){
+    var file=null;
+    try{file=new File([blob],filename,{type:"application/pdf"});}catch(e){}
+    if(file&&navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:filename}).catch(function(err){
+        if(err&&err.name!=="AbortError")vpPdfOverlay(blob,filename);
+      });
+      return;
+    }
+    vpPdfOverlay(blob,filename);
+    return;
+  }
+  try{doc.save(filename);}catch(e){vpPdfOverlay(blob,filename);}
+}
+function vpPdfOverlay(blob,filename){
+  var url=URL.createObjectURL(blob);
+  var ov=document.createElement("div");
+  ov.style.cssText="position:fixed;inset:0;z-index:99999;background:rgba(12,20,16,0.94);display:flex;align-items:center;justify-content:center;padding:26px;";
+  ov.innerHTML=
+    "<div style='background:#ffffff;border-radius:20px;padding:26px 22px;max-width:340px;width:100%;text-align:center;font-family:inherit;box-shadow:0 24px 60px rgba(0,0,0,0.35)'>"
+    +"<div style='width:58px;height:58px;border-radius:16px;margin:0 auto 14px;background:linear-gradient(135deg,#0d7a40,#0a5c31);display:flex;align-items:center;justify-content:center'><i class='ti ti-file-type-pdf' style='font-size:28px;color:#fff'></i></div>"
+    +"<div style='font-size:15px;font-weight:800;color:#1c222c;margin-bottom:4px'>Report ready</div>"
+    +"<div style='font-size:11.5px;color:#6e7482;font-weight:600;word-break:break-all;margin-bottom:18px'>"+escapeHtml(filename)+"</div>"
+    +"<a id='pdfov-dl' href='"+url+"' download='"+escapeHtml(filename)+"' style='display:flex;align-items:center;justify-content:center;gap:7px;padding:13px;border-radius:13px;background:linear-gradient(135deg,#0d7a40,#0a5c31);color:#fff;font-size:14px;font-weight:800;text-decoration:none;margin-bottom:9px'><i class='ti ti-download'></i> Save / Open PDF</a>"
+    +"<button id='pdfov-back' style='width:100%;padding:13px;border-radius:13px;border:1.5px solid #d9dde4;background:transparent;color:#1c222c;font-size:14px;font-weight:700;cursor:pointer;font-family:inherit'><i class='ti ti-arrow-left'></i> Back to app</button>"
+    +"</div>";
+  document.body.appendChild(ov);
+  function close(){
+    setTimeout(function(){try{URL.revokeObjectURL(url);}catch(e){}},60000);
+    try{document.body.removeChild(ov);}catch(e){}
+  }
+  ov.querySelector("#pdfov-back").addEventListener("click",close);
+  ov.addEventListener("click",function(ev){if(ev.target===ov)close();});
+}
+document.getElementById("vp-detail-pdf").addEventListener("click",function(){
+  if(!window.jspdf||!window.jspdf.jsPDF){showToast("PDF library not loaded","info","ti-alert-circle");return;}
+  if(!vpDetailDate)return;
+  var dateStr=vpDetailDate;
+  var custNos=loadPlans()[dateStr]||[];
+  if(!custNos.length){showToast("No customers in this plan","info","ti-file-off");return;}
+  var doc=new window.jspdf.jsPDF({unit:"pt",format:"a4"});
+  var pageW=doc.internal.pageSize.getWidth(),pageH=doc.internal.pageSize.getHeight(),mx=40;
+  vpPdfHeader(doc,pageW,mx,"Daily Visit Report",vpFormatDate(dateStr));
+  var y=84;
+  var rows=[],visited=0,withComments=0;
+  for(var i=0;i<custNos.length;i++){
+    var c=getCustomerByNumber(custNos[i]);
+    if(!c)continue;
+    var dv=vpVisitsOn(custNos[i],dateStr);
+    var latest=dv.length?dv[dv.length-1]:null;
+    if(dv.length)visited++;
+    if(latest&&latest.note)withComments++;
+    rows.push({c:c,visited:dv.length>0,note:(latest&&latest.note)||"",user:(latest&&latest.user)||""});
+  }
+  y=vpPdfStatBoxes(doc,pageW,mx,y,[
+    {l:"Planned",v:rows.length,c:[28,34,44]},
+    {l:"Visited",v:visited,c:[13,110,58]},
+    {l:"Pending",v:rows.length-visited,c:[196,130,10]},
+    {l:"With comments",v:withComments,c:[0,90,210]}
+  ]);
+  for(var r=0;r<rows.length;r++){
+    var row=rows[r];
+    var noteLines=row.note?doc.splitTextToSize(row.note,pageW-mx*2-70):[];
+    var blockH=34+(noteLines.length?noteLines.length*10+16:0);
+    if(y+blockH>pageH-50){doc.addPage();y=48;}
+    doc.setFillColor(244,246,248);
+    doc.roundedRect(mx,y,pageW-mx*2,24,5,5,"F");
+    doc.setFont("helvetica","bold");doc.setFontSize(10);
+    doc.setTextColor(28,34,44);
+    doc.text((r+1)+".  "+row.c.name,mx+10,y+16);
+    doc.setFont("helvetica","bold");doc.setFontSize(8);
+    if(row.visited){doc.setTextColor(13,110,58);doc.text("VISITED",pageW-mx-10,y+16,{align:"right"});}
+    else{doc.setTextColor(196,130,10);doc.text("PENDING",pageW-mx-10,y+16,{align:"right"});}
+    y+=32;
+    doc.setFont("helvetica","normal");doc.setFontSize(8);
+    doc.setTextColor(110,116,130);
+    var meta=(row.c.area||"")+(row.c.ph?"  \u2022  "+row.c.ph:"")+(row.visited&&row.user?"  \u2022  Rep: "+row.user:"");
+    doc.text(meta,mx+16,y);
+    y+=6;
+    if(noteLines.length){
+      y+=8;
+      doc.setFont("helvetica","bold");doc.setFontSize(7.5);
+      doc.setTextColor(13,110,58);
+      doc.text("CUSTOMER COMMENTS",mx+16,y);
+      y+=11;
+      doc.setFont("helvetica","normal");doc.setFontSize(9);
+      doc.setTextColor(45,52,64);
+      doc.text(noteLines,mx+16,y);
+      y+=noteLines.length*10;
+    }
+    y+=12;
+  }
+  vpPdfFooter(doc,pageW,pageH,mx,"AgroFresh Sales Route Manager \u2014 Daily Visit Report");
+  vpDeliverPdf(doc,"AgroFresh-Daily-Report-"+dateStr+".pdf");
+  showToast("Daily report exported","success","ti-file-type-pdf");
+});
 document.getElementById("vp-back").addEventListener("click",function(){vpShowSection("home");renderPlansList();});
 document.getElementById("vp-edit-plan").addEventListener("click",function(){
   if(vpDetailDate)openPlanEditor(vpDetailDate);
@@ -4058,66 +4259,87 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
   });
   if(!items.length){showToast("No comments to export","info","ti-file-off");return;}
   var doc=new window.jspdf.jsPDF({unit:"pt",format:"a4"});
-  var pageW=doc.internal.pageSize.getWidth();
-  var pageH=doc.internal.pageSize.getHeight();
-  var mx=40,y=48;
+  var pageW=doc.internal.pageSize.getWidth(),pageH=doc.internal.pageSize.getHeight(),mx=40;
   var stLabel={pending:"PENDING",progress:"IN PROGRESS",done:"DONE"};
-  function newPageIf(need){
-    if(y+need>pageH-46){doc.addPage();y=48;}
-  }
-  doc.setFont("helvetica","bold");doc.setFontSize(16);doc.setTextColor(13,90,50);
-  doc.text("AgroFresh \u2014 Action Plan",mx,y);
-  doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(110,116,130);
-  y+=15;
+  var stColor={pending:[196,130,10],progress:[0,90,210],done:[13,110,58]};
   var fbits=[];
   if(apStFilter!=="all")fbits.push("Status: "+stLabel[apStFilter]);
   if(apAreaFilter)fbits.push("Area: "+apAreaFilter);
   if(apRepFilter)fbits.push("Rep: "+apRepFilter);
-  doc.text("Generated "+new Date().toLocaleString("en-SA",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"})+(fbits.length?"  \u2022  "+fbits.join("  \u2022  "):""),mx,y);
-  y+=8;
-  doc.setDrawColor(210,214,222);doc.setLineWidth(0.8);
-  doc.line(mx,y,pageW-mx,y);
-  y+=18;
+  vpPdfHeader(doc,pageW,mx,"Action Plan Report",fbits.length?fbits.join("  \u2022  "):"All comments");
+  var y=84;
+  var pend=0,prog=0,done=0;
+  for(var i=0;i<items.length;i++){
+    if(items[i].st==="pending")pend++;
+    else if(items[i].st==="progress")prog++;
+    else done++;
+  }
+  y=vpPdfStatBoxes(doc,pageW,mx,y,[
+    {l:"Total comments",v:items.length,c:[28,34,44]},
+    {l:"Pending",v:pend,c:stColor.pending},
+    {l:"In progress",v:prog,c:stColor.progress},
+    {l:"Done",v:done,c:stColor.done}
+  ]);
   // group by customer
   var groups=[],seen={};
   items.forEach(function(it){
     if(seen[it.n]===undefined){seen[it.n]=groups.length;groups.push({cust:it.cust,items:[]});}
     groups[seen[it.n]].items.push(it);
   });
-  groups.forEach(function(g){
-    newPageIf(40);
-    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(25,30,40);
-    doc.text(g.cust.name,mx,y);
-    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(110,116,130);
-    doc.text((g.cust.area||"")+(g.cust.ph?"  \u2022  "+g.cust.ph:""),mx,y+11);
-    y+=24;
-    g.items.forEach(function(it){
-      var noteLines=doc.splitTextToSize(it.note,pageW-mx*2-14);
-      var blockH=14+noteLines.length*11+8;
-      newPageIf(blockH);
-      doc.setFont("helvetica","bold");doc.setFontSize(8);
-      if(it.st==="done"){doc.setTextColor(13,122,64);}
-      else if(it.st==="progress"){doc.setTextColor(0,90,220);}
-      else{doc.setTextColor(200,134,10);}
-      doc.text("["+stLabel[it.st]+"]",mx+6,y);
-      doc.setTextColor(90,96,110);
-      doc.setFont("helvetica","normal");
-      doc.text(formatDMY(it.ts)+"  \u2022  "+it.user,mx+6+doc.getTextWidth("["+stLabel[it.st]+"]")+8,y);
-      y+=12;
-      doc.setFontSize(9);doc.setTextColor(35,40,52);
-      doc.text(noteLines,mx+6,y);
-      y+=noteLines.length*11+10;
-    });
+  var colDateW=70,colRepW=85,colStW=78;
+  var colDate=mx+8,colRep=colDate+colDateW,colSt=colRep+colRepW,colCom=colSt+colStW;
+  var comW=pageW-mx-8-colCom;
+  function tableHead(){
+    doc.setFont("helvetica","bold");doc.setFontSize(7);
+    doc.setTextColor(150,156,168);
+    doc.text("DATE",colDate,y);
+    doc.text("REP",colRep,y);
+    doc.text("STATUS",colSt,y);
+    doc.text("CUSTOMER COMMENT",colCom,y);
     y+=6;
-  });
-  var pages=doc.internal.getNumberOfPages();
-  for(var p=1;p<=pages;p++){
-    doc.setPage(p);
-    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(150,156,168);
-    doc.text("AgroFresh Sales Route Manager \u2014 Action Plan",mx,pageH-24);
-    doc.text("Page "+p+" of "+pages,pageW-mx,pageH-24,{align:"right"});
+    doc.setDrawColor(225,229,235);doc.setLineWidth(0.6);
+    doc.line(mx,y,pageW-mx,y);
+    y+=12;
   }
-  doc.save("AgroFresh-Action-Plan.pdf");
+  groups.forEach(function(g){
+    if(y+70>pageH-50){doc.addPage();y=48;}
+    doc.setFillColor(234,242,237);
+    doc.roundedRect(mx,y,pageW-mx*2,24,5,5,"F");
+    doc.setFont("helvetica","bold");doc.setFontSize(10.5);
+    doc.setTextColor(11,84,46);
+    doc.text(g.cust.name,mx+10,y+16);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);
+    doc.setTextColor(110,116,130);
+    doc.text((g.cust.area||"")+(g.cust.ph?"  \u2022  "+g.cust.ph:""),pageW-mx-10,y+16,{align:"right"});
+    y+=34;
+    tableHead();
+    g.items.forEach(function(it){
+      var lines=doc.splitTextToSize(it.note,comW);
+      var rowH=Math.max(14,lines.length*10+4);
+      if(y+rowH>pageH-50){
+        doc.addPage();y=48;
+        tableHead();
+      }
+      doc.setFont("helvetica","normal");doc.setFontSize(8.5);
+      doc.setTextColor(70,78,92);
+      doc.text(formatDMY(it.ts),colDate,y);
+      doc.text(doc.splitTextToSize(it.user,colRepW-8)[0]||"",colRep,y);
+      doc.setFont("helvetica","bold");
+      var sc=stColor[it.st]||stColor.pending;
+      doc.setTextColor(sc[0],sc[1],sc[2]);
+      doc.text(stLabel[it.st]||"",colSt,y);
+      doc.setFont("helvetica","normal");doc.setFontSize(9);
+      doc.setTextColor(35,42,54);
+      doc.text(lines,colCom,y);
+      y+=rowH;
+      doc.setDrawColor(238,241,245);doc.setLineWidth(0.5);
+      doc.line(mx,y-8,pageW-mx,y-8);
+      y+=2;
+    });
+    y+=10;
+  });
+  vpPdfFooter(doc,pageW,pageH,mx,"AgroFresh Sales Route Manager \u2014 Action Plan Report");
+  vpDeliverPdf(doc,"AgroFresh-Action-Plan.pdf");
   showToast("Action Plan PDF exported","success","ti-file-type-pdf");
 });
 
@@ -4343,6 +4565,30 @@ function fbSeedIfNeeded(){
 }
 
 // --- auth ---
+function fbCreateAuthUser(u,p){
+  if(!FB_READY)return;
+  try{
+    var email=u.indexOf("@")>-1?u.toLowerCase():(u.toLowerCase()+"@"+FB_EMAIL_DOMAIN);
+    var sec;
+    try{sec=firebase.app("fb-secondary");}
+    catch(e){sec=firebase.initializeApp(FB_CONFIG,"fb-secondary");}
+    sec.auth().createUserWithEmailAndPassword(email,p).then(function(){
+      try{sec.auth().signOut();}catch(e){}
+      try{showToast("Login created: "+email,"success","ti-user-check");}catch(e){}
+    }).catch(function(err){
+      var code=(err&&err.code)||"";
+      if(code==="auth/email-already-in-use"){
+        try{showToast("Login already exists for "+email,"info","ti-user-check");}catch(e){}
+      } else if(code==="auth/weak-password"){
+        try{showToast("Password too weak for login (min 6 characters)","danger","ti-alert-triangle");}catch(e){}
+      } else if(code==="auth/network-request-failed"){
+        try{showToast("No internet \u2014 create the login in Firebase Console later","danger","ti-wifi-off");}catch(e){}
+      } else {
+        try{showToast("Couldn't create login: "+(code||"error"),"danger","ti-alert-triangle");}catch(e){}
+      }
+    });
+  }catch(e){}
+}
 function fbAfterLogin(user){
   var email=(user.email||"").toLowerCase();
   var uname=email.split("@")[0];
@@ -4421,7 +4667,12 @@ function doLogin(){
 function fbInit(){
   // move any pre-Firebase local data into memory, then wipe browser storage
   fbMigrateLocal();
-  if(!window.firebase||!firebase.initializeApp){checkSession();return;}
+  var diag=document.getElementById("fb-diag");
+  function setDiag(msg,bad){if(diag){diag.innerHTML="v2.1 &bull; "+msg;diag.style.color=bad?"#d64545":"";}}
+  if(!window.firebase||!firebase.initializeApp){
+    setDiag("Cloud NOT loaded &mdash; no internet or this browser blocks it. Open in Chrome/Safari directly.",true);
+    checkSession();return;
+  }
   try{
     firebase.initializeApp(FB_CONFIG);
     FB_AUTH=firebase.auth();
@@ -4435,7 +4686,8 @@ function fbInit(){
     FB_DB=firebase.firestore();
     try{FB_DB.enablePersistence({synchronizeTabs:true}).catch(function(e){});}catch(e){}
     FB_READY=true;
-  }catch(e){checkSession();return;}
+    setDiag("Cloud connected &#10003;");
+  }catch(e){setDiag("Cloud error: "+((e&&e.message)||"unknown"),true);checkSession();return;}
   // show login until auth state confirms
   var ls=document.getElementById("login-screen");
   ls.style.display="flex";
@@ -4449,6 +4701,20 @@ function fbInit(){
     }
   });
 }
+
+// Live hint on the add-user form: show the exact login email
+(function(){
+  var inp=document.getElementById("user-new-username");
+  var hint=document.getElementById("user-new-hint");
+  if(!inp||!hint)return;
+  function upd(){
+    var v=inp.value.trim().toLowerCase();
+    if(!v){hint.innerHTML="The user will type this email + password on the login screen.";return;}
+    var email=v.indexOf("@")>-1?v:(v+"@"+FB_EMAIL_DOMAIN);
+    hint.innerHTML="Will log in as: <b style='color:var(--gr2)'>"+escapeHtml(email)+"</b>";
+  }
+  inp.addEventListener("input",upd);
+})();
 
 // Init
 fbInit();
