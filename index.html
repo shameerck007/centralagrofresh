@@ -4144,17 +4144,55 @@ FB_LS_MAP[CUSTOMER_DELETED_KEY]="customers";
 FB_LS_MAP[USER_CUSTOM_KEY]="users";
 FB_LS_MAP[USER_PW_KEY]="users";
 
-// --- localStorage hook: any app write to a synced key schedules a push ---
+// --- MEMORY STORE: app data lives in memory + Firestore, NOT in browser localStorage ---
+var FB_MEM={};
+var FB_MEM_KEYS={};
+(function(){
+  for(var k in FB_LS_MAP)FB_MEM_KEYS[k]=1;
+  var extra=["af_fb_base",SESSION_KEY,CREDS_KEY,ROLE_KEY,USER_NAME_KEY,USERNAME_KEY];
+  for(var i=0;i<extra.length;i++)FB_MEM_KEYS[extra[i]]=1;
+})();
+function fbIsMemKey(k){return FB_MEM_KEYS.hasOwnProperty(k);}
 var FB_LS_RAWSET=Storage.prototype.setItem;
-function fbRawSet(k,v){FB_LS_RAWSET.call(localStorage,k,v);}
+var FB_LS_RAWGET=Storage.prototype.getItem;
+var FB_LS_RAWREMOVE=Storage.prototype.removeItem;
+function fbRawSet(k,v){
+  if(fbIsMemKey(k)){FB_MEM[k]=String(v);return;}
+  FB_LS_RAWSET.call(localStorage,k,v);
+}
+Storage.prototype.getItem=function(k){
+  if(this===localStorage&&fbIsMemKey(k))return FB_MEM.hasOwnProperty(k)?FB_MEM[k]:null;
+  return FB_LS_RAWGET.apply(this,arguments);
+};
 Storage.prototype.setItem=function(k,v){
+  if(this===localStorage&&fbIsMemKey(k)){
+    FB_MEM[k]=String(v);
+    try{
+      if(!FB_APPLYING&&FB_LS_MAP[k]&&FB_READY&&FB_AUTH&&FB_AUTH.currentUser){
+        fbSchedulePush(FB_LS_MAP[k]);
+      }
+    }catch(e){}
+    return;
+  }
   FB_LS_RAWSET.apply(this,arguments);
+};
+Storage.prototype.removeItem=function(k){
+  if(this===localStorage&&fbIsMemKey(k)){delete FB_MEM[k];return;}
+  FB_LS_RAWREMOVE.apply(this,arguments);
+};
+// One-time migration: pull any old local data into memory (so it can be seeded to
+// Firestore if the cloud is still empty), then permanently wipe it from the browser.
+function fbMigrateLocal(){
   try{
-    if(this===localStorage&&!FB_APPLYING&&FB_LS_MAP[k]&&FB_READY&&FB_AUTH&&FB_AUTH.currentUser){
-      fbSchedulePush(FB_LS_MAP[k]);
+    for(var k in FB_MEM_KEYS){
+      var v=FB_LS_RAWGET.call(localStorage,k);
+      if(v!==null){
+        if(!FB_MEM.hasOwnProperty(k))FB_MEM[k]=v;
+        FB_LS_RAWREMOVE.call(localStorage,k);
+      }
     }
   }catch(e){}
-};
+}
 var FB_TIMERS={};
 function fbSchedulePush(docId){
   if(FB_TIMERS[docId])clearTimeout(FB_TIMERS[docId]);
@@ -4241,7 +4279,6 @@ function fbApply(id,data){
       fbRawSet(CUSTOM_CUST_KEY,JSON.stringify(obj.custom||[]));
       fbRawSet(CUSTOMER_OVERRIDES_KEY,JSON.stringify(obj.overrides||{}));
       fbRawSet(CUSTOMER_DELETED_KEY,JSON.stringify(obj.deleted||[]));
-      fbRawSet("af_fb_base",JSON.stringify(FB_BASE));
       fbRebuildCusts();
     }
     else if(id==="users"){
@@ -4296,8 +4333,7 @@ function fbSeedIfNeeded(){
         fbRawSet(CUSTOM_CUST_KEY,"[]");
         fbRawSet(CUSTOMER_OVERRIDES_KEY,"{}");
         fbRawSet(CUSTOMER_DELETED_KEY,"[]");
-        fbRawSet("af_fb_base",JSON.stringify(FB_BASE));
-      }finally{FB_APPLYING=false;}
+        }finally{FB_APPLYING=false;}
       fbPush("customers");
       try{showToast(CUSTS.length+" customers uploaded to live database","success","ti-cloud-upload");}catch(e){}
     }
@@ -4363,7 +4399,6 @@ function doLogin(){
   }
   var email=u.indexOf("@")>-1?u.toLowerCase():(u.toLowerCase()+"@"+FB_EMAIL_DOMAIN);
   FB_AUTH.signInWithEmailAndPassword(email,p).then(function(){
-    try{fbRawSet(CREDS_KEY,JSON.stringify({u:u,p:p}));}catch(e){}
     btn.classList.remove("loading");btn.disabled=false;
     // onAuthStateChanged completes the login
   }).catch(function(err){
@@ -4374,21 +4409,29 @@ function doLogin(){
       fail("Too many attempts. Please wait a moment and try again.");
     } else if(code==="auth/invalid-email"){
       fail("That email address is not valid.");
-    } else {
+    } else if(code==="auth/web-storage-unsupported"||code==="auth/operation-not-supported-in-this-environment"){
+      fail("This browser is blocking sign-in. Please open the app directly in Chrome (Android) or Safari (iPhone), not inside another app's built-in browser.");
+    } else if(code==="auth/wrong-password"||code==="auth/user-not-found"||code==="auth/invalid-credential"||code==="auth/invalid-login-credentials"){
       fail("Invalid email or password. Please try again.");
+    } else {
+      fail("Sign-in failed ("+(code||"unknown error")+"). Please try again or contact your admin.");
     }
   });
 }
 function fbInit(){
-  // offline-first: rebuild customers from cached live base if present
-  try{
-    var cb=localStorage.getItem("af_fb_base");
-    if(cb){FB_BASE=JSON.parse(cb);fbRebuildCusts();try{renderList();updateStatsBar();renderTabs();}catch(e){}}
-  }catch(e){}
+  // move any pre-Firebase local data into memory, then wipe browser storage
+  fbMigrateLocal();
   if(!window.firebase||!firebase.initializeApp){checkSession();return;}
   try{
     firebase.initializeApp(FB_CONFIG);
     FB_AUTH=firebase.auth();
+    try{
+      FB_AUTH.setPersistence(firebase.auth.Auth.Persistence.LOCAL).catch(function(){
+        return FB_AUTH.setPersistence(firebase.auth.Auth.Persistence.SESSION).catch(function(){
+          return FB_AUTH.setPersistence(firebase.auth.Auth.Persistence.NONE).catch(function(e){});
+        });
+      });
+    }catch(e){}
     FB_DB=firebase.firestore();
     try{FB_DB.enablePersistence({synchronizeTabs:true}).catch(function(e){});}catch(e){}
     FB_READY=true;
@@ -4396,10 +4439,6 @@ function fbInit(){
   // show login until auth state confirms
   var ls=document.getElementById("login-screen");
   ls.style.display="flex";
-  try{
-    var saved=localStorage.getItem(CREDS_KEY);
-    if(saved){var c=JSON.parse(saved);document.getElementById("l-user").value=c.u||"";document.getElementById("l-pass").value=c.p||"";}
-  }catch(e){}
   FB_AUTH.onAuthStateChanged(function(user){
     if(user){
       fbAfterLogin(user);
