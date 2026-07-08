@@ -1838,6 +1838,10 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
         <div class="areas-sub">See where your sales team is right now</div>
       </div>
       <div class="trk-note"><i class="ti ti-info-circle"></i><span>Locations update while a rep has the app open and location permission allowed. Positions stop updating when the app is closed.</span></div>
+      <div style="padding:0 16px 12px">
+        <button class="trk-btn primary" id="trk-test" style="width:100%;padding:12px"><i class="ti ti-radar-2"></i> Test location on this device</button>
+        <div id="trk-test-status" style="display:none;margin-top:9px;padding:10px 12px;border-radius:11px;background:var(--bg);border:1.5px solid var(--border);font-size:12px;font-weight:700;color:var(--text);line-height:1.5"></div>
+      </div>
       <div class="areas-list" id="trk-list"></div>
     </div>
   </div>
@@ -4907,11 +4911,16 @@ function trkStop(){
 function trkAdminListen(){
   if(TRK_UNSUB||!FB_READY)return;
   TRK_UNSUB=FB_DB.collection("tracking").onSnapshot(function(qs){
+    window.TRK_LISTEN_ERR="";
     TRK_DOCS=[];
     qs.forEach(function(d){var o=d.data();o._email=d.id;TRK_DOCS.push(o);});
     var av=document.querySelector(".view.active");
     if(av&&av.id==="v-track")renderTracking();
-  },function(err){});
+  },function(err){
+    window.TRK_LISTEN_ERR=(err&&err.code)||"listen-error";
+    var av=document.querySelector(".view.active");
+    if(av&&av.id==="v-track")renderTracking();
+  });
   if(!TRK_TIMER){
     TRK_TIMER=setInterval(function(){
       var av=document.querySelector(".view.active");
@@ -4922,6 +4931,10 @@ function trkAdminListen(){
 function renderTracking(){
   var el=document.getElementById("trk-list");
   if(!el)return;
+  if(window.TRK_LISTEN_ERR){
+    el.innerHTML="<div class='areas-empty'><i class='ti ti-alert-triangle'></i><p>Tracking feed error: "+escapeHtml(window.TRK_LISTEN_ERR)+"</p><span style='font-size:12px'>Check the Firestore security rules allow signed-in reads, then reload this page</span></div>";
+    return;
+  }
   if(!TRK_DOCS.length){
     el.innerHTML="<div class='areas-empty'><i class='ti ti-map-pin-off'></i><p>No location data yet</p><span style='font-size:12px'>Rep positions appear here after they log in on their phone and allow location access</span></div>";
     return;
@@ -5023,6 +5036,31 @@ document.getElementById("loc-btn").addEventListener("click",function(){
   }catch(e){trkAskPermission();}
 });
 setInterval(refreshLocBtn,15000);
+
+// ===== Tracking pipeline self-test (admin) =====
+document.getElementById("trk-test").addEventListener("click",function(){
+  var st=document.getElementById("trk-test-status");
+  st.style.display="block";
+  function say(msg,color){st.innerHTML=msg;st.style.color=color||"var(--text)";}
+  if(!FB_READY||!FB_AUTH||!FB_AUTH.currentUser){say("\u274c Not connected to Firebase \u2014 check internet and reload.","#c23434");return;}
+  if(!navigator.geolocation){say("\u274c This browser has no location capability.","#c23434");return;}
+  say("\u23f3 Step 1/3: Requesting location permission\u2026 (click Allow if asked)");
+  navigator.geolocation.getCurrentPosition(function(pos){
+    var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy||0);
+    say("\u2705 Step 2/3: GPS OK (\u00b1"+acc+"m). Writing to database\u2026");
+    var email=(FB_AUTH.currentUser.email||"").toLowerCase();
+    FB_DB.collection("tracking").doc(email).set({
+      lat:lat,lng:lng,acc:acc,ts:Date.now(),name:(CURRENT_USER||email)+" (test)",denied:false
+    }).then(function(){
+      say("\u2705 Step 3/3: SUCCESS \u2014 location reached the database. The pipeline works. Your own card should appear below within seconds. If reps still don't appear, the problem is on their phones (permission or old app version).","#128a4a");
+    }).catch(function(e){
+      say("\u274c Database REJECTED the write: <b>"+((e&&e.code)||"unknown")+"</b>. This means the Firestore security rules are blocking it \u2014 open Firebase Console \u2192 Firestore \u2192 Rules and publish the signed-in rules, then retest.","#c23434");
+    });
+  },function(err){
+    var why=(err&&err.code===1)?"Permission denied \u2014 the browser/site is blocking location. Click the lock icon near the address bar \u2192 allow Location \u2192 reload.":(err&&err.code===2)?"Position unavailable \u2014 the device could not determine a location.":(err&&err.code===3)?"GPS timeout \u2014 no location fix. Try again.":"Unknown location error.";
+    say("\u274c Step 1 failed: "+why,"#c23434");
+  },{enableHighAccuracy:false,timeout:20000,maximumAge:0});
+});
 
 // Init
 fbInit();
