@@ -532,8 +532,8 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* ===== CUSTOMER CARDS ===== */
 .ccard{
   background:var(--card);border-radius:var(--radius);
-  padding:13px 13px 13px 14px;margin-bottom:8px;
-  display:flex;align-items:center;gap:11px;
+  padding:12px 12px 12px 14px;margin-bottom:8px;
+  display:flex;align-items:center;gap:9px;
   cursor:pointer;
   border:1.5px solid var(--border);
   position:relative;overflow:hidden;
@@ -550,38 +550,40 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Malaz = green */
 .a0::before{background:linear-gradient(180deg,#10a354,#3dd68c)}
 .a0 .sbadge{background:linear-gradient(135deg,#064e2a,#0d7a40)}
-.a0 .abtn-call{background:linear-gradient(135deg,#064e2a,#10a354)}
+.a0 .abtn-call{background:rgba(13,122,64,0.09)}
+.a0 .abtn-call i{color:var(--gr2)}
 
 .no-phone::before{background:linear-gradient(180deg,var(--go1),var(--go3))!important}
 
 .sbadge{
-  width:40px;height:40px;border-radius:12px;
-  color:#fff;font-size:13px;font-weight:800;
+  width:32px;height:32px;border-radius:10px;
+  color:#fff;font-size:12px;font-weight:800;
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;box-shadow:0 3px 10px rgba(0,0,0,0.18);
+  flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,0.15);
 }
 .ci{flex:1;min-width:0;position:relative;z-index:1}
 .cn{font-size:13.5px;font-weight:700;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;letter-spacing:-0.1px}
-.cm{display:flex;align-items:center;gap:5px;margin-top:3px}
+.cm{display:flex;align-items:center;gap:5px;margin-top:3px;flex-wrap:wrap;row-gap:3px}
 .apill{font-size:10px;color:var(--ab1);background:rgba(0,102,255,0.08);border-radius:6px;padding:2px 7px;font-weight:700}
 .ok{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:700;background:rgba(13,122,64,0.1);color:var(--gr2);border:1px solid rgba(13,122,64,0.15)}
 .vfy{font-size:10px;padding:2px 7px;border-radius:6px;font-weight:700;background:rgba(200,134,10,0.08);color:var(--go1);border:1px solid rgba(200,134,10,0.18)}
 .ph{font-size:11px;color:var(--muted);margin-top:3px;display:flex;align-items:center;gap:3px;font-weight:500}
 .ph i{font-size:11px}
 
-.cacts{display:flex;gap:6px;flex-shrink:0;position:relative;z-index:1}
+.cacts{display:flex;gap:5px;flex-shrink:0;position:relative;z-index:1}
 .abtn{
-  width:38px;height:38px;border-radius:12px;border:none;
+  width:36px;height:36px;border-radius:11px;border:none;
   display:flex;align-items:center;justify-content:center;
   cursor:pointer;text-decoration:none;flex-shrink:0;
   transition:transform 0.13s,opacity 0.13s;
 }
 .abtn:active{transform:scale(0.86)}
 .abtn i{font-size:16px;color:#fff}
-.abtn-call{/* set per area */}
-.abtn-call.off{background:var(--border)!important;box-shadow:none!important}
-.abtn-call.off i{color:var(--light)}
-.abtn-nav{background:linear-gradient(135deg,#1565c0,#2196f3);box-shadow:0 3px 10px rgba(21,101,192,0.32)}
+.abtn-call{/* soft tint set per area */}
+.abtn-call.off{background:var(--bg)!important;box-shadow:none!important}
+.abtn-call.off i{color:var(--border)}
+.abtn-nav{background:rgba(0,102,255,0.09)}
+.abtn-nav i{color:var(--ab1)}
 
 /* Visited state on card */
 .ccard.visited::before{background:linear-gradient(180deg,var(--gr2),var(--gr4))!important}
@@ -720,7 +722,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .vadd-box textarea{
   width:100%;border:none;background:none;resize:none;
   font-family:inherit;font-size:16px;color:var(--text);outline:none;
-  min-height:44px;line-height:1.4;font-weight:500;
+  min-height:72px;line-height:1.5;font-weight:500;
 }
 .vadd-box textarea::placeholder{color:var(--light);font-weight:400}
 .vadd-btn{
@@ -1079,8 +1081,8 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .cf-note-wrap{margin-top:14px}
 .cf-note-wrap textarea{
   width:100%;border:1.5px solid var(--border);background:var(--bg);border-radius:12px;
-  padding:10px 11px;font-family:inherit;font-size:16px;color:var(--text);outline:none;
-  resize:none;min-height:56px;font-weight:500;transition:border-color 0.2s;
+  padding:12px 13px;font-family:inherit;font-size:16px;color:var(--text);outline:none;
+  resize:none;min-height:110px;max-height:220px;line-height:1.5;font-weight:500;transition:border-color 0.2s;
 }
 .cf-note-wrap textarea:focus{border-color:var(--gr3);box-shadow:0 0 0 3px rgba(13,122,64,0.1)}
 .cf-note-wrap textarea::placeholder{color:var(--light);font-weight:400}
@@ -1291,9 +1293,222 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 
   .toast-stack{bottom:28px}
 }
+
+/* ===== VISIT PLANNER ===== */
+.vp-section{padding:14px 16px 0}
+.vp-box{
+  background:var(--card);border:1.5px solid var(--border);border-radius:15px;
+  padding:14px;box-shadow:var(--sh1);
+}
+.vp-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:block;margin-bottom:7px}
+.vp-date-input{
+  width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;
+  font-size:15px;font-weight:600;color:var(--text);background:var(--bg);
+  font-family:inherit;-webkit-appearance:none;appearance:none;min-height:46px;
+}
+.vp-date-input:focus{outline:none;border-color:var(--gr3);box-shadow:0 0 0 3px rgba(13,122,64,0.1)}
+.vp-count-bar{
+  display:flex;align-items:center;justify-content:space-between;margin:12px 0 8px;
+}
+.vp-count-pill{
+  font-size:12px;font-weight:800;color:var(--gr2);
+  background:rgba(13,122,64,0.09);border-radius:999px;padding:5px 12px;
+}
+.vp-clear-btn{
+  border:none;background:none;color:var(--muted);font-size:12px;font-weight:700;
+  cursor:pointer;padding:5px 8px;font-family:inherit;
+}
+.vp-search-wrap{
+  display:flex;align-items:center;gap:8px;background:var(--bg);
+  border:1.5px solid var(--border);border-radius:12px;padding:0 12px;margin-top:4px;
+}
+.vp-search-wrap i{color:var(--muted);font-size:16px}
+.vp-search-wrap input{
+  flex:1;border:none;background:none;padding:11px 0;font-size:14px;color:var(--text);
+  font-family:inherit;outline:none;
+}
+.vp-cust-list{padding:10px 16px 4px}
+.vp-cust-row{
+  background:var(--card);border:1.5px solid var(--border);border-radius:13px;
+  padding:11px 13px;margin-bottom:8px;display:flex;align-items:center;gap:11px;
+  cursor:pointer;transition:border-color 0.15s, background 0.15s;
+  -webkit-tap-highlight-color:transparent;
+}
+.vp-cust-row.selected{border-color:var(--gr3);background:rgba(13,122,64,0.05)}
+.vp-check{
+  width:22px;height:22px;border-radius:7px;border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  color:#fff;font-size:14px;transition:all 0.15s;background:var(--card);
+}
+.vp-cust-row.selected .vp-check{background:linear-gradient(135deg,var(--gr2),var(--gr3));border-color:transparent}
+.vp-check i{opacity:0;transform:scale(0.5);transition:all 0.15s}
+.vp-cust-row.selected .vp-check i{opacity:1;transform:scale(1)}
+.vp-cust-body{flex:1;min-width:0}
+.vp-cust-name{font-size:13.5px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vp-cust-area{font-size:11px;color:var(--muted);font-weight:500;margin-top:1px;display:flex;align-items:center;gap:4px}
+.vp-cust-area i{font-size:11px}
+.vp-cust-empty{text-align:center;padding:34px 20px;color:var(--muted);font-size:13px;font-weight:600}
+.vp-footer{
+  display:flex;gap:9px;padding:12px 16px calc(16px + var(--safe-bottom));
+}
+.vp-footer .vp-cancel{
+  flex:1;padding:13px;border-radius:13px;border:1.5px solid var(--border);
+  background:var(--card);color:var(--text);font-size:14px;font-weight:700;
+  cursor:pointer;font-family:inherit;
+}
+.vp-footer .vp-save{
+  flex:2;padding:13px;border-radius:13px;border:none;cursor:pointer;
+  background:linear-gradient(135deg,var(--gr2),var(--gr3));color:#fff;
+  font-size:14px;font-weight:800;font-family:inherit;
+  display:flex;align-items:center;justify-content:center;gap:7px;
+  box-shadow:0 6px 16px rgba(13,122,64,0.3);
+}
+.vp-plan-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:15px;
+  padding:13px 14px;margin-bottom:9px;display:flex;align-items:center;gap:12px;
+  box-shadow:var(--sh1);cursor:pointer;-webkit-tap-highlight-color:transparent;
+  transition:transform 0.12s;
+}
+.vp-plan-card:active{transform:scale(0.985)}
+.vp-plan-date-badge{
+  width:46px;height:46px;border-radius:12px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gr1),var(--gr3));color:#fff;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;line-height:1;
+}
+.vp-plan-date-badge.past{background:linear-gradient(135deg,#8a94a6,#5b6472)}
+.vp-plan-date-badge .d{font-size:17px;font-weight:900}
+.vp-plan-date-badge .m{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;opacity:0.85}
+.vp-plan-body{flex:1;min-width:0}
+.vp-plan-title{font-size:14px;font-weight:800;color:var(--text)}
+.vp-plan-sub{font-size:11.5px;color:var(--muted);font-weight:500;margin-top:2px}
+.vp-plan-tag{
+  font-size:9.5px;font-weight:800;text-transform:uppercase;letter-spacing:0.8px;
+  border-radius:999px;padding:3px 9px;flex-shrink:0;
+}
+.vp-plan-tag.today{background:rgba(13,122,64,0.12);color:var(--gr2)}
+.vp-plan-tag.upcoming{background:rgba(0,102,255,0.1);color:var(--ab1)}
+.vp-plan-tag.past{background:rgba(100,110,130,0.12);color:var(--muted)}
+.vp-plan-chevron{color:var(--muted);font-size:16px;flex-shrink:0}
+.vp-detail-bar{
+  display:flex;align-items:center;gap:10px;padding:14px 16px 0;
+}
+.vp-back-btn{
+  width:38px;height:38px;border-radius:11px;border:1.5px solid var(--border);
+  background:var(--card);color:var(--text);cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:17px;
+}
+.vp-detail-title{flex:1;min-width:0}
+.vp-detail-date{font-size:15px;font-weight:900;color:var(--text)}
+.vp-detail-count{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:1px}
+.vp-detail-acts{display:flex;gap:6px;flex-shrink:0}
+.vp-stop-num{
+  width:34px;height:34px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gr1),var(--gr3));color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;
+}
+.vp-mini-act{
+  width:34px;height:34px;border-radius:10px;border:none;cursor:pointer;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:15px;
+  text-decoration:none;
+}
+.vp-mini-act.call{background:rgba(13,122,64,0.1);color:var(--gr2)}
+.vp-mini-act.nav{background:rgba(0,102,255,0.09);color:var(--ab1)}
+
+
+/* ===== VISIT PLANNER: NOTES ===== */
+.vp-visit-card{
+  background:var(--card);border:1.5px solid var(--border);border-radius:15px;
+  padding:12px 13px;margin-bottom:9px;box-shadow:var(--sh1);
+}
+.vp-visit-card.visited{border-color:rgba(13,122,64,0.4);background:rgba(13,122,64,0.025)}
+.vp-visit-top{display:flex;align-items:center;gap:11px}
+.vp-stop-num i{font-size:16px}
+.vp-visit-note{
+  margin-top:9px;background:var(--bg);border-radius:10px;padding:9px 11px;
+  font-size:12.5px;color:var(--text);line-height:1.45;font-weight:500;
+  display:flex;gap:7px;align-items:flex-start;
+}
+.vp-visit-note i{font-size:13px;color:var(--gr2);flex-shrink:0;margin-top:1px}
+.vp-visit-note.empty{color:var(--light);font-style:italic;font-weight:400}
+.vp-visit-note.empty i{color:var(--light)}
+.vp-visit-user{
+  font-size:10.5px;color:var(--muted);font-weight:600;margin-top:6px;
+  display:flex;align-items:center;gap:4px;padding-left:2px;
+}
+.vp-visit-user i{font-size:11px}
+.vp-mini-act.comment{background:rgba(200,134,10,0.12);color:var(--go1)}
+.vp-mini-act.comment.filled{background:linear-gradient(135deg,var(--gr2),var(--gr3));color:#fff}
+
+
+/* ===== ACTION PLAN ===== */
+.vp-ap-btn{
+  width:100%;padding:12px;margin-top:9px;border-radius:13px;border:1.5px solid var(--border);
+  background:var(--card);color:var(--text);font-size:14px;font-weight:800;cursor:pointer;
+  font-family:inherit;display:flex;align-items:center;justify-content:center;gap:7px;
+  box-shadow:var(--sh1);position:relative;
+}
+.vp-ap-btn i{color:var(--go1);font-size:17px}
+.vp-ap-badge{
+  background:linear-gradient(135deg,#e05252,#c73030);color:#fff;font-size:10.5px;font-weight:900;
+  border-radius:999px;padding:2px 8px;margin-left:2px;
+}
+.vp-ap-filters{padding:12px 16px 0}
+.vp-ap-chips{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:2px}
+.vp-ap-chip{
+  border:1.5px solid var(--border);background:var(--card);color:var(--muted);
+  font-size:12px;font-weight:800;border-radius:999px;padding:7px 13px;cursor:pointer;
+  font-family:inherit;white-space:nowrap;flex-shrink:0;
+}
+.vp-ap-chip.active{background:linear-gradient(135deg,var(--gr2),var(--gr3));color:#fff;border-color:transparent}
+.vp-ap-selects{display:flex;gap:8px;margin-top:9px}
+.vp-ap-select{
+  flex:1;padding:9px 10px;border:1.5px solid var(--border);border-radius:11px;
+  font-size:12.5px;font-weight:700;color:var(--text);background:var(--card);
+  font-family:inherit;min-width:0;
+}
+.vp-ap-cust{margin-bottom:12px}
+.vp-ap-cust-head{
+  display:flex;align-items:center;gap:9px;padding:2px 4px 7px;
+}
+.vp-ap-cust-ico{
+  width:32px;height:32px;border-radius:10px;flex-shrink:0;
+  background:linear-gradient(135deg,var(--gr1),var(--gr3));color:#fff;
+  display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:900;
+}
+.vp-ap-cust-name{font-size:13.5px;font-weight:800;color:var(--text)}
+.vp-ap-cust-meta{font-size:11px;color:var(--muted);font-weight:600;margin-top:1px}
+.vp-ap-item{
+  background:var(--card);border:1.5px solid var(--border);border-radius:13px;
+  padding:11px 12px;margin-bottom:7px;box-shadow:var(--sh1);
+}
+.vp-ap-item.st-done{opacity:0.72}
+.vp-ap-item-top{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+.vp-ap-item-date{font-size:11px;font-weight:800;color:var(--gr2)}
+.vp-ap-item-user{font-size:10.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:3px}
+.vp-ap-item-note{font-size:12.5px;color:var(--text);line-height:1.45;font-weight:500}
+.vp-ap-item.st-done .vp-ap-item-note{text-decoration:line-through}
+.vp-ap-sts{display:flex;gap:6px;margin-top:9px}
+.vp-ap-st{
+  flex:1;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);
+  font-size:10.5px;font-weight:800;border-radius:9px;padding:7px 4px;cursor:pointer;
+  font-family:inherit;display:flex;align-items:center;justify-content:center;gap:4px;
+  text-transform:uppercase;letter-spacing:0.4px;
+}
+.vp-ap-st i{font-size:12px}
+.vp-ap-st.on.pending{background:rgba(200,134,10,0.12);color:var(--go1);border-color:rgba(200,134,10,0.4)}
+.vp-ap-st.on.progress{background:rgba(0,102,255,0.1);color:var(--ab1);border-color:rgba(0,102,255,0.35)}
+.vp-ap-st.on.done{background:rgba(13,122,64,0.1);color:var(--gr2);border-color:rgba(13,122,64,0.4)}
+.vp-ap-export{
+  background:linear-gradient(135deg,var(--gr2),var(--gr3));color:#fff;border:none;
+}
+.vp-ap-export i{color:#fff}
+
 </style>
 </head>
 <body>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
 
 <!-- ===== LOGIN SCREEN ===== -->
 <div class="login-screen" id="login-screen">
@@ -1310,7 +1525,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     </div>
     <form id="login-form" action="#" autocomplete="on">
     <div class="login-field">
-      <label class="login-label" for="l-user">Username</label>
+      <label class="login-label" for="l-user">Email or Username</label>
       <div class="login-input-wrap">
         <input class="login-input" type="text" id="l-user" name="username" placeholder="Enter your username" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="text">
         <i class="ti ti-user"></i>
@@ -1445,6 +1660,92 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       <div class="areas-list" id="users-list"></div>
     </div>
   </div>
+  <!-- ===== VISIT PLANNER VIEW ===== -->
+  <div class="view" id="v-planner">
+    <div class="areas-scroll">
+      <div class="areas-hero">
+        <div class="areas-hero-pattern"></div>
+        <div class="areas-eyebrow"><i class="ti ti-calendar-time"></i> Plan Ahead</div>
+        <div class="areas-title">Visit Planner</div>
+        <div class="areas-sub">Pick a date, select customers, and save your visit plan</div>
+      </div>
+
+      <!-- Saved plans (home) -->
+      <div id="vp-home">
+        <div class="vp-section">
+          <button class="areas-add-btn" id="vp-new-btn" style="width:100%;padding:12px;justify-content:center;display:flex;align-items:center;gap:7px"><i class="ti ti-calendar-plus"></i> New Visit Plan</button>
+          <button class="vp-ap-btn" id="vp-ap-open"><i class="ti ti-target-arrow"></i> Action Plan <span class="vp-ap-badge" id="vp-ap-badge" style="display:none">0</span></button>
+        </div>
+        <div class="areas-list" id="vp-plans-list"></div>
+      </div>
+
+      <!-- Action Plan -->
+      <div id="vp-action" style="display:none">
+        <div class="vp-detail-bar">
+          <button class="vp-back-btn" id="vp-ap-back"><i class="ti ti-arrow-left"></i></button>
+          <div class="vp-detail-title">
+            <div class="vp-detail-date">Action Plan</div>
+            <div class="vp-detail-count" id="vp-ap-count"></div>
+          </div>
+          <div class="vp-detail-acts">
+            <button class="area-act-btn vp-ap-export" id="vp-ap-pdf" title="Export PDF"><i class="ti ti-file-type-pdf"></i></button>
+          </div>
+        </div>
+        <div class="vp-ap-filters">
+          <div class="vp-ap-chips" id="vp-ap-chips">
+            <button class="vp-ap-chip active" data-st="all">All</button>
+            <button class="vp-ap-chip" data-st="pending">Pending</button>
+            <button class="vp-ap-chip" data-st="progress">In Progress</button>
+            <button class="vp-ap-chip" data-st="done">Done</button>
+          </div>
+          <div class="vp-ap-selects">
+            <select class="vp-ap-select" id="vp-ap-area"><option value="">All Areas</option></select>
+            <select class="vp-ap-select" id="vp-ap-rep"><option value="">All Reps</option></select>
+          </div>
+        </div>
+        <div class="areas-list" id="vp-ap-list"></div>
+      </div>
+
+      <!-- Create / edit plan -->
+      <div id="vp-editor" style="display:none">
+        <div class="vp-section">
+          <div class="vp-box">
+            <label class="vp-label" for="vp-date"><i class="ti ti-calendar-event"></i> Visit Date</label>
+            <input type="date" class="vp-date-input" id="vp-date">
+            <div class="vp-count-bar">
+              <span class="vp-count-pill" id="vp-sel-count">0 selected</span>
+              <button class="vp-clear-btn" id="vp-clear-sel"><i class="ti ti-eraser"></i> Clear all</button>
+            </div>
+            <div class="vp-search-wrap">
+              <i class="ti ti-search"></i>
+              <input type="search" id="vp-search" placeholder="Search customer or area..." autocomplete="off">
+            </div>
+          </div>
+        </div>
+        <div class="vp-cust-list" id="vp-cust-list"></div>
+        <div class="vp-footer">
+          <button class="vp-cancel" id="vp-cancel">Cancel</button>
+          <button class="vp-save" id="vp-save"><i class="ti ti-device-floppy"></i> Save Plan</button>
+        </div>
+      </div>
+
+      <!-- Plan detail -->
+      <div id="vp-detail" style="display:none">
+        <div class="vp-detail-bar">
+          <button class="vp-back-btn" id="vp-back"><i class="ti ti-arrow-left"></i></button>
+          <div class="vp-detail-title">
+            <div class="vp-detail-date" id="vp-detail-date"></div>
+            <div class="vp-detail-count" id="vp-detail-count"></div>
+          </div>
+          <div class="vp-detail-acts">
+            <button class="area-act-btn rename" id="vp-edit-plan" title="Edit plan"><i class="ti ti-edit"></i></button>
+            <button class="area-act-btn delete" id="vp-delete-plan" title="Delete plan"><i class="ti ti-trash"></i></button>
+          </div>
+        </div>
+        <div class="areas-list" id="vp-detail-list"></div>
+      </div>
+    </div>
+  </div>
 </div>
 
   <!-- ===== BOTTOM NAV (mobile only) ===== -->
@@ -1459,6 +1760,11 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       <div class="nbtn-indicator"></div>
       <span class="nbtn-label-short">Visits</span>
       <span class="nbtn-label-full">Customer Visit</span>
+    </button>
+    <button class="nbtn" id="nb-planner">
+      <i class="ti ti-calendar-time"></i>
+      <div class="nbtn-indicator"></div>
+      <span>Planner</span>
     </button>
     <button class="nbtn admin-only-nav" id="nb-areas" style="display:none">
       <i class="ti ti-map-pin-cog"></i>
@@ -2475,6 +2781,18 @@ function escapeHtml(s){
 
 // ===== CONFIRM MODAL ENGINE =====
 var cfOnConfirm=null;
+// Auto-grow note textareas as the user types
+function wireAutoGrow(id,maxH){
+  var ta=document.getElementById(id);
+  if(!ta)return;
+  ta.addEventListener("input",function(){
+    this.style.height="auto";
+    this.style.height=Math.min(this.scrollHeight,maxH)+"px";
+  });
+}
+wireAutoGrow("cf-note",220);
+wireAutoGrow("ds-vnote",200);
+
 function showConfirm(opts){
   if(typeof hideInstallBanner==="function")hideInstallBanner();
   document.getElementById("cf-title").textContent=opts.title||"Confirm";
@@ -2772,7 +3090,18 @@ document.getElementById("ac-find-from-link").addEventListener("click",function()
     return;
   }
   if(url.indexOf("goo.gl")>=0||url.indexOf("maps.app")>=0){
-    showToast("Shortened links don't contain readable coordinates — paste the full link instead, or use \"Find My Location\"","danger","ti-map-pin-x");
+    showConfirm({
+      title:"This Is a Shortened Link",
+      message:"Short links (maps.app.goo.gl) don't contain coordinates. To get the full link: open this link in your browser, wait for Google Maps to load, then copy the long URL from the address bar and paste that here instead. Or if you're standing at the location, just use \"Find My Location\" above.",
+      icon:"ti-link",
+      iconType:"warn",
+      showNote:false,
+      confirmLabel:"Open Link Now",
+      cancelLabel:"OK, Got It",
+      onConfirm:function(){
+        window.open(url,"_blank");
+      }
+    });
     return;
   }
   var coords=extractCoordsFromMapsUrl(url);
@@ -3008,10 +3337,7 @@ renderTabs();
 renderList();
 
 // ===== LOGIN LOGIC =====
-var USERS=[
-  {u:"agrofresh",p:"agrofresh123",role:"rep",name:"AgroFresh Rep"},
-  {u:"admin",p:"admin123",role:"admin",name:"Admin"}
-];
+var USERS=[];
 var USER_CUSTOM_KEY="af_custom_users";
 var USER_PW_KEY="af_user_pw_overrides";
 (function(){
@@ -3201,6 +3527,8 @@ document.getElementById("logout-btn").addEventListener("click",function(){
     cancelLabel:"Stay Signed In",
     onConfirm:function(){
       try{localStorage.removeItem(SESSION_KEY);}catch(e){}
+      try{if(typeof fbStopSync==="function")fbStopSync();}catch(e){}
+      try{if(window.firebase&&firebase.auth)firebase.auth().signOut();}catch(e){}
       CURRENT_ROLE="rep";
       CURRENT_USER="";
       CURRENT_USERNAME="";
@@ -3292,8 +3620,799 @@ window.addEventListener("appinstalled",function(){
   markDismissed();
 });
 
+
+// ===== VISIT PLANNER (localStorage) =====
+var PLAN_KEY="af_visit_plans";
+var vpSelected=[];        // customer numbers selected in the editor
+var vpEditingDate=null;   // date being edited (null = new plan)
+var vpDetailDate=null;    // date currently shown in detail view
+var vpSearch="";
+
+function loadPlans(){
+  try{
+    var raw=localStorage.getItem(PLAN_KEY);
+    return raw?JSON.parse(raw):{};
+  }catch(e){return {};}
+}
+function savePlans(plans){
+  try{localStorage.setItem(PLAN_KEY,JSON.stringify(plans));}catch(e){}
+}
+function vpTodayStr(){
+  var d=new Date();
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function vpFormatDate(dateStr){
+  var parts=dateStr.split("-");
+  var d=new Date(parseInt(parts[0],10),parseInt(parts[1],10)-1,parseInt(parts[2],10));
+  return d.toLocaleDateString("en-SA",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+}
+function vpShowSection(which){
+  document.getElementById("vp-home").style.display=(which==="home")?"":"none";
+  document.getElementById("vp-editor").style.display=(which==="editor")?"":"none";
+  document.getElementById("vp-detail").style.display=(which==="detail")?"":"none";
+  document.getElementById("vp-action").style.display=(which==="action")?"":"none";
+  if(which==="home"&&typeof updateApBadge==="function")updateApBadge();
+}
+
+// ---- Saved plans list ----
+function renderPlansList(){
+  var listEl=document.getElementById("vp-plans-list");
+  var plans=loadPlans();
+  var dates=Object.keys(plans).filter(function(d){return plans[d]&&plans[d].length;});
+  if(!dates.length){
+    listEl.innerHTML="<div class='areas-empty'><i class='ti ti-calendar-off'></i><p>No visit plans yet</p><span style='font-size:12px'>Tap \"New Visit Plan\" to plan your first day of visits</span></div>";
+    return;
+  }
+  var today=vpTodayStr();
+  // upcoming (incl. today) first ascending, then past descending
+  var upcoming=dates.filter(function(d){return d>=today;}).sort();
+  var past=dates.filter(function(d){return d<today;}).sort().reverse();
+  var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  var html="";
+  upcoming.concat(past).forEach(function(d){
+    var custNos=plans[d];
+    var vc=0;custNos.forEach(function(n){if(vpVisitsOn(n,d).length)vc++;});
+    var parts=d.split("-");
+    var day=parseInt(parts[2],10);
+    var mon=months[parseInt(parts[1],10)-1]||"";
+    var isPast=d<today;
+    var tag=d===today?"<span class='vp-plan-tag today'>Today</span>":(isPast?"<span class='vp-plan-tag past'>Past</span>":"<span class='vp-plan-tag upcoming'>Upcoming</span>");
+    html+="<div class='vp-plan-card' data-date='"+d+"'>"
+      +"<div class='vp-plan-date-badge"+(isPast?" past":"")+"'><span class='d'>"+day+"</span><span class='m'>"+mon+"</span></div>"
+      +"<div class='vp-plan-body'>"
+      +"<div class='vp-plan-title'>"+escapeHtml(vpFormatDate(d))+"</div>"
+      +"<div class='vp-plan-sub'>"+custNos.length+" customer"+(custNos.length===1?"":"s")+" planned"+(vc?" \u2022 "+vc+" visited":"")+"</div>"
+      +"</div>"+tag
+      +"<i class='ti ti-chevron-right vp-plan-chevron'></i>"
+      +"</div>";
+  });
+  listEl.innerHTML=html;
+  listEl.querySelectorAll(".vp-plan-card").forEach(function(card){
+    card.addEventListener("click",function(){openPlanDetail(this.getAttribute("data-date"));});
+  });
+}
+
+// ---- Editor ----
+function openPlanEditor(dateStr){
+  vpEditingDate=dateStr||null;
+  vpSearch="";
+  document.getElementById("vp-search").value="";
+  var dateInput=document.getElementById("vp-date");
+  if(dateStr){
+    dateInput.value=dateStr;
+    vpSelected=(loadPlans()[dateStr]||[]).slice();
+  } else {
+    dateInput.value=vpTodayStr();
+    vpSelected=[];
+  }
+  dateInput.min=vpEditingDate?"":vpTodayStr();
+  renderPlanCustList();
+  updateVpCount();
+  vpShowSection("editor");
+  document.querySelector("#v-planner .areas-scroll").scrollTop=0;
+}
+function updateVpCount(){
+  document.getElementById("vp-sel-count").textContent=vpSelected.length+" selected";
+}
+function renderPlanCustList(){
+  var listEl=document.getElementById("vp-cust-list");
+  var q=vpSearch.trim().toLowerCase();
+  var list=CUSTS.slice().sort(function(a,b){
+    return (a.area||"").localeCompare(b.area||"")||(a.name||"").localeCompare(b.name||"");
+  }).filter(function(c){
+    if(!q)return true;
+    return (c.name||"").toLowerCase().indexOf(q)!==-1||(c.area||"").toLowerCase().indexOf(q)!==-1;
+  });
+  if(!list.length){
+    listEl.innerHTML="<div class='vp-cust-empty'>No customers match your search</div>";
+    return;
+  }
+  var html="";
+  list.forEach(function(c){
+    var sel=vpSelected.indexOf(c.n)!==-1;
+    html+="<div class='vp-cust-row"+(sel?" selected":"")+"' data-n='"+c.n+"'>"
+      +"<div class='vp-check'><i class='ti ti-check'></i></div>"
+      +"<div class='vp-cust-body'>"
+      +"<div class='vp-cust-name'>"+escapeHtml(c.name)+"</div>"
+      +"<div class='vp-cust-area'><i class='ti ti-map-pin'></i>"+escapeHtml(c.area||"")+"</div>"
+      +"</div></div>";
+  });
+  listEl.innerHTML=html;
+  listEl.querySelectorAll(".vp-cust-row").forEach(function(row){
+    row.addEventListener("click",function(){
+      var n=parseInt(this.getAttribute("data-n"),10);
+      var idx=vpSelected.indexOf(n);
+      if(idx===-1){vpSelected.push(n);this.classList.add("selected");}
+      else{vpSelected.splice(idx,1);this.classList.remove("selected");}
+      updateVpCount();
+    });
+  });
+}
+document.getElementById("vp-new-btn").addEventListener("click",function(){openPlanEditor(null);});
+document.getElementById("vp-cancel").addEventListener("click",function(){vpShowSection("home");renderPlansList();});
+document.getElementById("vp-clear-sel").addEventListener("click",function(){
+  vpSelected=[];updateVpCount();renderPlanCustList();
+});
+document.getElementById("vp-search").addEventListener("input",function(){
+  vpSearch=this.value;renderPlanCustList();
+});
+document.getElementById("vp-save").addEventListener("click",function(){
+  var dateStr=document.getElementById("vp-date").value;
+  if(!dateStr){showToast("Please pick a visit date","info","ti-calendar-question");return;}
+  if(!vpSelected.length){showToast("Select at least one customer","info","ti-user-question");return;}
+  var plans=loadPlans();
+  var overwriting=!vpEditingDate&&plans[dateStr]&&plans[dateStr].length;
+  var doSave=function(){
+    if(vpEditingDate&&vpEditingDate!==dateStr)delete plans[vpEditingDate];
+    plans[dateStr]=vpSelected.slice();
+    savePlans(plans);
+    showToast("Plan saved for "+vpFormatDate(dateStr),"success","ti-calendar-check");
+    vpEditingDate=null;
+    vpShowSection("home");
+    renderPlansList();
+  };
+  if(overwriting){
+    showConfirm({
+      title:"Replace existing plan?",
+      message:"A visit plan already exists for "+vpFormatDate(dateStr)+". Saving will replace it with your new selection.",
+      icon:"ti-calendar-exclamation",iconType:"warn",
+      confirmLabel:"Replace",
+      onConfirm:doSave
+    });
+  } else {
+    doSave();
+  }
+});
+
+// ---- Visit-log helpers for planner ----
+function vpTsToDateStr(ts){
+  var d=new Date(ts);
+  return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+}
+function vpVisitsOn(custNo,dateStr){
+  var store=loadVisitStore();
+  var arr=store[custNo]||[];
+  return arr.filter(function(v){return vpTsToDateStr(v.ts)===dateStr;});
+}
+function vpAddVisitOn(sno,note,dateStr){
+  var store=loadVisitStore();
+  if(!store[sno])store[sno]=[];
+  var ts;
+  if(dateStr===vpTodayStr()){ts=Date.now();}
+  else{
+    var p=dateStr.split("-");
+    ts=new Date(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10),12,0,0).getTime();
+  }
+  store[sno].push({ts:ts,note:(note||"").trim(),user:CURRENT_USER||"Unknown"});
+  saveVisitStore(store);
+  if(typeof updateStatsBar==="function")try{updateStatsBar();}catch(e){}
+}
+
+// ---- Detail view ----
+function openPlanDetail(dateStr){
+  vpDetailDate=dateStr;
+  var plans=loadPlans();
+  var custNos=plans[dateStr]||[];
+  var listEl=document.getElementById("vp-detail-list");
+  var html="";
+  var stop=1;
+  var visitedCount=0;
+  custNos.forEach(function(n){
+    var c=getCustomerByNumber(n);
+    if(!c){
+      html+="<div class='vp-visit-card'><div class='vp-visit-top'><div class='vp-stop-num'>"+(stop++)+"</div><div class='area-card-body'><div class='area-card-name' style='color:var(--muted)'>Customer removed</div></div></div></div>";
+      return;
+    }
+    var dayVisits=vpVisitsOn(n,dateStr);
+    var visited=dayVisits.length>0;
+    if(visited)visitedCount++;
+    var latest=visited?dayVisits[dayVisits.length-1]:null;
+    var noteTxt=(latest&&latest.note)?latest.note:"";
+    html+="<div class='vp-visit-card"+(visited?" visited":"")+"'>"
+      +"<div class='vp-visit-top'>"
+      +"<div class='vp-stop-num'>"+(visited?"<i class='ti ti-check'></i>":(stop))+"</div>"
+      +"<div class='area-card-body'>"
+      +"<div class='area-card-name'>"+escapeHtml(c.name)+"</div>"
+      +"<div class='area-card-count'><i class='ti ti-map-pin' style='font-size:10px'></i> "+escapeHtml(c.area||"")+(c.ph?" &bull; "+escapeHtml(c.ph):"")+"</div>"
+      +"</div>"
+      +"<div class='area-card-acts'>"
+      +(c.ph?"<a class='vp-mini-act call' href='tel:"+escapeHtml(c.ph)+"' title='Call'><i class='ti ti-phone'></i></a>":"")
+      +(c.maps?"<a class='vp-mini-act nav' href='"+escapeHtml(c.maps)+"' target='_blank' title='Navigate'><i class='ti ti-navigation'></i></a>":"")
+      +"<button class='vp-mini-act comment"+(visited?" filled":"")+"' data-n='"+n+"' title='Visit comments'><i class='ti "+(visited?"ti-message-2":"ti-message-plus")+"'></i></button>"
+      +"</div>"
+      +"</div>"
+      +"<div class='vp-visit-note"+(noteTxt?"":" empty")+"'>"
+      +"<i class='ti "+(noteTxt?"ti-message-2":"ti-message-off")+"'></i>"
+      +"<span>"+(noteTxt?escapeHtml(noteTxt):(visited?"Visited — no comments added. Tap the message button to add.":"Not visited yet — tap the message button to record the visit and customer comments."))+"</span>"
+      +"</div>"
+      +(visited&&latest.user?"<div class='vp-visit-user'><i class='ti ti-user'></i>"+escapeHtml(latest.user)+"</div>":"")
+      +"</div>";
+    stop++;
+  });
+  if(!html)html="<div class='areas-empty'><i class='ti ti-users'></i><p>No customers in this plan</p></div>";
+  listEl.innerHTML=html;
+  document.getElementById("vp-detail-date").textContent=vpFormatDate(dateStr);
+  document.getElementById("vp-detail-count").textContent=custNos.length+" planned"+(visitedCount?" \u2022 "+visitedCount+" visited":"");
+  listEl.querySelectorAll(".vp-mini-act.comment").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      vpAddComment(parseInt(this.getAttribute("data-n"),10));
+    });
+  });
+  vpShowSection("detail");
+  document.querySelector("#v-planner .areas-scroll").scrollTop=0;
+}
+function vpAddComment(n){
+  var c=getCustomerByNumber(n);
+  if(!c||!vpDetailDate)return;
+  var dateStr=vpDetailDate;
+  var dayVisits=vpVisitsOn(n,dateStr);
+  if(dayVisits.length){
+    var latest=dayVisits[dayVisits.length-1];
+    showConfirm({
+      title:"Visit comments",
+      message:c.name+" \u2014 update the customer's comments for this visit.",
+      icon:"ti-message-2",
+      showNote:true,
+      prefill:latest.note||"",
+      notePlaceholder:"Customer comments / feedback...",
+      confirmLabel:"Save",
+      onConfirm:function(note){
+        var store=loadVisitStore();
+        var arr=store[n]||[];
+        for(var i=arr.length-1;i>=0;i--){
+          if(arr[i].ts===latest.ts){arr[i].note=(note||"").trim();break;}
+        }
+        saveVisitStore(store);
+        showToast("Comments saved","success","ti-message-check");
+        openPlanDetail(dateStr);
+      }
+    });
+  } else {
+    showConfirm({
+      title:"Record visit",
+      message:c.name+" \u2014 mark as visited and add the customer's comments.",
+      icon:"ti-checkup-list",
+      showNote:true,
+      notePlaceholder:"Customer comments / feedback...",
+      confirmLabel:"Save Visit",
+      onConfirm:function(note){
+        vpAddVisitOn(n,note,dateStr);
+        showToast("Visit recorded","success","ti-circle-check");
+        openPlanDetail(dateStr);
+        if(typeof renderList==="function")try{renderList();}catch(e){}
+      }
+    });
+  }
+}
+document.getElementById("vp-back").addEventListener("click",function(){vpShowSection("home");renderPlansList();});
+document.getElementById("vp-edit-plan").addEventListener("click",function(){
+  if(vpDetailDate)openPlanEditor(vpDetailDate);
+});
+document.getElementById("vp-delete-plan").addEventListener("click",function(){
+  if(!vpDetailDate)return;
+  var d=vpDetailDate;
+  showConfirm({
+    title:"Delete this plan?",
+    message:"The visit plan for "+vpFormatDate(d)+" will be permanently removed.",
+    icon:"ti-trash",iconType:"danger",danger:true,
+    confirmLabel:"Delete",
+    onConfirm:function(){
+      var plans=loadPlans();
+      delete plans[d];
+      savePlans(plans);
+      showToast("Visit plan deleted","danger","ti-trash");
+      vpShowSection("home");
+      renderPlansList();
+    }
+  });
+});
+document.getElementById("nb-planner").addEventListener("click",function(){
+  switchView("planner");
+  vpShowSection("home");
+  renderPlansList();
+});
+
+// ===== ACTION PLAN =====
+var AP_KEY="af_action_status";
+var apStFilter="all",apAreaFilter="",apRepFilter="";
+function loadApStatus(){
+  try{var raw=localStorage.getItem(AP_KEY);return raw?JSON.parse(raw):{};}catch(e){return {};}
+}
+function saveApStatus(m){
+  try{localStorage.setItem(AP_KEY,JSON.stringify(m));}catch(e){}
+}
+function vpGetActionItems(){
+  var store=loadVisitStore();
+  var stMap=loadApStatus();
+  var items=[];
+  Object.keys(store).forEach(function(sno){
+    var c=getCustomerByNumber(parseInt(sno,10));
+    if(!c)return;
+    (store[sno]||[]).forEach(function(v){
+      if(!v.note)return;
+      var key=sno+"_"+v.ts;
+      var st=(stMap[key]&&stMap[key].st)||"pending";
+      items.push({n:parseInt(sno,10),cust:c,ts:v.ts,note:v.note,user:v.user||"\u2014",key:key,st:st});
+    });
+  });
+  items.sort(function(a,b){return b.ts-a.ts;});
+  return items;
+}
+function updateApBadge(){
+  var pend=vpGetActionItems().filter(function(it){return it.st==="pending";}).length;
+  var b=document.getElementById("vp-ap-badge");
+  if(pend>0){b.style.display="";b.textContent=pend;}
+  else{b.style.display="none";}
+}
+function renderActionPlan(){
+  var items=vpGetActionItems();
+  // populate filter selects (preserve selection)
+  var areas={},reps={};
+  items.forEach(function(it){
+    if(it.cust.area)areas[it.cust.area]=true;
+    if(it.user&&it.user!=="\u2014")reps[it.user]=true;
+  });
+  var areaSel=document.getElementById("vp-ap-area");
+  var repSel=document.getElementById("vp-ap-rep");
+  areaSel.innerHTML="<option value=''>All Areas</option>"+Object.keys(areas).sort().map(function(a){return "<option value=\""+escapeHtml(a)+"\""+(a===apAreaFilter?" selected":"")+">"+escapeHtml(a)+"</option>";}).join("");
+  repSel.innerHTML="<option value=''>All Reps</option>"+Object.keys(reps).sort().map(function(r){return "<option value=\""+escapeHtml(r)+"\""+(r===apRepFilter?" selected":"")+">"+escapeHtml(r)+"</option>";}).join("");
+  // filter
+  var filtered=items.filter(function(it){
+    if(apStFilter!=="all"&&it.st!==apStFilter)return false;
+    if(apAreaFilter&&it.cust.area!==apAreaFilter)return false;
+    if(apRepFilter&&it.user!==apRepFilter)return false;
+    return true;
+  });
+  var pend=items.filter(function(it){return it.st==="pending";}).length;
+  var prog=items.filter(function(it){return it.st==="progress";}).length;
+  var done=items.filter(function(it){return it.st==="done";}).length;
+  document.getElementById("vp-ap-count").textContent=items.length+" comments \u2022 "+pend+" pending \u2022 "+prog+" in progress \u2022 "+done+" done";
+  var listEl=document.getElementById("vp-ap-list");
+  if(!filtered.length){
+    listEl.innerHTML="<div class='areas-empty'><i class='ti ti-message-off'></i><p>No comments found</p><span style='font-size:12px'>Customer comments recorded during visits will appear here</span></div>";
+    return;
+  }
+  // group by customer, keep order of most recent
+  var groups=[],seen={};
+  filtered.forEach(function(it){
+    if(seen[it.n]===undefined){seen[it.n]=groups.length;groups.push({cust:it.cust,n:it.n,items:[]});}
+    groups[seen[it.n]].items.push(it);
+  });
+  var html="";
+  groups.forEach(function(g){
+    html+="<div class='vp-ap-cust'>"
+      +"<div class='vp-ap-cust-head'>"
+      +"<div class='vp-ap-cust-ico'>"+escapeHtml((g.cust.name||"?").charAt(0).toUpperCase())+"</div>"
+      +"<div><div class='vp-ap-cust-name'>"+escapeHtml(g.cust.name)+"</div>"
+      +"<div class='vp-ap-cust-meta'>"+escapeHtml(g.cust.area||"")+(g.cust.ph?" \u2022 "+escapeHtml(g.cust.ph):"")+"</div></div>"
+      +"</div>";
+    g.items.forEach(function(it){
+      html+="<div class='vp-ap-item st-"+it.st+"' data-key='"+it.key+"'>"
+        +"<div class='vp-ap-item-top'>"
+        +"<span class='vp-ap-item-date'><i class='ti ti-calendar'></i> "+escapeHtml(formatDMY(it.ts))+"</span>"
+        +"<span class='vp-ap-item-user'><i class='ti ti-user'></i>"+escapeHtml(it.user)+"</span>"
+        +"</div>"
+        +"<div class='vp-ap-item-note'>"+escapeHtml(it.note)+"</div>"
+        +"<div class='vp-ap-sts'>"
+        +"<button class='vp-ap-st pending"+(it.st==="pending"?" on":"")+"' data-key='"+it.key+"' data-st='pending'><i class='ti ti-clock'></i>Pending</button>"
+        +"<button class='vp-ap-st progress"+(it.st==="progress"?" on":"")+"' data-key='"+it.key+"' data-st='progress'><i class='ti ti-progress'></i>Progress</button>"
+        +"<button class='vp-ap-st done"+(it.st==="done"?" on":"")+"' data-key='"+it.key+"' data-st='done'><i class='ti ti-check'></i>Done</button>"
+        +"</div></div>";
+    });
+    html+="</div>";
+  });
+  listEl.innerHTML=html;
+  listEl.querySelectorAll(".vp-ap-st").forEach(function(btn){
+    btn.addEventListener("click",function(){
+      var key=this.getAttribute("data-key"),st=this.getAttribute("data-st");
+      var m=loadApStatus();
+      m[key]={st:st,by:CURRENT_USER||"Unknown",up:Date.now()};
+      saveApStatus(m);
+      renderActionPlan();
+    });
+  });
+}
+document.getElementById("vp-ap-open").addEventListener("click",function(){
+  vpShowSection("action");
+  renderActionPlan();
+  document.querySelector("#v-planner .areas-scroll").scrollTop=0;
+});
+document.getElementById("vp-ap-back").addEventListener("click",function(){vpShowSection("home");renderPlansList();});
+document.getElementById("vp-ap-chips").addEventListener("click",function(ev){
+  var chip=ev.target.closest(".vp-ap-chip");
+  if(!chip)return;
+  apStFilter=chip.getAttribute("data-st");
+  this.querySelectorAll(".vp-ap-chip").forEach(function(c){c.classList.remove("active");});
+  chip.classList.add("active");
+  renderActionPlan();
+});
+document.getElementById("vp-ap-area").addEventListener("change",function(){apAreaFilter=this.value;renderActionPlan();});
+document.getElementById("vp-ap-rep").addEventListener("change",function(){apRepFilter=this.value;renderActionPlan();});
+document.getElementById("vp-ap-pdf").addEventListener("click",function(){
+  if(!window.jspdf||!window.jspdf.jsPDF){showToast("PDF library not loaded","info","ti-alert-circle");return;}
+  var items=vpGetActionItems().filter(function(it){
+    if(apStFilter!=="all"&&it.st!==apStFilter)return false;
+    if(apAreaFilter&&it.cust.area!==apAreaFilter)return false;
+    if(apRepFilter&&it.user!==apRepFilter)return false;
+    return true;
+  });
+  if(!items.length){showToast("No comments to export","info","ti-file-off");return;}
+  var doc=new window.jspdf.jsPDF({unit:"pt",format:"a4"});
+  var pageW=doc.internal.pageSize.getWidth();
+  var pageH=doc.internal.pageSize.getHeight();
+  var mx=40,y=48;
+  var stLabel={pending:"PENDING",progress:"IN PROGRESS",done:"DONE"};
+  function newPageIf(need){
+    if(y+need>pageH-46){doc.addPage();y=48;}
+  }
+  doc.setFont("helvetica","bold");doc.setFontSize(16);doc.setTextColor(13,90,50);
+  doc.text("AgroFresh \u2014 Action Plan",mx,y);
+  doc.setFont("helvetica","normal");doc.setFontSize(8.5);doc.setTextColor(110,116,130);
+  y+=15;
+  var fbits=[];
+  if(apStFilter!=="all")fbits.push("Status: "+stLabel[apStFilter]);
+  if(apAreaFilter)fbits.push("Area: "+apAreaFilter);
+  if(apRepFilter)fbits.push("Rep: "+apRepFilter);
+  doc.text("Generated "+new Date().toLocaleString("en-SA",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"})+(fbits.length?"  \u2022  "+fbits.join("  \u2022  "):""),mx,y);
+  y+=8;
+  doc.setDrawColor(210,214,222);doc.setLineWidth(0.8);
+  doc.line(mx,y,pageW-mx,y);
+  y+=18;
+  // group by customer
+  var groups=[],seen={};
+  items.forEach(function(it){
+    if(seen[it.n]===undefined){seen[it.n]=groups.length;groups.push({cust:it.cust,items:[]});}
+    groups[seen[it.n]].items.push(it);
+  });
+  groups.forEach(function(g){
+    newPageIf(40);
+    doc.setFont("helvetica","bold");doc.setFontSize(11);doc.setTextColor(25,30,40);
+    doc.text(g.cust.name,mx,y);
+    doc.setFont("helvetica","normal");doc.setFontSize(8);doc.setTextColor(110,116,130);
+    doc.text((g.cust.area||"")+(g.cust.ph?"  \u2022  "+g.cust.ph:""),mx,y+11);
+    y+=24;
+    g.items.forEach(function(it){
+      var noteLines=doc.splitTextToSize(it.note,pageW-mx*2-14);
+      var blockH=14+noteLines.length*11+8;
+      newPageIf(blockH);
+      doc.setFont("helvetica","bold");doc.setFontSize(8);
+      if(it.st==="done"){doc.setTextColor(13,122,64);}
+      else if(it.st==="progress"){doc.setTextColor(0,90,220);}
+      else{doc.setTextColor(200,134,10);}
+      doc.text("["+stLabel[it.st]+"]",mx+6,y);
+      doc.setTextColor(90,96,110);
+      doc.setFont("helvetica","normal");
+      doc.text(formatDMY(it.ts)+"  \u2022  "+it.user,mx+6+doc.getTextWidth("["+stLabel[it.st]+"]")+8,y);
+      y+=12;
+      doc.setFontSize(9);doc.setTextColor(35,40,52);
+      doc.text(noteLines,mx+6,y);
+      y+=noteLines.length*11+10;
+    });
+    y+=6;
+  });
+  var pages=doc.internal.getNumberOfPages();
+  for(var p=1;p<=pages;p++){
+    doc.setPage(p);
+    doc.setFont("helvetica","normal");doc.setFontSize(7.5);doc.setTextColor(150,156,168);
+    doc.text("AgroFresh Sales Route Manager \u2014 Action Plan",mx,pageH-24);
+    doc.text("Page "+p+" of "+pages,pageW-mx,pageH-24,{align:"right"});
+  }
+  doc.save("AgroFresh-Action-Plan.pdf");
+  showToast("Action Plan PDF exported","success","ti-file-type-pdf");
+});
+
+// ===================== FIREBASE LIVE SYNC =====================
+var FB_CONFIG={
+  apiKey:"AIzaSyADCmKE01k7qoVuMO26dtwj5zI_XzwS1i4",
+  authDomain:"agrofresh-sales.firebaseapp.com",
+  projectId:"agrofresh-sales",
+  storageBucket:"agrofresh-sales.firebasestorage.app",
+  messagingSenderId:"61225585342",
+  appId:"1:61225585342:web:d456441ba33a8a7c912cef"
+};
+var FB_EMAIL_DOMAIN="agrofresh.com";
+var FB_AUTH=null,FB_DB=null,FB_READY=false,FB_APPLYING=false,FB_UNSUB=null,FB_BASE=null;
+var FB_USERS_DEFAULT=[];
+var FB_LS_MAP={};
+FB_LS_MAP[VISIT_KEY]="visits";
+FB_LS_MAP[PLAN_KEY]="plans";
+FB_LS_MAP[AP_KEY]="actionStatus";
+FB_LS_MAP[AREAS_KEY]="areas";
+FB_LS_MAP[CUSTOM_CUST_KEY]="customers";
+FB_LS_MAP[CUSTOMER_OVERRIDES_KEY]="customers";
+FB_LS_MAP[CUSTOMER_DELETED_KEY]="customers";
+FB_LS_MAP[USER_CUSTOM_KEY]="users";
+FB_LS_MAP[USER_PW_KEY]="users";
+
+// --- localStorage hook: any app write to a synced key schedules a push ---
+var FB_LS_RAWSET=Storage.prototype.setItem;
+function fbRawSet(k,v){FB_LS_RAWSET.call(localStorage,k,v);}
+Storage.prototype.setItem=function(k,v){
+  FB_LS_RAWSET.apply(this,arguments);
+  try{
+    if(this===localStorage&&!FB_APPLYING&&FB_LS_MAP[k]&&FB_READY&&FB_AUTH&&FB_AUTH.currentUser){
+      fbSchedulePush(FB_LS_MAP[k]);
+    }
+  }catch(e){}
+};
+var FB_TIMERS={};
+function fbSchedulePush(docId){
+  if(FB_TIMERS[docId])clearTimeout(FB_TIMERS[docId]);
+  FB_TIMERS[docId]=setTimeout(function(){FB_TIMERS[docId]=null;fbPush(docId);},400);
+}
+function fbGetJson(k,d){
+  try{return JSON.parse(localStorage.getItem(k)||d);}catch(e){return JSON.parse(d);}
+}
+function fbBuildDoc(docId){
+  if(docId==="visits")return{data:fbGetJson(VISIT_KEY,"{}")};
+  if(docId==="plans")return{data:fbGetJson(PLAN_KEY,"{}")};
+  if(docId==="actionStatus")return{data:fbGetJson(AP_KEY,"{}")};
+  if(docId==="areas")return{list:fbGetJson(AREAS_KEY,"[]")};
+  if(docId==="users")return{custom:fbGetJson(USER_CUSTOM_KEY,"[]"),pw:fbGetJson(USER_PW_KEY,"{}")};
+  if(docId==="customers")return{
+    base:FB_BASE||[],
+    custom:fbGetJson(CUSTOM_CUST_KEY,"[]"),
+    overrides:fbGetJson(CUSTOMER_OVERRIDES_KEY,"{}"),
+    deleted:fbGetJson(CUSTOMER_DELETED_KEY,"[]")
+  };
+  return null;
+}
+function fbPush(docId){
+  if(!FB_READY||!FB_AUTH||!FB_AUTH.currentUser)return;
+  var payload=fbBuildDoc(docId);
+  if(!payload)return;
+  try{
+    FB_DB.collection("appdata").doc(docId).set({
+      json:JSON.stringify(payload),
+      up:Date.now(),
+      by:(FB_AUTH.currentUser.email||"")
+    }).catch(function(e){});
+  }catch(e){}
+}
+
+// --- rebuild in-memory state from synced storage ---
+function fbRebuildCusts(){
+  try{
+    if(!FB_BASE||!FB_BASE.length)return;
+    var list=FB_BASE.slice();
+    var custom=fbGetJson(CUSTOM_CUST_KEY,"[]");
+    for(var i=0;i<custom.length;i++)list.push(custom[i]);
+    var deleted=fbGetJson(CUSTOMER_DELETED_KEY,"[]");
+    if(deleted.length)list=list.filter(function(c){return deleted.indexOf(c.n)===-1;});
+    var overrides=fbGetJson(CUSTOMER_OVERRIDES_KEY,"{}");
+    var out=list.map(function(c){
+      var cc={};for(var k in c)cc[k]=c[k];
+      var ov=overrides[c.n];
+      if(ov){for(var k2 in ov)cc[k2]=ov[k2];}
+      return cc;
+    });
+    CUSTS.length=0;
+    for(var j=0;j<out.length;j++)CUSTS.push(out[j]);
+  }catch(e){}
+}
+function fbRebuildUsers(){
+  try{
+    USERS.length=0;
+    for(var i=0;i<FB_USERS_DEFAULT.length;i++){
+      var d=FB_USERS_DEFAULT[i];
+      USERS.push({u:d.u,p:d.p,role:d.role,name:d.name});
+    }
+    var custom=fbGetJson(USER_CUSTOM_KEY,"[]");
+    for(var j=0;j<custom.length;j++)USERS.push(custom[j]);
+    var pw=fbGetJson(USER_PW_KEY,"{}");
+    for(var k=0;k<USERS.length;k++){if(pw[USERS[k].u])USERS[k].p=pw[USERS[k].u];}
+  }catch(e){}
+}
+
+// --- apply remote snapshots ---
+function fbApply(id,data){
+  if(!data)return;
+  var obj=null;
+  try{obj=data.json?JSON.parse(data.json):null;}catch(e){}
+  if(!obj)return;
+  FB_APPLYING=true;
+  try{
+    if(id==="visits"){fbRawSet(VISIT_KEY,JSON.stringify(obj.data||{}));}
+    else if(id==="plans"){fbRawSet(PLAN_KEY,JSON.stringify(obj.data||{}));}
+    else if(id==="actionStatus"){fbRawSet(AP_KEY,JSON.stringify(obj.data||{}));}
+    else if(id==="areas"){fbRawSet(AREAS_KEY,JSON.stringify(obj.list||[]));}
+    else if(id==="customers"){
+      FB_BASE=obj.base||[];
+      fbRawSet(CUSTOM_CUST_KEY,JSON.stringify(obj.custom||[]));
+      fbRawSet(CUSTOMER_OVERRIDES_KEY,JSON.stringify(obj.overrides||{}));
+      fbRawSet(CUSTOMER_DELETED_KEY,JSON.stringify(obj.deleted||[]));
+      fbRawSet("af_fb_base",JSON.stringify(FB_BASE));
+      fbRebuildCusts();
+    }
+    else if(id==="users"){
+      fbRawSet(USER_CUSTOM_KEY,JSON.stringify(obj.custom||[]));
+      fbRawSet(USER_PW_KEY,JSON.stringify(obj.pw||{}));
+      fbRebuildUsers();
+    }
+    else{FB_APPLYING=false;return;}
+  }finally{FB_APPLYING=false;}
+  fbRefresh(id);
+}
+function fbRefresh(id){
+  function safe(f){try{f();}catch(e){}}
+  var active=document.querySelector(".view.active");
+  var av=active?active.id:"";
+  if(id==="customers"||id==="visits"){safe(renderList);safe(updateStatsBar);safe(renderTabs);}
+  if(id==="areas"){safe(renderTabs);if(av==="v-areas")safe(renderAreasScreen);}
+  if(id==="users"&&av==="v-users")safe(renderUsersScreen);
+  if(av==="v-report"&&(id==="visits"||id==="customers"))safe(renderReport);
+  if(av==="v-planner"){
+    var act=document.getElementById("vp-action");
+    var det=document.getElementById("vp-detail");
+    var home=document.getElementById("vp-home");
+    if(act&&act.style.display!=="none"&&(id==="visits"||id==="actionStatus"||id==="customers")){safe(renderActionPlan);}
+    else if(det&&det.style.display!=="none"&&vpDetailDate&&(id==="visits"||id==="plans"||id==="customers")){safe(function(){openPlanDetail(vpDetailDate);});}
+    else if(home&&home.style.display!=="none"&&(id==="plans"||id==="visits")){safe(renderPlansList);}
+  }
+}
+
+// --- sync lifecycle ---
+function fbStartSync(){
+  if(FB_UNSUB||!FB_READY)return;
+  FB_UNSUB=FB_DB.collection("appdata").onSnapshot(function(qs){
+    qs.docChanges().forEach(function(ch){
+      if(ch.type==="removed")return;
+      fbApply(ch.doc.id,ch.doc.data());
+    });
+  },function(err){});
+}
+function fbStopSync(){
+  if(FB_UNSUB){try{FB_UNSUB();}catch(e){}FB_UNSUB=null;}
+}
+function fbSeedIfNeeded(){
+  if(!isAdmin()||!FB_READY)return;
+  FB_DB.collection("appdata").get().then(function(qs){
+    var have={};
+    qs.forEach(function(d){have[d.id]=true;});
+    if(!have.customers){
+      FB_BASE=CUSTS.slice();
+      FB_APPLYING=true;
+      try{
+        fbRawSet(CUSTOM_CUST_KEY,"[]");
+        fbRawSet(CUSTOMER_OVERRIDES_KEY,"{}");
+        fbRawSet(CUSTOMER_DELETED_KEY,"[]");
+        fbRawSet("af_fb_base",JSON.stringify(FB_BASE));
+      }finally{FB_APPLYING=false;}
+      fbPush("customers");
+      try{showToast(CUSTS.length+" customers uploaded to live database","success","ti-cloud-upload");}catch(e){}
+    }
+    var rest=["visits","plans","actionStatus","areas","users"];
+    for(var i=0;i<rest.length;i++){if(!have[rest[i]])fbPush(rest[i]);}
+  }).catch(function(e){});
+}
+
+// --- auth ---
+function fbAfterLogin(user){
+  var email=(user.email||"").toLowerCase();
+  var uname=email.split("@")[0];
+  function finish(cfg){
+    var matched=findUser(uname)||findUser(email);
+    var isAdm=(cfg&&cfg.adminEmail&&cfg.adminEmail===email)||(matched&&matched.role==="admin");
+    CURRENT_ROLE=isAdm?"admin":"rep";
+    CURRENT_USER=matched?(matched.name||uname):uname;
+    CURRENT_USERNAME=uname;
+    try{
+      fbRawSet(SESSION_KEY,"1");
+      fbRawSet(ROLE_KEY,CURRENT_ROLE);
+      fbRawSet(USER_NAME_KEY,CURRENT_USER);
+      fbRawSet(USERNAME_KEY,CURRENT_USERNAME);
+    }catch(e){}
+    fbStartSync();
+    fbSeedIfNeeded();
+    showApp();
+  }
+  FB_DB.collection("appdata").doc("config").get().then(function(snap){
+    var cfg=snap.exists?snap.data():null;
+    if(!cfg||!cfg.adminEmail){
+      cfg={adminEmail:email};
+      FB_DB.collection("appdata").doc("config").set({adminEmail:email},{merge:true}).catch(function(e){});
+    }
+    finish(cfg);
+  }).catch(function(){
+    finish({adminEmail:(localStorage.getItem(ROLE_KEY)==="admin")?email:""});
+  });
+}
+function doLogin(){
+  var u=document.getElementById("l-user").value.trim();
+  var p=document.getElementById("l-pass").value;
+  var btn=document.getElementById("login-btn");
+  var errDiv=document.getElementById("login-error");
+  errDiv.classList.remove("show");
+  if(!u||!p){
+    document.getElementById("login-error-msg").textContent="Please enter your email/username and password.";
+    errDiv.classList.add("show");
+    return;
+  }
+  function fail(msg){
+    btn.classList.remove("loading");btn.disabled=false;
+    document.getElementById("login-error-msg").textContent=msg;
+    errDiv.classList.add("show");
+    document.getElementById("l-pass").focus();
+    var card=document.querySelector(".login-card");
+    card.style.animation="none";card.offsetHeight;card.style.animation="shake 0.4s ease";
+  }
+  btn.classList.add("loading");btn.disabled=true;
+  if(!FB_READY||!FB_AUTH){
+    fail("Internet connection is required to sign in for the first time on this device.");
+    return;
+  }
+  var email=u.indexOf("@")>-1?u.toLowerCase():(u.toLowerCase()+"@"+FB_EMAIL_DOMAIN);
+  FB_AUTH.signInWithEmailAndPassword(email,p).then(function(){
+    try{fbRawSet(CREDS_KEY,JSON.stringify({u:u,p:p}));}catch(e){}
+    btn.classList.remove("loading");btn.disabled=false;
+    // onAuthStateChanged completes the login
+  }).catch(function(err){
+    var code=(err&&err.code)||"";
+    if(code==="auth/network-request-failed"){
+      fail("No internet connection. Connect to the internet and try again.");
+    } else if(code==="auth/too-many-requests"){
+      fail("Too many attempts. Please wait a moment and try again.");
+    } else if(code==="auth/invalid-email"){
+      fail("That email address is not valid.");
+    } else {
+      fail("Invalid email or password. Please try again.");
+    }
+  });
+}
+function fbInit(){
+  // offline-first: rebuild customers from cached live base if present
+  try{
+    var cb=localStorage.getItem("af_fb_base");
+    if(cb){FB_BASE=JSON.parse(cb);fbRebuildCusts();try{renderList();updateStatsBar();renderTabs();}catch(e){}}
+  }catch(e){}
+  if(!window.firebase||!firebase.initializeApp){checkSession();return;}
+  try{
+    firebase.initializeApp(FB_CONFIG);
+    FB_AUTH=firebase.auth();
+    FB_DB=firebase.firestore();
+    try{FB_DB.enablePersistence({synchronizeTabs:true}).catch(function(e){});}catch(e){}
+    FB_READY=true;
+  }catch(e){checkSession();return;}
+  // show login until auth state confirms
+  var ls=document.getElementById("login-screen");
+  ls.style.display="flex";
+  try{
+    var saved=localStorage.getItem(CREDS_KEY);
+    if(saved){var c=JSON.parse(saved);document.getElementById("l-user").value=c.u||"";document.getElementById("l-pass").value=c.p||"";}
+  }catch(e){}
+  FB_AUTH.onAuthStateChanged(function(user){
+    if(user){
+      fbAfterLogin(user);
+    } else {
+      ls.classList.remove("hiding");
+      ls.style.display="flex";
+      try{document.getElementById("l-user").focus();}catch(e){}
+    }
+  });
+}
+
 // Init
-checkSession();
+fbInit();
 
 </script>
 </body>
