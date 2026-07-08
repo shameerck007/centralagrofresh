@@ -1611,7 +1611,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     </button>
     </form>
     <div class="login-footer">AgroFresh &copy; 2024 &mdash; Delivering Nature's Best</div>
-    <div class="login-footer" id="fb-diag" style="margin-top:8px;font-weight:700">v2.1 &bull; Checking cloud connection...</div>
+    <div class="login-footer" id="fb-diag" style="margin-top:8px;font-weight:700">v2.3 &bull; Checking cloud connection...</div>
   </div>
 </div>
 
@@ -4704,7 +4704,7 @@ function fbAfterLogin(user){
     fbSeedIfNeeded();
     showApp();
     if(CURRENT_ROLE==="admin"){trkAdminListen();}
-    else{setTimeout(trkStart,1500);}
+    else{setTimeout(trkAskPermission,1200);}
   }
   FB_DB.collection("appdata").doc("config").get().then(function(snap){
     var cfg=snap.exists?snap.data():null;
@@ -4766,7 +4766,7 @@ function fbInit(){
   // move any pre-Firebase local data into memory, then wipe browser storage
   fbMigrateLocal();
   var diag=document.getElementById("fb-diag");
-  function setDiag(msg,bad){if(diag){diag.innerHTML="v2.1 &bull; "+msg;diag.style.color=bad?"#d64545":"";}}
+  function setDiag(msg,bad){if(diag){diag.innerHTML="v2.3 &bull; "+msg;diag.style.color=bad?"#d64545":"";}}
   if(!window.firebase||!firebase.initializeApp){
     setDiag("Cloud NOT loaded &mdash; no internet or this browser blocks it. Open in Chrome/Safari directly.",true);
     checkSession();return;
@@ -4822,6 +4822,35 @@ function trkDist(lat1,lon1,lat2,lon2){
   var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*Math.PI/180)*Math.cos(lat2*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
   return R*2*Math.atan2(Math.sqrt(a),Math.sqrt(1-a));
 }
+function trkAskPermission(){
+  if(!FB_READY||!FB_AUTH||!FB_AUTH.currentUser)return;
+  if(!navigator.geolocation)return;
+  function ask(){
+    showConfirm({
+      title:"Enable Location Sharing",
+      message:"AgroFresh uses your live location during work so your manager can coordinate the field team. Your phone will now ask for permission \u2014 please tap Allow. Sharing works only while the app is open.",
+      icon:"ti-map-pin",
+      iconType:"success",
+      confirmLabel:"Enable Location",
+      onConfirm:function(){trkStart();}
+    });
+  }
+  try{
+    if(navigator.permissions&&navigator.permissions.query){
+      navigator.permissions.query({name:"geolocation"}).then(function(res){
+        if(res.state==="granted"){trkStart();}
+        else if(res.state==="denied"){
+          showToast("Location is blocked \u2014 enable it in your phone settings for this site","info","ti-map-pin-off");
+          try{
+            var email=(FB_AUTH.currentUser&&FB_AUTH.currentUser.email||"").toLowerCase();
+            if(email)FB_DB.collection("tracking").doc(email).set({denied:true,ts:Date.now(),name:CURRENT_USER||email},{merge:true}).catch(function(e){});
+          }catch(e){}
+        }
+        else{ask();}
+      }).catch(function(){ask();});
+    } else {ask();}
+  }catch(e){ask();}
+}
 function trkStart(){
   if(!FB_READY||!FB_AUTH||!FB_AUTH.currentUser)return;
   if(!navigator.geolocation)return;
@@ -4838,13 +4867,19 @@ function trkStart(){
       FB_DB.collection("tracking").doc(email).set({
         lat:lat,lng:lng,acc:Math.round(pos.coords.accuracy||0),
         ts:now,name:CURRENT_USER||email,denied:false
-      }).catch(function(e){});
+      }).then(function(){
+        if(!window.TRK_FIRST_OK){window.TRK_FIRST_OK=true;showToast("Location shared with admin \u2713","success","ti-map-pin-check");}
+      }).catch(function(e){
+        if(!window.TRK_ERR_SHOWN){window.TRK_ERR_SHOWN=true;showToast("Location update failed: "+((e&&e.code)||"error"),"danger","ti-alert-triangle");}
+      });
     },function(err){
+      var why=(err&&err.code===1)?"permission denied":(err&&err.code===2)?"position unavailable":(err&&err.code===3)?"GPS timeout":"unknown";
+      if(!window.TRK_GEO_ERR){window.TRK_GEO_ERR=true;showToast("Location error: "+why,"danger","ti-map-pin-off");}
       try{
         var email=(FB_AUTH.currentUser&&FB_AUTH.currentUser.email||"").toLowerCase();
-        if(email)FB_DB.collection("tracking").doc(email).set({denied:true,ts:Date.now(),name:CURRENT_USER||email},{merge:true}).catch(function(e){});
+        if(email&&err&&err.code===1)FB_DB.collection("tracking").doc(email).set({denied:true,ts:Date.now(),name:CURRENT_USER||email},{merge:true}).catch(function(e){});
       }catch(e){}
-    },{enableHighAccuracy:false,maximumAge:30000,timeout:20000});
+    },{enableHighAccuracy:false,maximumAge:30000,timeout:25000});
     showToast("Location sharing is active","info","ti-map-pin");
   }catch(e){}
 }
