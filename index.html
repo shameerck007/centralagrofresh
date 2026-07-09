@@ -5006,7 +5006,7 @@ function refreshLocBtn(){
     if(navigator.permissions&&navigator.permissions.query){
       navigator.permissions.query({name:"geolocation"}).then(function(res){
         if(res.state==="denied")updateLocBtn("blocked");
-        else if(res.state==="granted"&&TRK_WATCH!==null)updateLocBtn("on");
+        else if(res.state==="granted"&&TRK_WATCH!==null&&window.TRK_FIRST_OK)updateLocBtn("on");
       }).catch(function(){});
     }
   }catch(e){}
@@ -5049,12 +5049,25 @@ document.getElementById("trk-test").addEventListener("click",function(){
     var lat=pos.coords.latitude,lng=pos.coords.longitude,acc=Math.round(pos.coords.accuracy||0);
     say("\u2705 Step 2/3: GPS OK (\u00b1"+acc+"m). Writing to database\u2026");
     var email=(FB_AUTH.currentUser.email||"").toLowerCase();
+    var acked=false;
+    var stuck=setTimeout(function(){
+      if(!acked)say("\u26a0\ufe0f Step 3 STUCK: the write was sent 12s ago but the server has NOT confirmed it. The device is talking to Firebase but writes are not completing \u2014 usually a network/firewall blocking firestore.googleapis.com, or App Check enforcement turned on in Firebase Console. The card below (if any) is only a local echo, NOT saved.","#b07c14");
+    },12000);
     FB_DB.collection("tracking").doc(email).set({
       lat:lat,lng:lng,acc:acc,ts:Date.now(),name:(CURRENT_USER||email)+" (test)",denied:false
     }).then(function(){
-      say("\u2705 Step 3/3: SUCCESS \u2014 location reached the database. The pipeline works. Your own card should appear below within seconds. If reps still don't appear, the problem is on their phones (permission or old app version).","#128a4a");
+      acked=true;clearTimeout(stuck);
+      say("\u2705 Step 3/4: server CONFIRMED the write. Reading back from server\u2026");
+      return FB_DB.collection("tracking").doc(email).get({source:"server"}).then(function(snap){
+        if(snap.exists){
+          say("\u2705 Step 4/4: VERIFIED \u2014 the location exists on the server. Pipeline fully working. The tracking collection now exists in Firestore. If a rep still doesn't appear, their device is the problem (permission or old build).","#128a4a");
+        } else {
+          say("\u26a0\ufe0f Server confirmed the write but read-back found nothing \u2014 tell your developer this exact message.","#b07c14");
+        }
+      });
     }).catch(function(e){
-      say("\u274c Database REJECTED the write: <b>"+((e&&e.code)||"unknown")+"</b>. This means the Firestore security rules are blocking it \u2014 open Firebase Console \u2192 Firestore \u2192 Rules and publish the signed-in rules, then retest.","#c23434");
+      acked=true;clearTimeout(stuck);
+      say("\u274c Database REJECTED the write: <b>"+((e&&e.code)||"unknown")+"</b>. Check Firestore Rules (must be signed-in rules) and App Check (must not be enforced).","#c23434");
     });
   },function(err){
     var why=(err&&err.code===1)?"Permission denied \u2014 the browser/site is blocking location. Click the lock icon near the address bar \u2192 allow Location \u2192 reload.":(err&&err.code===2)?"Position unavailable \u2014 the device could not determine a location.":(err&&err.code===3)?"GPS timeout \u2014 no location fix. Try again.":"Unknown location error.";
