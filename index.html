@@ -5107,7 +5107,20 @@ if(db){
     });
   }
 
-  function startListening(){
+  async function reconcileUp(){
+    try{
+      if(!db) return;
+      var snap = await getDocs(collection(db, COLLECTION));
+      var cloudKeys = {};
+      snap.forEach(function(d){ cloudKeys[d.id]=true; });
+      var lk = localSyncableKeys();
+      for(var i=0;i<lk.length;i++){
+        var k = lk[i];
+        if(!cloudKeys[k]){ var v = localStorage.getItem(k); if(v!=null) pushKey(k, v); }
+      }
+    }catch(e){ console.warn("[Fastrack] reconcile failed", e); }
+  }
+    function startListening(){
     try{
       onSnapshot(collection(db, COLLECTION), function(snap){
         var changed = false;
@@ -5211,7 +5224,7 @@ if(db){
       try{ await setDoc(doc(db,"appMeta","seed"), { customers:true, count:DEF.length, at: serverTimestamp() }, { merge:true }); }catch(e){}
     }catch(e){ console.warn("[Fastrack] seed skipped", e); }
   }
-    try{ onAuthStateChanged(auth, function(user){ if(user){ startListening(); if(!_seedTried){ _seedTried=true; ensureSeed(); } } }); }catch(e){}
+    try{ onAuthStateChanged(auth, function(user){ if(user){ startListening(); if(!_seedTried){ _seedTried=true; ensureSeed().then(reconcileUp).catch(reconcileUp); } } }); }catch(e){}
 
   window.FB = {
     ready:true,
