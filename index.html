@@ -2147,7 +2147,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 })();
 </script>
 <script>
-var CUSTS=[
+var DEFAULT_CUSTS=[
   {n:1,name:"Almas Restaurent",ph:"+966568065187",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/4fRhFar2z1EqDEti7"},
   {n:2,name:"Cherries Restaurant",ph:"+966556209757",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/yB7ZxntDK8mxf4D19"},
   {n:3,name:"Chilly Master",ph:"+966594355511",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/sFGu7tfCuB13SSuS8"},
@@ -2170,18 +2170,44 @@ var CUSTS=[
   {n:20,name:"Kerala Hotel",ph:"+966558828146",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/X1Y8tXU6bxZc9raF8"},
   {n:21,name:"Moon Light Family Restaurent",ph:"+966556823632",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/NSxAhDTziGEAth8f7"},
   {n:22,name:"Malabar Paris",ph:"+966534280387",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/bqBohncpb9RHigkT7"},
-  {n:23,name:"Nanma Kitchen",ph:"+966506475396",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/gcdudA5QBrYrrsq26"}
+  {n:23,name:"Nanma Kitchen",ph:"+966506475396",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/gcdudA5QBrYrrsq26"},
+  {n:24,name:"Calicut Restaurent",ph:"+966550889501",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/NoyDCNDsLMFcpVdR9"},
+  {n:25,name:"Indian Corner",ph:"+966507692500",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/JFnpJkK9juXzn4sY9"},
+  {n:26,name:"Anjappar Chettinad Indian Restaurant",ph:"+966554411542",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/2mTAE8XgHY3mFYU1A"},
+  {n:27,name:"Taste India Restaurent",ph:"+966560044798",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/kyScj2UTHS7rfndr7"},
+  {n:28,name:"Tambis Restaurent café",ph:"+966597974906",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/wbwwq56ijzWerCfc8"},
+  {n:29,name:"The Canteen Lounge",ph:"+966536607776",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/PtZ4SWhvND19XJCi6"},
+  {n:30,name:"Jazeera Amwaj Restaurent",ph:"+966536827673",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/2o77s8hoVVotFtUX7"},
+  {n:31,name:"Minha Multi Cusin Restaurent",ph:"+966562354012",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/pkfpQfseLwP3dyQu8"},
+  {n:32,name:"Seera Restaurent",ph:"+966535090965",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/Wi2Bm954Y9crY1fq6"},
+  {n:33,name:"Shahi Bawarchi Restaurent",ph:"+966567174159",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/TPePkFfhEfRR1hkw5"},
+  {n:34,name:"The Biriyani King",ph:"+966552646827",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/LWDnkiZTKnHLMQTr5"},
+  {n:35,name:"Khana Khazana",ph:"+966114055492",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/P46rr9mYTi2R7jsy7"},
+  {n:36,name:"Shalimar Family Restaurent",ph:"+966504455918",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/vVj8pLx3bdr86H9V8"},
+  {n:37,name:"Al Jalsa Restaurent",ph:"+966566715786",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/P2tQRJJPKorNQ8BL7"},
+  {n:38,name:"Cylon Restaurent",ph:"+966507746829",area:"Malaz",ak:0,maps:"https://maps.app.goo.gl/NPvA4Uhx4RrnmLw5A"}
 ];
+var CUSTS=[];
+try{window.__AF_DEFAULT_CUSTS__=DEFAULT_CUSTS;}catch(e){}
 
 // ===== CUSTOM CUSTOMERS (added via UI, persisted in localStorage) =====
 var CUSTOM_CUST_KEY="af_custom_customers";
 var CUSTOMER_OVERRIDES_KEY="af_customer_overrides";
 var CUSTOMER_DELETED_KEY="af_deleted_customers";
-(function(){
+function rebuildCustomers(){
+  CUSTS=[];
   try{
     var custom=JSON.parse(localStorage.getItem(CUSTOM_CUST_KEY)||"[]");
     for(var i=0;i<custom.length;i++)CUSTS.push(custom[i]);
   }catch(e){}
+  // if the synced store is empty, fall back to the bundled starter list so the app is never blank
+  if(CUSTS.length===0 && window.__AF_DEFAULT_CUSTS__){
+    for(var d=0;d<window.__AF_DEFAULT_CUSTS__.length;d++){
+      var src=window.__AF_DEFAULT_CUSTS__[d], cp={};
+      for(var kk in src)cp[kk]=src[kk];
+      CUSTS.push(cp);
+    }
+  }
   try{
     var deleted=JSON.parse(localStorage.getItem(CUSTOMER_DELETED_KEY)||"[]");
     if(deleted.length)CUSTS=CUSTS.filter(function(c){return deleted.indexOf(c.n)===-1;});
@@ -2193,7 +2219,9 @@ var CUSTOMER_DELETED_KEY="af_deleted_customers";
       if(ov){for(var k in ov)CUSTS[j][k]=ov[k];}
     }
   }catch(e){}
-})();
+}
+rebuildCustomers();
+window.afRebuildCustomers=function(){ try{ rebuildCustomers(); if(typeof renderList==="function") renderList(); }catch(e){} };
 function saveCustomCustomer(cust){
   try{
     var custom=JSON.parse(localStorage.getItem(CUSTOM_CUST_KEY)||"[]");
@@ -4034,9 +4062,10 @@ function doLogin(){
   // Preferred path: Firebase Authentication + cloud data
   if(window.FB && window.FB.ready){
     var _done=false;
+    var _stage="Signing in";
     var _watch=setTimeout(function(){
       if(_done)return; _done=true;
-      loginFail("Couldn't reach the login server. Check your internet connection — a firewall may be blocking Google/Firebase. Try mobile data or another network.");
+      loginFail("Timed out at: "+_stage+". If it says 'Signing in', Firebase Authentication can't be reached or is not set up. If it says 'Loading data', the Firestore database can't be reached.");
     },15000);
     window.FB.signIn(u,p).then(function(profile){
       CURRENT_ROLE=profile.role;
@@ -4049,6 +4078,7 @@ function doLogin(){
         localStorage.setItem(USERNAME_KEY,CURRENT_USERNAME);
       }catch(e){}
       recordLogin(CURRENT_USERNAME);
+      _stage="Loading data";
       // give cloud sync up to 8s, then continue regardless
       return Promise.race([
         window.FB.hydrate().catch(function(){}),
@@ -5019,7 +5049,8 @@ try{
   auth = getAuth(app);
   try{ setPersistence(auth, browserLocalPersistence); }catch(e){}
   db = initializeFirestore(app, {
-    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() })
+    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+    experimentalAutoDetectLongPolling: true
   });
 }catch(e){
   console.error("[Fastrack] Firebase init failed — running in local-only mode.", e);
@@ -5090,17 +5121,19 @@ if(db){
     }catch(e){ console.warn("[Fastrack] could not start live sync", e); }
   }
 
+  function withTimeout(promise, ms){
+    return Promise.race([ promise, new Promise(function(_,rej){ setTimeout(function(){ var e=new Error("timeout"); e.code="app/timeout"; rej(e); }, ms); }) ]);
+  }
   async function signIn(email, password){
     email = (email||"").trim();
-    var cred = await signInWithEmailAndPassword(auth, email, password);
+    var cred = await signInWithEmailAndPassword(auth, email, password); /* AUTH must succeed */
     var user = cred.user;
     var role = "rep";
     var name = (email.indexOf("@")>0) ? email.split("@")[0] : email;
-    var uref = doc(db, "users", user.uid);
     var existing = null;
     try{
-      var usnap = await getDoc(uref);
-      if(usnap.exists()){
+      var usnap = await withTimeout(getDoc(doc(db, "users", user.uid)), 6000);
+      if(usnap && usnap.exists()){
         existing = usnap.data() || {};
         if(existing.role) role = existing.role;
         if(existing.name) name = existing.name;
@@ -5109,14 +5142,15 @@ if(db){
           var derr = new Error("account-disabled"); derr.code = "auth/user-disabled"; throw derr;
         }
       }
-    }catch(e){ if(e && e.code==="auth/user-disabled") throw e; }
+    }catch(e){ if(e && e.code==="auth/user-disabled") throw e; /* timeout/offline: proceed with defaults */ }
     if(ADMIN_EMAILS.indexOf(email.toLowerCase())>=0) role = "admin";
     if(!existing){
-      try{ await setDoc(uref, { email: email.toLowerCase(), name: name, role: role, disabled:false, at: serverTimestamp() }); }catch(e){}
+      /* fire-and-forget so a slow/missing Firestore can never block login */
+      try{ setDoc(doc(db, "users", user.uid), { email: email.toLowerCase(), name: name, role: role, disabled:false, at: serverTimestamp() }).catch(function(){}); }catch(e){}
     }
     return { role: role, name: name, username: email, uid: user.uid };
   }
-
+  
   function signOutUser(){ try{ return signOut(auth); }catch(e){} }
 
   /* --- Admin user management (all from the app) --- */
@@ -5153,7 +5187,31 @@ if(db){
     return sendPasswordResetEmail(auth, (email||"").trim());
   }
 
-  try{ onAuthStateChanged(auth, function(user){ if(user){ startListening(); } }); }catch(e){}
+  var _seedTried=false;
+  async function ensureSeed(){
+    try{
+      if(!db) return;
+      var DEF = window.__AF_DEFAULT_CUSTS__ || [];
+      if(!DEF.length) return;
+      var custom = [];
+      try{ custom = JSON.parse(localStorage.getItem("af_custom_customers")||"[]"); }catch(e){ custom = []; }
+      var deleted = [];
+      try{ deleted = JSON.parse(localStorage.getItem("af_deleted_customers")||"[]"); }catch(e){ deleted = []; }
+      var have = {}; custom.forEach(function(c){ have[c.n]=true; });
+      var isDeleted = {}; deleted.forEach(function(n){ isDeleted[n]=true; });
+      var added = false;
+      DEF.forEach(function(d){
+        if(!have[d.n] && !isDeleted[d.n]){ var cp={}; for(var k in d)cp[k]=d[k]; custom.push(cp); added=true; }
+      });
+      if(added){
+        localStorage.setItem("af_custom_customers", JSON.stringify(custom));
+        try{ var areas = JSON.parse(localStorage.getItem("af_areas")||"[]"); if(!areas.length){ localStorage.setItem("af_areas", JSON.stringify(["Malaz"])); } }catch(e){}
+        if(typeof window.afRebuildCustomers==="function"){ window.afRebuildCustomers(); }
+      }
+      try{ await setDoc(doc(db,"appMeta","seed"), { customers:true, count:DEF.length, at: serverTimestamp() }, { merge:true }); }catch(e){}
+    }catch(e){ console.warn("[Fastrack] seed skipped", e); }
+  }
+    try{ onAuthStateChanged(auth, function(user){ if(user){ startListening(); if(!_seedTried){ _seedTried=true; ensureSeed(); } } }); }catch(e){}
 
   window.FB = {
     ready:true,
