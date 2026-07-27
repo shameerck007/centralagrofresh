@@ -5348,7 +5348,7 @@ try{
   auth = getAuth(app);
   try{ setPersistence(auth, browserLocalPersistence); }catch(e){}
   db = initializeFirestore(app, {
-    experimentalAutoDetectLongPolling: true
+    experimentalForceLongPolling: true
   });
 }catch(e){
   console.error("[Fastrack] Firebase init failed — running in local-only mode.", e);
@@ -5411,11 +5411,30 @@ if(db){
   async function fetchAppStateIntoMemory(){
     if(!db) return;
     var DATA = (window.__AF_SYNC__ && window.__AF_SYNC__.data) || {};
-    var snap = await getDocs(collection(db, COLLECTION));
-    snap.forEach(function(d){
-      var v = d.data() && d.data().v;
-      if(v!=null) DATA[d.id] = v;
-    });
+    var lastErr = null;
+    for(var attempt=0; attempt<3; attempt++){
+      try{
+        var snap = await getDocs(collection(db, COLLECTION));
+        if(snap.size === 0){
+          /* An empty result here is suspicious (this app always has at least
+             a few appState keys once anyone has used it) rather than a sign
+             of a genuinely brand-new install — retry a couple of times
+             before giving up, since this can happen transiently in
+             restrictive network/browser environments (e.g. Safari private
+             browsing) on the very first request of a session. */
+          if(attempt < 2){ await new Promise(function(r){ setTimeout(r, 700); }); continue; }
+        }
+        snap.forEach(function(d){
+          var v = d.data() && d.data().v;
+          if(v!=null) DATA[d.id] = v;
+        });
+        return;
+      }catch(e){
+        lastErr = e;
+        if(attempt < 2){ await new Promise(function(r){ setTimeout(r, 700); }); continue; }
+      }
+    }
+    if(lastErr) throw lastErr;
   }
 
   function startListening(){
@@ -5605,7 +5624,6 @@ if(db){
       });
       if(added){
         localStorage.setItem("af_custom_customers", JSON.stringify(custom));
-        try{ var areas = JSON.parse(localStorage.getItem("af_areas")||"[]"); if(!areas.length){ localStorage.setItem("af_areas", JSON.stringify(["Malaz"])); } }catch(e){}
         if(typeof window.afRebuildCustomers==="function"){ window.afRebuildCustomers(); }
       }
       try{ await setDoc(doc(db,"appMeta","seed"), { customers:true, count:DEF.length, at: serverTimestamp() }, { merge:true }); }catch(e){}
