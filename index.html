@@ -2608,28 +2608,27 @@ function loadAreas(){
   try{localStorage.setItem(AREAS_KEY,JSON.stringify(list));}catch(e){}
   return list;
 }
-function saveAreas(list){
-  try{localStorage.setItem(AREAS_KEY,JSON.stringify(list));}catch(e){}
-}
-function addArea(name){
+async function addArea(name){
   name=name.trim();
-  if(!name)return false;
+  if(!name) throw new Error("empty");
   var list=loadAreas();
   for(var i=0;i<list.length;i++){
-    if(list[i].toLowerCase()===name.toLowerCase())return false;
+    if(list[i].toLowerCase()===name.toLowerCase()) throw new Error("duplicate");
   }
   list.push(name);
-  saveAreas(list);
+  if(!(window.FB && window.FB.saveAreas)) throw new Error("offline");
+  await window.FB.saveAreas(list);
   return true;
 }
-function renameArea(oldName,newName){
+async function renameArea(oldName,newName){
   newName=newName.trim();
-  if(!newName)return false;
+  if(!newName) throw new Error("empty");
   var list=loadAreas();
   var idx=list.indexOf(oldName);
-  if(idx===-1)return false;
+  if(idx===-1) throw new Error("notfound");
   list[idx]=newName;
-  saveAreas(list);
+  if(!(window.FB && window.FB.saveAreas)) throw new Error("offline");
+  await window.FB.saveAreas(list);
   // Update every customer currently in this area (in-memory + persisted overrides)
   for(var i=0;i<CUSTS.length;i++){
     if(CUSTS[i].area===oldName){
@@ -2650,9 +2649,11 @@ function renameArea(oldName,newName){
   }
   return true;
 }
-function deleteArea(name){
+async function deleteArea(name){
   var list=loadAreas().filter(function(a){return a!==name;});
-  saveAreas(list);
+  if(!(window.FB && window.FB.saveAreas)) throw new Error("offline");
+  await window.FB.saveAreas(list);
+  return true;
 }
 function areaCustomerCount(name){
   var c=0;
@@ -3110,15 +3111,15 @@ function renderAreasScreen(){
       if(newName===null)return;
       newName=newName.trim();
       if(!newName||newName===oldName)return;
-      var ok=renameArea(oldName,newName);
-      if(ok){
+      renameArea(oldName,newName).then(function(){
         renderAreasScreen();
         renderTabs();
         renderList();
         showToast("Area renamed to "+newName,"success","ti-map-pin-check");
-      } else {
-        showToast("Couldn't rename that area","danger","ti-alert-triangle");
-      }
+      }).catch(function(err){
+        var msg=(err && err.message==="offline")?"Can't reach the server right now. Check your connection and try again.":"Couldn't rename that area";
+        showToast(msg,"danger","ti-alert-triangle");
+      });
     });
   });
   listEl.querySelectorAll(".area-act-btn.delete").forEach(function(btn){
@@ -3135,10 +3136,14 @@ function renderAreasScreen(){
         cancelLabel:"Keep It",
         danger:true,
         onConfirm:function(){
-          deleteArea(area);
-          renderAreasScreen();
-          renderTabs();
-          showToast("Area deleted: "+area,"danger","ti-trash");
+          deleteArea(area).then(function(){
+            renderAreasScreen();
+            renderTabs();
+            showToast("Area deleted: "+area,"danger","ti-trash");
+          }).catch(function(err){
+            var msg=(err && err.message==="offline")?"Can't reach the server right now. Check your connection and try again.":"Couldn't delete that area";
+            showToast(msg,"danger","ti-alert-triangle");
+          });
         }
       });
     });
@@ -3735,15 +3740,21 @@ document.getElementById("area-add-btn").addEventListener("click",function(){
     showToast("Enter an area name first","danger","ti-alert-triangle");
     return;
   }
-  var ok=addArea(name);
-  if(ok){
+  var btn=this;
+  btn.disabled=true;
+  addArea(name).then(function(){
+    btn.disabled=false;
     input.value="";
     renderAreasScreen();
     renderTabs();
     showToast("Area added: "+name,"success","ti-map-pin-plus");
-  } else {
-    showToast("That area already exists","danger","ti-alert-triangle");
-  }
+  }).catch(function(err){
+    btn.disabled=false;
+    var msg="Couldn't save this area. Check your connection and try again.";
+    if(err && err.message==="duplicate") msg="That area already exists";
+    else if(err && err.message==="offline") msg="Can't reach the server right now. Check your connection and try again.";
+    showToast(msg,"danger","ti-alert-triangle");
+  });
 });
 document.getElementById("area-new-input").addEventListener("keydown",function(e){
   if(e.key==="Enter")document.getElementById("area-add-btn").click();
@@ -5676,9 +5687,20 @@ if(db){
   window.addEventListener("offline", function(){ if(window.afShowOffline) window.afShowOffline(); });
   runBoot();
 
+  /* Direct, immediately-awaited write for the areas list — bypasses the
+     debounced pushKey queue entirely. Areas are added/removed rarely and
+     the admin needs to know INSTANTLY, on the same tap, whether it actually
+     reached the database — not several seconds later in the background. */
+  async function saveAreasDirect(list){
+    await setDoc(doc(db, COLLECTION, "af_areas"), { v: JSON.stringify(list), at: serverTimestamp() });
+    var DATA = (window.__AF_SYNC__ && window.__AF_SYNC__.data) || {};
+    DATA["af_areas"] = JSON.stringify(list);
+  }
+
   window.FB = {
     ready:true,
     signIn:signIn, signOutUser:signOutUser, pushKey:pushKey, runBoot:runBoot,
+    saveAreas:saveAreasDirect,
     createUser:createUser, listUsers:listUsers, updateUserProfile:updateUserProfile, resetUserPassword:resetUserPassword,
     createNotification:createNotification, watchNotifications:watchNotifications,
     markNotificationRead:markNotificationRead, markAllNotificationsRead:markAllNotificationsRead
