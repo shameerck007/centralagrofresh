@@ -3991,7 +3991,7 @@ function renderSessionInfo(){
   var subEl=document.getElementById("session-info-sub");
   if(!lineEl||!subEl)return;
   var name=CURRENT_USER||CURRENT_USERNAME||"—";
-  lineEl.textContent="Signed in as "+name+(CURRENT_ROLE==="admin"?" (Admin)":" (Rep)");
+  lineEl.textContent="Signed in as "+name+(CURRENT_ROLE==="admin"?" (Admin)":" (Sales Executive)");
   var loginTs=null;
   try{loginTs=localStorage.getItem(SESSION_LOGIN_TIME_KEY);}catch(e){}
   subEl.textContent=loginTs?("Session started "+formatSessionTime(loginTs)):"Session start time unavailable";
@@ -4843,13 +4843,14 @@ checkSession();
 /* ===== Fastrack — Admin Team panel (Firebase-backed user management) ===== */
 (function(){
   function ready(fn){ if(document.readyState!=="loading"){ fn(); } else { document.addEventListener("DOMContentLoaded", fn); } }
+  var ROLES=[{v:"rep",label:"Sales Executive"},{v:"admin",label:"Admin"}];
+  function roleLabel(v){ for(var i=0;i<ROLES.length;i++){ if(ROLES[i].v===v) return ROLES[i].label; } return "Sales Executive"; }
   ready(function(){
     try{
       var view = document.getElementById("v-users");
       if(!view) return;
       var scroll = view.querySelector(".areas-scroll") || view;
 
-      // hide the old local-storage user UI
       var oldBtn = document.getElementById("user-open-create-btn");
       var oldList = document.getElementById("users-list");
       if(oldBtn) oldBtn.style.display = "none";
@@ -4863,21 +4864,20 @@ checkSession();
         + ".fbt-sub{font-size:12.5px;color:var(--muted,#5a6b8a);margin:0 0 12px;line-height:1.4}"
         + ".fbt-field{margin-bottom:10px}"
         + ".fbt-label{display:block;font-size:12px;font-weight:600;color:var(--muted,#5a6b8a);margin:0 0 5px}"
-        + ".fbt-input,.fbt-select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border,#e4e9f4);border-radius:11px;font-size:14px;background:#fff;color:var(--text,#0a1628);-webkit-appearance:none;appearance:none}"
-        + ".fbt-input:focus,.fbt-select:focus{outline:none;border-color:#0d7a40;box-shadow:0 0 0 3px rgba(13,122,64,.12)}"
+        + ".fbt-input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border,#e4e9f4);border-radius:11px;font-size:14px;background:#fff;color:var(--text,#0a1628);-webkit-appearance:none;appearance:none}"
+        + ".fbt-input:focus{outline:none;border-color:#0d7a40;box-shadow:0 0 0 3px rgba(13,122,64,.12)}"
         + ".fbt-btn{width:100%;padding:12px;border:none;border-radius:12px;background:#0d7a40;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}"
         + ".fbt-btn:active{opacity:.9;transform:scale(.99)}"
         + ".fbt-btn[disabled]{opacity:.6}"
         + ".fbt-msg{margin-top:10px;font-size:13px;border-radius:10px;padding:9px 11px;display:none}"
         + ".fbt-msg.ok{display:block;background:#e6f6ec;color:#0d7a40;border:1px solid #b7e4c7}"
         + ".fbt-msg.err{display:block;background:#fdecec;color:#dc2626;border:1px solid #f5c2c2}"
-        + ".fbt-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border,#e4e9f4)}"
-        + ".fbt-row:last-child{border-bottom:none}"
+        + ".fbt-row{display:flex;align-items:center;gap:10px}"
         + ".fbt-av{width:38px;height:38px;border-radius:50%;background:#0d7a40;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 auto}"
         + ".fbt-info{flex:1;min-width:0}"
         + ".fbt-nm{font-size:14px;font-weight:600;color:var(--text,#0a1628);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
         + ".fbt-em{font-size:12px;color:var(--muted,#5a6b8a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
-        + ".fbt-badge{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px}"
+        + ".fbt-badge{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}"
         + ".fbt-badge.admin{background:#e6f6ec;color:#0d7a40}"
         + ".fbt-badge.rep{background:#eef1f7;color:#5a6b8a}"
         + ".fbt-badge.off{background:#fdecec;color:#dc2626}"
@@ -4888,21 +4888,41 @@ checkSession();
         + ".fbt-empty{font-size:13px;color:var(--muted,#5a6b8a);text-align:center;padding:18px 0}"
         + ".fbt-cell{display:flex;flex-direction:column;padding:12px 0;border-bottom:1px solid var(--border,#e4e9f4)}"
         + ".fbt-cell:last-child{border-bottom:none}"
-        + ".fbt-top{display:flex;align-items:center;gap:10px}";
+        + ".fbt-top{display:flex;align-items:center;gap:10px}"
+        // searchable dropdown
+        + ".fbt-drop{position:relative}"
+        + ".fbt-drop-list{position:absolute;left:0;right:0;top:calc(100% + 4px);background:#fff;border:1px solid var(--border,#e4e9f4);border-radius:11px;box-shadow:0 8px 24px rgba(10,22,40,.12);z-index:5;max-height:180px;overflow:auto;display:none}"
+        + ".fbt-drop-list.open{display:block}"
+        + ".fbt-drop-item{padding:10px 12px;font-size:14px;color:var(--text,#0a1628);cursor:pointer}"
+        + ".fbt-drop-item:hover,.fbt-drop-item.active{background:#e6f6ec;color:#0d7a40}"
+        + ".fbt-drop-empty{padding:10px 12px;font-size:13px;color:var(--muted,#5a6b8a)}"
+        // modal
+        + ".fbt-overlay{position:fixed;inset:0;background:rgba(10,22,40,.45);display:none;align-items:flex-end;justify-content:center;z-index:9999}"
+        + ".fbt-overlay.open{display:flex}"
+        + ".fbt-modal{background:#fff;width:100%;max-width:480px;border-radius:20px 20px 0 0;padding:18px 18px calc(18px + env(safe-area-inset-bottom,0px));max-height:88vh;overflow:auto;animation:fbtUp .22s ease}"
+        + "@media(min-width:520px){.fbt-overlay{align-items:center}.fbt-modal{border-radius:20px}}"
+        + "@keyframes fbtUp{from{transform:translateY(24px);opacity:.6}to{transform:translateY(0);opacity:1}}"
+        + ".fbt-modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:4px}"
+        + ".fbt-modal-title{font-size:16px;font-weight:700;color:var(--text,#0a1628);display:flex;align-items:center;gap:8px}"
+        + ".fbt-x{border:none;background:#eef1f7;color:#5a6b8a;width:32px;height:32px;border-radius:50%;font-size:18px;line-height:1;cursor:pointer}"
+        + ".fbt-edit-btn{padding:7px 14px;border-radius:9px;border:1px solid var(--border,#e4e9f4);background:#fff;color:var(--text,#0a1628);font-size:12.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:5px}"
+        + ".fbt-edit-btn:active{opacity:.85}"
+        + ".fbt-static{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border,#e4e9f4);border-radius:11px;font-size:14px;background:#f5f7fb;color:var(--muted,#5a6b8a)}"
+        + ".fbt-div{height:1px;background:var(--border,#e4e9f4);margin:14px 0}"
+        + ".fbt-sec-title{font-size:12px;font-weight:700;color:var(--muted,#5a6b8a);text-transform:uppercase;letter-spacing:.4px;margin:0 0 8px}"
+        + ".fbt-btn-outline{width:100%;padding:11px;border:1px solid var(--border,#e4e9f4);border-radius:12px;background:#fff;color:var(--text,#0a1628);font-size:13.5px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;margin-bottom:8px}"
+        + ".fbt-btn-outline:active{opacity:.85}"
+        + ".fbt-btn-outline.danger{color:#dc2626;border-color:#f5c2c2}"
+        + ".fbt-btn-outline[disabled]{opacity:.6}";
       document.head.appendChild(style);
 
       var panel = document.createElement("div");
       panel.className = "fbt-wrap";
       panel.innerHTML = ""
         + "<div class='fbt-card'>"
-        +   "<div class='fbt-h'><i class='ti ti-user-plus'></i> Add Team Member</div>"
-        +   "<div class='fbt-sub'>Creates a login in Firebase and sets their name and role \u2014 all from here.</div>"
-        +   "<div class='fbt-field'><label class='fbt-label'>Full name</label><input class='fbt-input' id='fbt-name' type='text' placeholder='e.g. Ahmed Khan' autocomplete='off'></div>"
-        +   "<div class='fbt-field'><label class='fbt-label'>Email (this is their login)</label><input class='fbt-input' id='fbt-email' type='email' placeholder='name@company.com' autocomplete='off' autocapitalize='none'></div>"
-        +   "<div class='fbt-field'><label class='fbt-label'>Password (min 6 characters)</label><input class='fbt-input' id='fbt-pass' type='text' placeholder='Set a starting password' autocomplete='off'></div>"
-        +   "<div class='fbt-field'><label class='fbt-label'>Role</label><select class='fbt-select' id='fbt-role'><option value='rep'>Rep</option><option value='admin'>Admin</option></select></div>"
-        +   "<button class='fbt-btn' id='fbt-create'><i class='ti ti-user-plus'></i> Create Account</button>"
-        +   "<div class='fbt-msg' id='fbt-msg'></div>"
+        +   "<div class='fbt-h'><i class='ti ti-user-plus'></i> Add a team member</div>"
+        +   "<div class='fbt-sub'>Create a login, then set their name and role \u2014 all from here.</div>"
+        +   "<button class='fbt-btn' id='fbt-add-open'><i class='ti ti-user-plus'></i> Add Team Member</button>"
         + "</div>"
         + "<div class='fbt-card'>"
         +   "<div class='fbt-h' style='justify-content:space-between'><span><i class='ti ti-users'></i> Team</span><button class='fbt-mini' id='fbt-refresh'><i class='ti ti-refresh'></i> Refresh</button></div>"
@@ -4911,29 +4931,121 @@ checkSession();
       if(oldList && oldList.parentNode){ oldList.parentNode.insertBefore(panel, oldList); }
       else { scroll.appendChild(panel); }
 
+      var overlay = document.createElement("div");
+      overlay.className = "fbt-overlay";
+      overlay.id = "fbt-overlay";
+      overlay.innerHTML = ""
+        + "<div class='fbt-modal' id='fbt-modal'>"
+        +   "<div class='fbt-modal-head'><div class='fbt-modal-title'><i class='ti ti-user-plus'></i> Add Team Member</div><button class='fbt-x' id='fbt-close'>\u00d7</button></div>"
+        +   "<div class='fbt-sub'>Creates a login in Firebase and sets their name and role.</div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Full name</label><input class='fbt-input' id='fbt-name' type='text' placeholder='e.g. Ahmed Khan' autocomplete='off'></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Email (this is their login)</label><input class='fbt-input' id='fbt-email' type='email' placeholder='name@company.com' autocomplete='off' autocapitalize='none'></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Password (min 6 characters)</label><input class='fbt-input' id='fbt-pass' type='text' placeholder='Set a starting password' autocomplete='off'></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Role</label>"
+        +     "<div class='fbt-drop' id='fbt-role-drop'>"
+        +       "<input class='fbt-input' id='fbt-role-input' type='text' placeholder='Search role\u2026' autocomplete='off' value='Sales Executive'>"
+        +       "<input type='hidden' id='fbt-role' value='rep'>"
+        +       "<div class='fbt-drop-list' id='fbt-role-list'></div>"
+        +     "</div>"
+        +   "</div>"
+        +   "<button class='fbt-btn' id='fbt-create'><i class='ti ti-user-plus'></i> Create Account</button>"
+        +   "<div class='fbt-msg' id='fbt-msg'></div>"
+        + "</div>";
+      document.body.appendChild(overlay);
+
+      var editOverlay = document.createElement("div");
+      editOverlay.className = "fbt-overlay";
+      editOverlay.id = "fbt-edit-overlay";
+      editOverlay.innerHTML = ""
+        + "<div class='fbt-modal' id='fbt-edit-modal'>"
+        +   "<div class='fbt-modal-head'><div class='fbt-modal-title'><i class='ti ti-user-edit'></i> Edit Team Member</div><button class='fbt-x' id='fbt-edit-close'>\u00d7</button></div>"
+        +   "<div class='fbt-sub'>Update their name, role, or account status, or send a password reset.</div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Email</label><input class='fbt-static' id='fbt-edit-email' type='text' disabled></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Full name</label><input class='fbt-input' id='fbt-edit-name' type='text' placeholder='e.g. Ahmed Khan' autocomplete='off'></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Role</label>"
+        +     "<div class='fbt-drop' id='fbt-edit-role-drop'>"
+        +       "<input class='fbt-input' id='fbt-edit-role-input' type='text' placeholder='Search role\u2026' autocomplete='off'>"
+        +       "<input type='hidden' id='fbt-edit-role' value='rep'>"
+        +       "<div class='fbt-drop-list' id='fbt-edit-role-list'></div>"
+        +     "</div>"
+        +   "</div>"
+        +   "<button class='fbt-btn' id='fbt-edit-save'><i class='ti ti-device-floppy'></i> Save changes</button>"
+        +   "<div class='fbt-div'></div>"
+        +   "<div class='fbt-sec-title'>Other actions</div>"
+        +   "<button class='fbt-btn-outline' id='fbt-edit-reset'><i class='ti ti-key'></i> Send password reset email</button>"
+        +   "<button class='fbt-btn-outline danger' id='fbt-edit-toggle'><i class='ti ti-user-off'></i> Disable account</button>"
+        +   "<div class='fbt-msg' id='fbt-edit-msg'></div>"
+        + "</div>";
+      document.body.appendChild(editOverlay);
+
       function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
       function msg(t,kind){ var m=document.getElementById("fbt-msg"); if(!m)return; m.textContent=t; m.className="fbt-msg "+(kind||""); }
       function fbReady(){ return window.FB && window.FB.ready; }
 
+      /* ---- searchable role dropdown (reusable for add + edit modals) ---- */
+      function makeRoleDropdown(inputId, hiddenId, listId, dropId){
+        var input=document.getElementById(inputId);
+        var hidden=document.getElementById(hiddenId);
+        var list=document.getElementById(listId);
+        var drop=document.getElementById(dropId);
+        function renderRoles(filter){
+          var q=(filter||"").toLowerCase();
+          var items=ROLES.filter(function(r){return r.label.toLowerCase().indexOf(q)>=0;});
+          if(!items.length){ list.innerHTML="<div class='fbt-drop-empty'>No match</div>"; return; }
+          list.innerHTML=items.map(function(r){return "<div class='fbt-drop-item' data-v='"+r.v+"' data-label='"+esc(r.label)+"'>"+esc(r.label)+"</div>";}).join("");
+        }
+        function openRoles(){ renderRoles(""); list.classList.add("open"); }
+        function closeRoles(){ list.classList.remove("open"); input.value=roleLabel(hidden.value); }
+        input.addEventListener("focus",function(){ openRoles(); this.select(); });
+        input.addEventListener("input",function(){ renderRoles(this.value); list.classList.add("open"); });
+        list.addEventListener("click",function(e){
+          var it=e.target.closest?e.target.closest(".fbt-drop-item"):null; if(!it)return;
+          hidden.value=it.getAttribute("data-v");
+          input.value=it.getAttribute("data-label");
+          list.classList.remove("open");
+        });
+        document.addEventListener("click",function(e){ if(drop && !drop.contains(e.target)) closeRoles(); });
+        return {
+          setValue:function(v){ hidden.value=v; input.value=roleLabel(v); },
+          getValue:function(){ return hidden.value; }
+        };
+      }
+      var addRoleDD = makeRoleDropdown("fbt-role-input","fbt-role","fbt-role-list","fbt-role-drop");
+      var roleHidden=document.getElementById("fbt-role");
+      var editRoleDD = makeRoleDropdown("fbt-edit-role-input","fbt-edit-role","fbt-edit-role-list","fbt-edit-role-drop");
+
+      /* ---- modal open/close ---- */
+      function openModal(){
+        document.getElementById("fbt-name").value="";
+        document.getElementById("fbt-email").value="";
+        document.getElementById("fbt-pass").value="";
+        addRoleDD.setValue("rep");
+        msg("","");
+        overlay.classList.add("open");
+      }
+      function closeModal(){ overlay.classList.remove("open"); document.getElementById("fbt-role-list").classList.remove("open"); }
+      document.getElementById("fbt-add-open").addEventListener("click", openModal);
+      document.getElementById("fbt-close").addEventListener("click", closeModal);
+      overlay.addEventListener("click", function(e){ if(e.target===overlay) closeModal(); });
+
+      /* ---- team list ---- */
       function render(users){
         var list = document.getElementById("fbt-list");
         if(!list) return;
-        if(!users || !users.length){ list.innerHTML = "<div class='fbt-empty'>No team members yet. Add one above.</div>"; return; }
+        if(!users || !users.length){ list.innerHTML = "<div class='fbt-empty'>No team members yet. Tap \u201cAdd Team Member\u201d.</div>"; return; }
         var html = "";
         users.forEach(function(u){
           var initial = (u.name||u.email||"?").trim().charAt(0).toUpperCase();
-          var roleBadge = u.disabled ? "<span class='fbt-badge off'>Disabled</span>"
-                        : (u.role==="admin" ? "<span class='fbt-badge admin'>Admin</span>" : "<span class='fbt-badge rep'>Rep</span>");
-          html += "<div class='fbt-cell' data-uid='"+esc(u.uid)+"' data-email='"+esc(u.email)+"' data-role='"+esc(u.role)+"' data-disabled='"+(u.disabled?1:0)+"'>"
+          var badge = u.disabled ? "<span class='fbt-badge off'>Disabled</span>"
+                    : (u.role==="admin" ? "<span class='fbt-badge admin'>Admin</span>" : "<span class='fbt-badge rep'>Sales Executive</span>");
+          html += "<div class='fbt-cell' data-uid='"+esc(u.uid)+"' data-email='"+esc(u.email)+"' data-role='"+esc(u.role)+"' data-name='"+esc(u.name||"")+"' data-disabled='"+(u.disabled?1:0)+"'>"
                 +   "<div class='fbt-top'>"
                 +     "<div class='fbt-av'>"+esc(initial)+"</div>"
                 +     "<div class='fbt-info'><div class='fbt-nm'>"+esc(u.name||"(no name)")+"</div><div class='fbt-em'>"+esc(u.email)+"</div></div>"
-                +     roleBadge
+                +     badge
                 +   "</div>"
                 +   "<div class='fbt-acts'>"
-                +     "<button class='fbt-mini' data-act='role'>"+(u.role==="admin"?"Make Rep":"Make Admin")+"</button>"
-                +     "<button class='fbt-mini' data-act='reset'>Reset password</button>"
-                +     "<button class='fbt-mini "+(u.disabled?"":"danger")+"' data-act='toggle'>"+(u.disabled?"Enable":"Disable")+"</button>"
+                +     "<button class='fbt-edit-btn' data-act='edit'><i class='ti ti-pencil'></i> Edit</button>"
                 +   "</div>"
                 + "</div>";
         });
@@ -4946,31 +5058,27 @@ checkSession();
         if(!fbReady()){ if(list) list.innerHTML = "<div class='fbt-empty'>Connecting to the server\u2026</div>"; setTimeout(load, 1200); return; }
         if(loading) return; loading = true;
         window.FB.listUsers().then(function(users){ loading=false; render(users); })
-          .catch(function(e){ loading=false; if(list) list.innerHTML = "<div class='fbt-empty'>Couldn't load the team. Pull to refresh.</div>"; console.warn(e); });
+          .catch(function(e){ loading=false; if(list) list.innerHTML = "<div class='fbt-empty'>Couldn't load the team. Tap Refresh.</div>"; console.warn(e); });
       }
       window.afTeamReload = load;
       window.afRefreshFromCloud = function(){ var v=document.getElementById("v-users"); if(v && v.classList.contains("active")) load(); };
-
       document.getElementById("fbt-refresh").addEventListener("click", load);
 
+      /* ---- create ---- */
       document.getElementById("fbt-create").addEventListener("click", function(){
         var btn = this;
         var name = document.getElementById("fbt-name").value.trim();
         var email = document.getElementById("fbt-email").value.trim();
         var pass = document.getElementById("fbt-pass").value;
-        var role = document.getElementById("fbt-role").value;
+        var role = roleHidden.value;
         msg("","");
         if(!email || !pass){ msg("Please enter an email and a password.","err"); return; }
         if(pass.length < 6){ msg("Password must be at least 6 characters.","err"); return; }
         if(!fbReady()){ msg("Still connecting to the server \u2014 try again in a moment.","err"); return; }
         btn.disabled = true;
         window.FB.createUser(email, pass, name, role).then(function(){
-          msg("Account created for "+email+".","ok");
-          document.getElementById("fbt-name").value="";
-          document.getElementById("fbt-email").value="";
-          document.getElementById("fbt-pass").value="";
-          document.getElementById("fbt-role").value="rep";
           btn.disabled=false;
+          closeModal();
           load();
         }).catch(function(err){
           btn.disabled=false;
@@ -4984,31 +5092,89 @@ checkSession();
         });
       });
 
-      // row actions (event delegation)
+      /* ---- row actions: open the Edit modal ---- */
       document.getElementById("fbt-list").addEventListener("click", function(e){
         var b = e.target.closest ? e.target.closest("[data-act]") : null;
         if(!b) return;
         var cell = b.closest(".fbt-cell"); if(!cell) return;
-        var uid = cell.getAttribute("data-uid");
-        var email = cell.getAttribute("data-email");
-        var role = cell.getAttribute("data-role");
-        var disabled = cell.getAttribute("data-disabled")==="1";
-        var act = b.getAttribute("data-act");
-        if(!fbReady()){ return; }
-        if(act==="role"){
-          var newRole = role==="admin" ? "rep" : "admin";
-          b.disabled=true;
-          window.FB.updateUserProfile(uid,{role:newRole}).then(load).catch(function(){ b.disabled=false; });
-        } else if(act==="toggle"){
-          b.disabled=true;
-          window.FB.updateUserProfile(uid,{disabled:!disabled}).then(load).catch(function(){ b.disabled=false; });
-        } else if(act==="reset"){
-          window.FB.resetUserPassword(email).then(function(){ alert("Password reset email sent to "+email+"."); })
-            .catch(function(){ alert("Couldn't send the reset email. Check the address."); });
-        }
+        if(b.getAttribute("data-act")==="edit"){ openEditModal(cell); }
       });
 
-      // load the list whenever the Users view is opened
+      /* ---- edit modal ---- */
+      var editState = { uid:"", email:"", disabled:false };
+      var editMsgEl = document.getElementById("fbt-edit-msg");
+      function editMsg(t,kind){ if(!editMsgEl) return; editMsgEl.textContent=t; editMsgEl.className="fbt-msg "+(kind||""); }
+      function setToggleBtnLabel(){
+        var tb = document.getElementById("fbt-edit-toggle");
+        tb.innerHTML = editState.disabled
+          ? "<i class='ti ti-user-check'></i> Enable account"
+          : "<i class='ti ti-user-off'></i> Disable account";
+        tb.className = "fbt-btn-outline" + (editState.disabled ? "" : " danger");
+      }
+      function openEditModal(cell){
+        editState.uid = cell.getAttribute("data-uid");
+        editState.email = cell.getAttribute("data-email");
+        editState.disabled = cell.getAttribute("data-disabled")==="1";
+        document.getElementById("fbt-edit-email").value = editState.email;
+        document.getElementById("fbt-edit-name").value = cell.getAttribute("data-name")||"";
+        editRoleDD.setValue(cell.getAttribute("data-role")==="admin" ? "admin" : "rep");
+        setToggleBtnLabel();
+        editMsg("","");
+        editOverlay.classList.add("open");
+      }
+      function closeEditModal(){
+        editOverlay.classList.remove("open");
+        document.getElementById("fbt-edit-role-list").classList.remove("open");
+      }
+      document.getElementById("fbt-edit-close").addEventListener("click", closeEditModal);
+      editOverlay.addEventListener("click", function(e){ if(e.target===editOverlay) closeEditModal(); });
+
+      document.getElementById("fbt-edit-save").addEventListener("click", function(){
+        var btn = this;
+        var name = document.getElementById("fbt-edit-name").value.trim();
+        var role = editRoleDD.getValue();
+        if(!fbReady()){ editMsg("Still connecting to the server \u2014 try again in a moment.","err"); return; }
+        btn.disabled = true;
+        window.FB.updateUserProfile(editState.uid, { name:name, role:role }).then(function(){
+          btn.disabled = false;
+          editMsg("Changes saved.","ok");
+          load();
+        }).catch(function(){
+          btn.disabled = false;
+          editMsg("Couldn't save changes. Please try again.","err");
+        });
+      });
+
+      document.getElementById("fbt-edit-reset").addEventListener("click", function(){
+        var btn = this;
+        if(!fbReady()){ editMsg("Still connecting to the server \u2014 try again in a moment.","err"); return; }
+        btn.disabled = true;
+        window.FB.resetUserPassword(editState.email).then(function(){
+          btn.disabled = false;
+          editMsg("Password reset email sent to "+editState.email+".","ok");
+        }).catch(function(){
+          btn.disabled = false;
+          editMsg("Couldn't send the reset email. Check the address.","err");
+        });
+      });
+
+      document.getElementById("fbt-edit-toggle").addEventListener("click", function(){
+        var btn = this;
+        if(!fbReady()){ editMsg("Still connecting to the server \u2014 try again in a moment.","err"); return; }
+        btn.disabled = true;
+        var nextDisabled = !editState.disabled;
+        window.FB.updateUserProfile(editState.uid, { disabled: nextDisabled }).then(function(){
+          btn.disabled = false;
+          editState.disabled = nextDisabled;
+          setToggleBtnLabel();
+          editMsg(nextDisabled ? "Account disabled." : "Account enabled.", "ok");
+          load();
+        }).catch(function(){
+          btn.disabled = false;
+          editMsg("Couldn't update the account. Please try again.","err");
+        });
+      });
+
       if(typeof window.switchView==="function"){
         var _sv = window.switchView;
         window.switchView = function(v){ _sv(v); if(v==="users"){ try{ load(); }catch(e){} } };
