@@ -4797,12 +4797,192 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
 checkSession();
 
 </script>
+<script>
+/* ===== Fastrack — Admin Team panel (Firebase-backed user management) ===== */
+(function(){
+  function ready(fn){ if(document.readyState!=="loading"){ fn(); } else { document.addEventListener("DOMContentLoaded", fn); } }
+  ready(function(){
+    try{
+      var view = document.getElementById("v-users");
+      if(!view) return;
+      var scroll = view.querySelector(".areas-scroll") || view;
+
+      // hide the old local-storage user UI
+      var oldBtn = document.getElementById("user-open-create-btn");
+      var oldList = document.getElementById("users-list");
+      if(oldBtn) oldBtn.style.display = "none";
+      if(oldList) oldList.style.display = "none";
+
+      var style = document.createElement("style");
+      style.textContent = ""
+        + ".fbt-wrap{padding:0 16px 20px}"
+        + ".fbt-card{background:var(--card,#fff);border:1px solid var(--border,#e4e9f4);border-radius:16px;padding:16px;margin-bottom:14px}"
+        + ".fbt-h{font-size:15px;font-weight:700;color:var(--text,#0a1628);margin:0 0 4px;display:flex;align-items:center;gap:8px}"
+        + ".fbt-sub{font-size:12.5px;color:var(--muted,#5a6b8a);margin:0 0 12px;line-height:1.4}"
+        + ".fbt-field{margin-bottom:10px}"
+        + ".fbt-label{display:block;font-size:12px;font-weight:600;color:var(--muted,#5a6b8a);margin:0 0 5px}"
+        + ".fbt-input,.fbt-select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border,#e4e9f4);border-radius:11px;font-size:14px;background:#fff;color:var(--text,#0a1628);-webkit-appearance:none;appearance:none}"
+        + ".fbt-input:focus,.fbt-select:focus{outline:none;border-color:#0d7a40;box-shadow:0 0 0 3px rgba(13,122,64,.12)}"
+        + ".fbt-btn{width:100%;padding:12px;border:none;border-radius:12px;background:#0d7a40;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}"
+        + ".fbt-btn:active{opacity:.9;transform:scale(.99)}"
+        + ".fbt-btn[disabled]{opacity:.6}"
+        + ".fbt-msg{margin-top:10px;font-size:13px;border-radius:10px;padding:9px 11px;display:none}"
+        + ".fbt-msg.ok{display:block;background:#e6f6ec;color:#0d7a40;border:1px solid #b7e4c7}"
+        + ".fbt-msg.err{display:block;background:#fdecec;color:#dc2626;border:1px solid #f5c2c2}"
+        + ".fbt-row{display:flex;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--border,#e4e9f4)}"
+        + ".fbt-row:last-child{border-bottom:none}"
+        + ".fbt-av{width:38px;height:38px;border-radius:50%;background:#0d7a40;color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;flex:0 0 auto}"
+        + ".fbt-info{flex:1;min-width:0}"
+        + ".fbt-nm{font-size:14px;font-weight:600;color:var(--text,#0a1628);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+        + ".fbt-em{font-size:12px;color:var(--muted,#5a6b8a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
+        + ".fbt-badge{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;text-transform:uppercase;letter-spacing:.3px}"
+        + ".fbt-badge.admin{background:#e6f6ec;color:#0d7a40}"
+        + ".fbt-badge.rep{background:#eef1f7;color:#5a6b8a}"
+        + ".fbt-badge.off{background:#fdecec;color:#dc2626}"
+        + ".fbt-acts{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}"
+        + ".fbt-mini{font-size:11.5px;font-weight:600;padding:6px 10px;border-radius:9px;border:1px solid var(--border,#e4e9f4);background:#fff;color:var(--muted,#5a6b8a);cursor:pointer}"
+        + ".fbt-mini:active{opacity:.85}"
+        + ".fbt-mini.danger{color:#dc2626;border-color:#f5c2c2}"
+        + ".fbt-empty{font-size:13px;color:var(--muted,#5a6b8a);text-align:center;padding:18px 0}"
+        + ".fbt-cell{display:flex;flex-direction:column;padding:12px 0;border-bottom:1px solid var(--border,#e4e9f4)}"
+        + ".fbt-cell:last-child{border-bottom:none}"
+        + ".fbt-top{display:flex;align-items:center;gap:10px}";
+      document.head.appendChild(style);
+
+      var panel = document.createElement("div");
+      panel.className = "fbt-wrap";
+      panel.innerHTML = ""
+        + "<div class='fbt-card'>"
+        +   "<div class='fbt-h'><i class='ti ti-user-plus'></i> Add Team Member</div>"
+        +   "<div class='fbt-sub'>Creates a login in Firebase and sets their name and role \u2014 all from here.</div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Full name</label><input class='fbt-input' id='fbt-name' type='text' placeholder='e.g. Ahmed Khan' autocomplete='off'></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Email (this is their login)</label><input class='fbt-input' id='fbt-email' type='email' placeholder='name@company.com' autocomplete='off' autocapitalize='none'></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Password (min 6 characters)</label><input class='fbt-input' id='fbt-pass' type='text' placeholder='Set a starting password' autocomplete='off'></div>"
+        +   "<div class='fbt-field'><label class='fbt-label'>Role</label><select class='fbt-select' id='fbt-role'><option value='rep'>Rep</option><option value='admin'>Admin</option></select></div>"
+        +   "<button class='fbt-btn' id='fbt-create'><i class='ti ti-user-plus'></i> Create Account</button>"
+        +   "<div class='fbt-msg' id='fbt-msg'></div>"
+        + "</div>"
+        + "<div class='fbt-card'>"
+        +   "<div class='fbt-h' style='justify-content:space-between'><span><i class='ti ti-users'></i> Team</span><button class='fbt-mini' id='fbt-refresh'><i class='ti ti-refresh'></i> Refresh</button></div>"
+        +   "<div id='fbt-list'><div class='fbt-empty'>Loading\u2026</div></div>"
+        + "</div>";
+      if(oldList && oldList.parentNode){ oldList.parentNode.insertBefore(panel, oldList); }
+      else { scroll.appendChild(panel); }
+
+      function esc(s){ return String(s==null?"":s).replace(/[&<>"']/g,function(c){return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];}); }
+      function msg(t,kind){ var m=document.getElementById("fbt-msg"); if(!m)return; m.textContent=t; m.className="fbt-msg "+(kind||""); }
+      function fbReady(){ return window.FB && window.FB.ready; }
+
+      function render(users){
+        var list = document.getElementById("fbt-list");
+        if(!list) return;
+        if(!users || !users.length){ list.innerHTML = "<div class='fbt-empty'>No team members yet. Add one above.</div>"; return; }
+        var html = "";
+        users.forEach(function(u){
+          var initial = (u.name||u.email||"?").trim().charAt(0).toUpperCase();
+          var roleBadge = u.disabled ? "<span class='fbt-badge off'>Disabled</span>"
+                        : (u.role==="admin" ? "<span class='fbt-badge admin'>Admin</span>" : "<span class='fbt-badge rep'>Rep</span>");
+          html += "<div class='fbt-cell' data-uid='"+esc(u.uid)+"' data-email='"+esc(u.email)+"' data-role='"+esc(u.role)+"' data-disabled='"+(u.disabled?1:0)+"'>"
+                +   "<div class='fbt-top'>"
+                +     "<div class='fbt-av'>"+esc(initial)+"</div>"
+                +     "<div class='fbt-info'><div class='fbt-nm'>"+esc(u.name||"(no name)")+"</div><div class='fbt-em'>"+esc(u.email)+"</div></div>"
+                +     roleBadge
+                +   "</div>"
+                +   "<div class='fbt-acts'>"
+                +     "<button class='fbt-mini' data-act='role'>"+(u.role==="admin"?"Make Rep":"Make Admin")+"</button>"
+                +     "<button class='fbt-mini' data-act='reset'>Reset password</button>"
+                +     "<button class='fbt-mini "+(u.disabled?"":"danger")+"' data-act='toggle'>"+(u.disabled?"Enable":"Disable")+"</button>"
+                +   "</div>"
+                + "</div>";
+        });
+        list.innerHTML = html;
+      }
+
+      var loading = false;
+      function load(){
+        var list = document.getElementById("fbt-list");
+        if(!fbReady()){ if(list) list.innerHTML = "<div class='fbt-empty'>Connecting to the server\u2026</div>"; setTimeout(load, 1200); return; }
+        if(loading) return; loading = true;
+        window.FB.listUsers().then(function(users){ loading=false; render(users); })
+          .catch(function(e){ loading=false; if(list) list.innerHTML = "<div class='fbt-empty'>Couldn't load the team. Pull to refresh.</div>"; console.warn(e); });
+      }
+      window.afTeamReload = load;
+      window.afRefreshFromCloud = function(){ var v=document.getElementById("v-users"); if(v && v.classList.contains("active")) load(); };
+
+      document.getElementById("fbt-refresh").addEventListener("click", load);
+
+      document.getElementById("fbt-create").addEventListener("click", function(){
+        var btn = this;
+        var name = document.getElementById("fbt-name").value.trim();
+        var email = document.getElementById("fbt-email").value.trim();
+        var pass = document.getElementById("fbt-pass").value;
+        var role = document.getElementById("fbt-role").value;
+        msg("","");
+        if(!email || !pass){ msg("Please enter an email and a password.","err"); return; }
+        if(pass.length < 6){ msg("Password must be at least 6 characters.","err"); return; }
+        if(!fbReady()){ msg("Still connecting to the server \u2014 try again in a moment.","err"); return; }
+        btn.disabled = true;
+        window.FB.createUser(email, pass, name, role).then(function(){
+          msg("Account created for "+email+".","ok");
+          document.getElementById("fbt-name").value="";
+          document.getElementById("fbt-email").value="";
+          document.getElementById("fbt-pass").value="";
+          document.getElementById("fbt-role").value="rep";
+          btn.disabled=false;
+          load();
+        }).catch(function(err){
+          btn.disabled=false;
+          var code=(err&&err.code)||"";
+          var m="Couldn't create the account. Please try again.";
+          if(code.indexOf("email-already-in-use")>=0) m="That email already has an account.";
+          else if(code.indexOf("invalid-email")>=0) m="That doesn't look like a valid email.";
+          else if(code.indexOf("weak-password")>=0) m="Password must be at least 6 characters.";
+          else if(code.indexOf("network")>=0) m="Network problem \u2014 check your connection.";
+          msg(m,"err");
+        });
+      });
+
+      // row actions (event delegation)
+      document.getElementById("fbt-list").addEventListener("click", function(e){
+        var b = e.target.closest ? e.target.closest("[data-act]") : null;
+        if(!b) return;
+        var cell = b.closest(".fbt-cell"); if(!cell) return;
+        var uid = cell.getAttribute("data-uid");
+        var email = cell.getAttribute("data-email");
+        var role = cell.getAttribute("data-role");
+        var disabled = cell.getAttribute("data-disabled")==="1";
+        var act = b.getAttribute("data-act");
+        if(!fbReady()){ return; }
+        if(act==="role"){
+          var newRole = role==="admin" ? "rep" : "admin";
+          b.disabled=true;
+          window.FB.updateUserProfile(uid,{role:newRole}).then(load).catch(function(){ b.disabled=false; });
+        } else if(act==="toggle"){
+          b.disabled=true;
+          window.FB.updateUserProfile(uid,{disabled:!disabled}).then(load).catch(function(){ b.disabled=false; });
+        } else if(act==="reset"){
+          window.FB.resetUserPassword(email).then(function(){ alert("Password reset email sent to "+email+"."); })
+            .catch(function(){ alert("Couldn't send the reset email. Check the address."); });
+        }
+      });
+
+      // load the list whenever the Users view is opened
+      if(typeof window.switchView==="function"){
+        var _sv = window.switchView;
+        window.switchView = function(v){ _sv(v); if(v==="users"){ try{ load(); }catch(e){} } };
+      }
+      var nbUsers = document.getElementById("nb-users");
+      if(nbUsers) nbUsers.addEventListener("click", function(){ setTimeout(load, 50); });
+    }catch(e){ console.warn("[Fastrack] team panel failed to load", e); }
+  });
+})();
+</script>
 <script type="module">
 /* ===== Fastrack Cloud Sync — Firebase (Authentication + Firestore) =====
    Safe by design: if anything here fails, window.FB.ready stays false and the
    app falls back to the local login + local storage it has always used. */
-import { initializeApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
-import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
+import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
+import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
 import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, getDoc, getDocs, setDoc, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 var firebaseConfig = {
@@ -4814,9 +4994,8 @@ var firebaseConfig = {
   appId: "1:584103392536:web:5873abc2555409ba145a6d"
 };
 
-/* Emails listed here always get Admin. You can also set role in Firestore at
-   users/{uid} = { name: "...", role: "admin" }. Leave [] if unsure. */
-var ADMIN_EMAILS = [];
+/* Emails here always get Admin (in addition to any users/{uid}.role). */
+var ADMIN_EMAILS = ["shameerck007@gmail.com"];
 
 var COLLECTION = "appState";
 var NO_SYNC = (window.__AF_SYNC__ && window.__AF_SYNC__.NO_SYNC) || {};
@@ -4900,26 +5079,75 @@ if(db){
   }
 
   async function signIn(email, password){
+    email = (email||"").trim();
     var cred = await signInWithEmailAndPassword(auth, email, password);
     var user = cred.user;
     var role = "rep";
-    var name = (email && email.indexOf("@")>0) ? email.split("@")[0] : email;
+    var name = (email.indexOf("@")>0) ? email.split("@")[0] : email;
+    var uref = doc(db, "users", user.uid);
+    var existing = null;
     try{
-      var usnap = await getDoc(doc(db, "users", user.uid));
+      var usnap = await getDoc(uref);
       if(usnap.exists()){
-        var ud = usnap.data();
-        if(ud){ if(ud.role) role = ud.role; if(ud.name) name = ud.name; }
+        existing = usnap.data() || {};
+        if(existing.role) role = existing.role;
+        if(existing.name) name = existing.name;
+        if(existing.disabled === true){
+          try{ await signOut(auth); }catch(e){}
+          var derr = new Error("account-disabled"); derr.code = "auth/user-disabled"; throw derr;
+        }
       }
-    }catch(e){}
-    if(ADMIN_EMAILS.indexOf((email||"").toLowerCase())>=0) role = "admin";
+    }catch(e){ if(e && e.code==="auth/user-disabled") throw e; }
+    if(ADMIN_EMAILS.indexOf(email.toLowerCase())>=0) role = "admin";
+    if(!existing){
+      try{ await setDoc(uref, { email: email.toLowerCase(), name: name, role: role, disabled:false, at: serverTimestamp() }); }catch(e){}
+    }
     return { role: role, name: name, username: email, uid: user.uid };
   }
 
   function signOutUser(){ try{ return signOut(auth); }catch(e){} }
 
+  /* --- Admin user management (all from the app) --- */
+  async function createUser(email, password, name, role){
+    email = (email||"").trim().toLowerCase();
+    role = (role==="admin") ? "admin" : "rep";
+    var secApp = initializeApp(firebaseConfig, "afSec_"+Date.now());
+    try{
+      var secAuth = getAuth(secApp);
+      var cred = await createUserWithEmailAndPassword(secAuth, email, password);
+      var uid = cred.user.uid;
+      await setDoc(doc(db, "users", uid), { email: email, name: name||"", role: role, disabled:false, at: serverTimestamp() });
+      try{ await signOut(secAuth); }catch(e){}
+      return { uid: uid, email: email };
+    } finally {
+      try{ await deleteApp(secApp); }catch(e){}
+    }
+  }
+  async function listUsers(){
+    var out = [];
+    var snap = await getDocs(collection(db, "users"));
+    snap.forEach(function(d){
+      var x = d.data() || {};
+      out.push({ uid: d.id, email: x.email||"", name: x.name||"", role: x.role||"rep", disabled: x.disabled===true });
+    });
+    out.sort(function(a,b){ return (a.name||a.email).localeCompare(b.name||b.email); });
+    return out;
+  }
+  async function updateUserProfile(uid, patch){
+    if(!uid || !patch) return;
+    await setDoc(doc(db, "users", uid), patch, { merge:true });
+  }
+  async function resetUserPassword(email){
+    return sendPasswordResetEmail(auth, (email||"").trim());
+  }
+
   try{ onAuthStateChanged(auth, function(user){ if(user){ startListening(); } }); }catch(e){}
 
-  window.FB = { ready:true, signIn:signIn, signOutUser:signOutUser, hydrate:hydrate, pushKey:pushKey };
+  window.FB = {
+    ready:true,
+    signIn:signIn, signOutUser:signOutUser, hydrate:hydrate, pushKey:pushKey,
+    createUser:createUser, listUsers:listUsers, updateUserProfile:updateUserProfile, resetUserPassword:resetUserPassword
+  };
 }
 </script>
 </body>
