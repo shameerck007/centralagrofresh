@@ -483,7 +483,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* ===== HEADER: bell + profile ===== */
 .hdr-icon-btn{
   position:relative;background:var(--bg);border:1px solid var(--border);
-  color:var(--muted);border-radius:8px;width:30px;height:30px;
+  color:var(--muted);border-radius:10px;width:40px;height:40px;
   display:flex;align-items:center;justify-content:center;cursor:pointer;font-family:inherit;
 }
 .hdr-icon-btn:hover{background:#eceff5}
@@ -517,8 +517,8 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .bell-item-time{font-size:10.5px;color:var(--light);margin:4px 0 0 10px}
 .profile-btn{background:none;border:none;padding:0;cursor:pointer;display:flex;align-items:center}
 .profile-av{
-  width:30px;height:30px;border-radius:50%;background:var(--gr2);color:#fff;
-  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12.5px;
+  width:40px;height:40px;border-radius:50%;background:var(--gr2);color:#fff;
+  display:flex;align-items:center;justify-content:center;font-weight:700;font-size:15px;
   overflow:hidden;flex-shrink:0;
 }
 .profile-av img{width:100%;height:100%;object-fit:cover;display:block}
@@ -571,6 +571,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .tab.active .tcnt{background:rgba(255,255,255,0.2)}
 
 /* ===== SCROLL ===== */
+.scroll-area,.areas-scroll,.rpt-scroll{overscroll-behavior-y:contain}
 .scroll-area{
   flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
   padding:4px 14px calc(72px + var(--safe-bottom));
@@ -1441,7 +1442,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .vp-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:1px;color:var(--muted);display:block;margin-bottom:7px}
 .vp-date-input{
   width:100%;padding:12px 14px;border:1.5px solid var(--border);border-radius:12px;
-  font-size:15px;font-weight:600;color:var(--text);background:var(--bg);
+  font-size:16px;font-weight:600;color:var(--text);background:var(--bg);
   font-family:inherit;-webkit-appearance:none;appearance:none;min-height:46px;
 }
 .vp-date-input:focus{outline:none;border-color:var(--gr3);box-shadow:0 0 0 3px rgba(13,122,64,0.1)}
@@ -1462,7 +1463,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 }
 .vp-search-wrap i{color:var(--muted);font-size:16px}
 .vp-search-wrap input{
-  flex:1;border:none;background:none;padding:11px 0;font-size:14px;color:var(--text);
+  flex:1;border:none;background:none;padding:11px 0;font-size:16px;color:var(--text);
   font-family:inherit;outline:none;
 }
 .vp-cust-list{padding:10px 16px 4px}
@@ -1671,6 +1672,8 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 [dir="rtl"] .eye-btn{ right:auto; left:12px; }
 [dir="rtl"] .search-inner i{ left:auto; right:13px; }
 [dir="rtl"] .search-inner input{ padding:9px 40px 9px 14px; }
+[dir="rtl"] .s-close{ right:auto; left:14px; }
+[dir="rtl"] .ccard::before{ left:auto; right:0; border-radius:0 4px 4px 0; }
 </style>
 </head>
 <body>
@@ -4848,7 +4851,7 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
         + ".fbt-sub{font-size:12.5px;color:var(--muted,#5a6b8a);margin:0 0 12px;line-height:1.4}"
         + ".fbt-field{margin-bottom:10px}"
         + ".fbt-label{display:block;font-size:12px;font-weight:600;color:var(--muted,#5a6b8a);margin:0 0 5px}"
-        + ".fbt-input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border,#e4e9f4);border-radius:11px;font-size:14px;background:#fff;color:var(--text,#0a1628);-webkit-appearance:none;appearance:none}"
+        + ".fbt-input{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--border,#e4e9f4);border-radius:11px;font-size:16px;background:#fff;color:var(--text,#0a1628);-webkit-appearance:none;appearance:none}"
         + ".fbt-input:focus{outline:none;border-color:#0d7a40;box-shadow:0 0 0 3px rgba(13,122,64,.12)}"
         + ".fbt-btn{width:100%;padding:12px;border:none;border-radius:12px;background:#0d7a40;color:#fff;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer}"
         + ".fbt-btn:active{opacity:.9;transform:scale(.99)}"
@@ -5106,7 +5109,19 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
           .catch(function(e){ loading=false; if(list) list.innerHTML = "<div class='fbt-empty'>Couldn't load the team. Tap Refresh.</div>"; console.warn(e); });
       }
       window.afTeamReload = load;
-      window.afRefreshFromCloud = function(){ var v=document.getElementById("v-users"); if(v && v.classList.contains("active")) load(); };
+      window.afRefreshFromCloud = function(){
+        /* Any af_* key changing in Firestore (from another device/tab) lands
+           here. Refresh whichever screens actually read that shared data. */
+        try{ if(typeof window.rebuildCustomers==="function") window.rebuildCustomers(); }catch(e){}
+        try{ if(typeof window.renderTabs==="function") window.renderTabs(); }catch(e){}
+        try{ if(typeof window.renderList==="function") window.renderList(); }catch(e){}
+        try{
+          var av = document.getElementById("v-areas");
+          if(av && av.classList.contains("active") && typeof window.renderAreasScreen==="function") window.renderAreasScreen();
+        }catch(e){}
+        var v = document.getElementById("v-users");
+        if(v && v.classList.contains("active")) load();
+      };
       document.getElementById("fbt-refresh").addEventListener("click", load);
 
       /* ---- photo upload (add modal) ---- */
@@ -5301,7 +5316,7 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
    app falls back to the local login + local storage it has always used. */
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { initializeFirestore, persistentLocalCache, persistentMultipleTabManager, collection, doc, getDoc, getDocs, setDoc, onSnapshot, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { initializeFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 var firebaseConfig = {
   apiKey: "AIzaSyCH6pU237U2wBW6EqY9TYKM1OTeLls619s",
@@ -5324,7 +5339,6 @@ try{
   auth = getAuth(app);
   try{ setPersistence(auth, browserLocalPersistence); }catch(e){}
   db = initializeFirestore(app, {
-    localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
     experimentalAutoDetectLongPolling: true
   });
 }catch(e){
