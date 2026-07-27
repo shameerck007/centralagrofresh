@@ -4033,6 +4033,11 @@ function doLogin(){
 
   // Preferred path: Firebase Authentication + cloud data
   if(window.FB && window.FB.ready){
+    var _done=false;
+    var _watch=setTimeout(function(){
+      if(_done)return; _done=true;
+      loginFail("Couldn't reach the login server. Check your internet connection — a firewall may be blocking Google/Firebase. Try mobile data or another network.");
+    },15000);
     window.FB.signIn(u,p).then(function(profile){
       CURRENT_ROLE=profile.role;
       CURRENT_USER=profile.name||profile.username;
@@ -4044,20 +4049,27 @@ function doLogin(){
         localStorage.setItem(USERNAME_KEY,CURRENT_USERNAME);
       }catch(e){}
       recordLogin(CURRENT_USERNAME);
-      return window.FB.hydrate().catch(function(){});
+      // give cloud sync up to 8s, then continue regardless
+      return Promise.race([
+        window.FB.hydrate().catch(function(){}),
+        new Promise(function(res){ setTimeout(res,8000); })
+      ]);
     }).then(function(){
+      if(_done)return; _done=true; clearTimeout(_watch);
       location.reload();
     }).catch(function(err){
+      if(_done)return; _done=true; clearTimeout(_watch);
       var code=(err&&err.code)||"";
       var msg="Invalid email or password. Please try again.";
-      if(code.indexOf("network")>=0)msg="Network problem \u2014 check your connection and try again.";
+      if(code.indexOf("network")>=0)msg="Network problem — check your connection and try again.";
       else if(code.indexOf("too-many")>=0)msg="Too many attempts. Please wait a moment and try again.";
       else if(code.indexOf("user-disabled")>=0)msg="This account has been disabled.";
+      else if(code.indexOf("operation-not-allowed")>=0)msg="Email/Password sign-in is not enabled in Firebase yet.";
       loginFail(msg);
     });
     return;
   }
-
+  
   // Emergency fallback: Firebase could not load (bad config / offline first run)
   // -> local accounts, so a setup problem or outage can never lock you out.
   setTimeout(function(){
