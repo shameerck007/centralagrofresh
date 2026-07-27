@@ -2230,7 +2230,12 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
    rewrite of individual features was needed. Two per-user preference keys
    (af_notif_enabled, af_install_dismissed) are special-cased to live on the
    signed-in user's own Firestore profile instead of the shared app-state
-   collection, since they're personal, not team-wide. */
+   collection, since they're personal, not team-wide.
+
+   IMPORTANT: any key that is NOT one of ours (doesn't start with "af_")
+   must still go to the REAL localStorage untouched. Firebase Auth itself
+   depends on real localStorage (browserLocalPersistence) to remember your
+   signed-in session — blocking that breaks login persistence entirely. */
 (function(){
   try{
     window.__AF_SYNC__ = window.__AF_SYNC__ || {};
@@ -2240,6 +2245,10 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 
     var PREF_KEYS = { "af_notif_enabled":1, "af_install_dismissed":1, "af_language":1 };
 
+    var realGetItem = Storage.prototype.getItem.bind(localStorage);
+    var realSetItem = Storage.prototype.setItem.bind(localStorage);
+    var realRemoveItem = Storage.prototype.removeItem.bind(localStorage);
+
     localStorage.getItem = function(k){
       if(typeof k==="string" && k.indexOf("af_")===0){
         if(PREF_KEYS[k]){
@@ -2248,10 +2257,10 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
         }
         return (k in DATA) ? DATA[k] : null;
       }
-      return null;
+      return realGetItem(k);
     };
     localStorage.setItem = function(k, v){
-      if(typeof k!=="string" || k.indexOf("af_")!==0) return;
+      if(typeof k!=="string" || k.indexOf("af_")!==0){ realSetItem(k, v); return; }
       if(PREF_KEYS[k]){
         try{ if(window.__AF_SYNC__.setPref) window.__AF_SYNC__.setPref(k, v); }catch(e){}
         return;
@@ -2260,7 +2269,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       try{ if(window.__AF_SYNC__.pushKey) window.__AF_SYNC__.pushKey(k, v); }catch(e){}
     };
     localStorage.removeItem = function(k){
-      if(typeof k!=="string" || k.indexOf("af_")!==0) return;
+      if(typeof k!=="string" || k.indexOf("af_")!==0){ realRemoveItem(k); return; }
       delete DATA[k];
       try{ if(window.__AF_SYNC__.pushKey) window.__AF_SYNC__.pushKey(k, ""); }catch(e){}
     };
