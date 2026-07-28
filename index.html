@@ -3676,7 +3676,7 @@ function loadGoogleMapsScript(){
   return _gmapsLoadPromise;
 }
 
-var _gMap=null,_gMarker=null,_gAutocomplete=null,_gSelectedPlace=null;
+var _gMap=null,_gMarker=null,_gAutocomplete=null,_gSelectedPlace=null,_gPlacesService=null;
 function initGooglePickerMapIfNeeded(){
   if(_gMap) return;
   var mapEl=document.getElementById("gplaces-map");
@@ -3704,6 +3704,27 @@ function initGooglePickerMapIfNeeded(){
     _gMap.setZoom(16);
     _gMarker.setPosition(place.geometry.location);
     renderGooglePlacePreview(place);
+  });
+  // Google Maps shows its own built-in restaurant/shop/etc. icons directly
+  // on the map tiles — tapping one of those is a completely natural thing
+  // to do, separate from typing in the search box above. Handle that too.
+  _gPlacesService=new google.maps.places.PlacesService(_gMap);
+  _gMap.addListener("click",function(event){
+    if(!event.placeId) return;
+    event.stop();
+    _gPlacesService.getDetails({
+      placeId:event.placeId,
+      fields:["place_id","name","formatted_phone_number","international_phone_number","geometry","formatted_address"]
+    },function(place,status){
+      if(status!==google.maps.places.PlacesServiceStatus.OK||!place||!place.geometry){
+        showToast("Couldn't load details for that place","danger","ti-alert-triangle");
+        return;
+      }
+      _gSelectedPlace=place;
+      _gMap.setCenter(place.geometry.location);
+      _gMarker.setPosition(place.geometry.location);
+      renderGooglePlacePreview(place);
+    });
   });
 }
 function renderGooglePlacePreview(place){
