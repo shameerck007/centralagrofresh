@@ -3725,6 +3725,7 @@ function showGplacesStatus(titleKey,msgKey,iconClass){
   statusEl.style.display="block";
   document.getElementById("gplaces-map").style.display="none";
 }
+var _pendingMapsLinkHighlight=false;
 function openGooglePicker(){
   if(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.indexOf("YOUR_")===0){
     showConfirm({
@@ -3734,16 +3735,8 @@ function openGooglePicker(){
       showNote:false,
       confirmLabel:t("gplacesFreeBtn"),
       onConfirm:function(){
-        window.open("https://www.google.com/maps","_blank");
-        var linkField=document.getElementById("ac-mapslink");
-        if(linkField){
-          setTimeout(function(){
-            linkField.scrollIntoView({behavior:"smooth",block:"center"});
-            linkField.focus();
-            linkField.classList.add("gfg-highlight");
-            setTimeout(function(){ linkField.classList.remove("gfg-highlight"); },2300);
-          },300);
-        }
+        _pendingMapsLinkHighlight=true;
+        window.location.href="https://www.google.com/maps";
       }
     });
     return;
@@ -3775,6 +3768,20 @@ function closeGooglePicker(){
   document.getElementById("gplaces-sheet").classList.remove("open");
 }
 document.getElementById("ac-add-from-google-btn").addEventListener("click",openGooglePicker);
+window.addEventListener("pageshow",function(e){
+  if(!_pendingMapsLinkHighlight) return;
+  _pendingMapsLinkHighlight=false;
+  var linkField=document.getElementById("ac-mapslink");
+  var sheet=document.getElementById("add-sheet");
+  if(linkField && sheet && sheet.classList.contains("open")){
+    setTimeout(function(){
+      linkField.scrollIntoView({behavior:"smooth",block:"center"});
+      linkField.focus();
+      linkField.classList.add("gfg-highlight");
+      setTimeout(function(){ linkField.classList.remove("gfg-highlight"); },2300);
+    },300);
+  }
+});
 document.getElementById("gplaces-close").addEventListener("click",closeGooglePicker);
 document.getElementById("gplaces-cancel-btn").addEventListener("click",closeGooglePicker);
 document.getElementById("gplaces-overlay").addEventListener("click",closeGooglePicker);
