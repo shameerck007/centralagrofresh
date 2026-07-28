@@ -1216,7 +1216,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .cf-icon.danger{background:linear-gradient(135deg,#7f1d1d,#dc2626);box-shadow:0 6px 18px rgba(220,38,38,0.3)}
 .cf-icon.warn{background:linear-gradient(135deg,var(--go1),var(--go2));box-shadow:0 6px 18px rgba(200,134,10,0.3)}
 .cf-title{font-size:16px;font-weight:800;color:var(--text);text-align:center;letter-spacing:-0.2px}
-.cf-msg{font-size:13px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5;font-weight:500}
+.cf-msg{font-size:13px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5;font-weight:500;white-space:pre-line}
 .cf-note-wrap{margin-top:14px}
 .cf-note-wrap textarea{
   width:100%;border:1.5px solid var(--border);background:var(--bg);border-radius:12px;
@@ -3909,10 +3909,12 @@ function fillInExtractedCoords(coords,name,phone){
   else msg="GPS coordinates extracted from link";
   showToast(msg,"success","ti-map-pin-check");
 }
-function showShortLinkDialog(url){
+function showShortLinkDialog(url,reason){
+  var msg="Couldn't automatically resolve this short link right now. Fastest fix: on Google Maps, long-press the exact spot instead of using Share — it drops a pin and shows the coordinates as plain numbers you can copy straight into the Latitude/Longitude fields above. Or, to get the full link: open this link in your browser, wait for Google Maps to load, then copy the long URL from the address bar and paste that here instead.";
+  if(reason){ msg += "\n\n(Technical detail: "+reason+")"; }
   showConfirm({
     title:"This Is a Shortened Link",
-    message:"Couldn't automatically resolve this short link right now. Fastest fix: on Google Maps, long-press the exact spot instead of using Share — it drops a pin and shows the coordinates as plain numbers you can copy straight into the Latitude/Longitude fields above. Or, to get the full link: open this link in your browser, wait for Google Maps to load, then copy the long URL from the address bar and paste that here instead.",
+    message:msg,
     icon:"ti-link",
     iconType:"warn",
     showNote:false,
@@ -3935,16 +3937,29 @@ function showShortLinkDialog(url){
    taps. */
 function resolveShortMapsLink(shortUrl){
   if(!MAPS_LINK_RESOLVER_URL || MAPS_LINK_RESOLVER_URL.indexOf("YOUR_")===0){
-    return Promise.reject(new Error("no-resolver-configured"));
+    return Promise.reject(new Error("no-resolver-configured: MAPS_LINK_RESOLVER_URL is not set in the app file"));
   }
   var resolverUrl=MAPS_LINK_RESOLVER_URL+"?url="+encodeURIComponent(shortUrl);
   return fetch(resolverUrl).then(function(resp){
-    if(!resp.ok) throw new Error("resolver-failed");
+    if(!resp.ok){
+      return resp.text().then(function(bodyText){
+        throw new Error("worker returned HTTP "+resp.status+" — "+bodyText.slice(0,150));
+      }).catch(function(e){
+        if(e && e.message && e.message.indexOf("worker returned")===0) throw e;
+        throw new Error("worker returned HTTP "+resp.status);
+      });
+    }
     return resp.json();
   }).then(function(data){
+    if(data && data.error){ throw new Error("worker error: "+data.error); }
     var finalUrl=data && data.finalUrl;
-    if(!finalUrl) throw new Error("no-final-url");
+    if(!finalUrl) throw new Error("worker responded but sent no finalUrl — raw response: "+JSON.stringify(data).slice(0,150));
     return {finalUrl:finalUrl,phone:(data&&data.phone)||null};
+  }).catch(function(e){
+    if(e instanceof TypeError){
+      throw new Error("network/CORS error reaching the Worker — "+e.message);
+    }
+    throw e;
   });
 }
 document.getElementById("ac-find-from-link").addEventListener("click",function(){
@@ -3977,12 +3992,12 @@ document.getElementById("ac-find-from-link").addEventListener("click",function()
         fillInExtractedCoords(coords,extractNameFromMapsUrl(result.finalUrl),result.phone);
       } else {
         textEl.textContent=originalText;
-        showShortLinkDialog(url);
+        showShortLinkDialog(url,"resolved to "+result.finalUrl.slice(0,150)+" but no coordinates pattern was found in it");
       }
-    }).catch(function(){
+    }).catch(function(e){
       btn.disabled=false;
       textEl.textContent=originalText;
-      showShortLinkDialog(url);
+      showShortLinkDialog(url,(e&&e.message)||String(e));
     });
     return;
   }
