@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0d7a40">
 <meta name="mobile-web-app-capable" content="yes">
@@ -3718,6 +3719,7 @@ function initGooglePickerMapIfNeeded(){
       },function(place,status){
         if(status!==google.maps.places.PlacesServiceStatus.OK||!place||!place.geometry){
           // Fall back to a plain pin at the tapped spot rather than a dead end.
+          showToast("Place lookup status: "+status+" — dropped a plain pin instead","info","ti-bug");
           dropPlainPin(event.latLng);
           return;
         }
@@ -3733,6 +3735,7 @@ function initGooglePickerMapIfNeeded(){
     // with coordinates, leaving name/phone to fill in manually — the same
     // outcome as the long-press method, just inside this picker.
     if(event.latLng){
+      showToast("No placeId on this exact spot — dropped a plain pin instead","info","ti-bug");
       dropPlainPin(event.latLng);
     }
   });
