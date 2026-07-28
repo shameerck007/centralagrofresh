@@ -3948,10 +3948,19 @@ function resolveShortMapsLink(shortUrl){
   });
 }
 document.getElementById("ac-find-from-link").addEventListener("click",function(){
-  var url=document.getElementById("ac-mapslink").value.trim();
-  if(!url){
+  var pasted=document.getElementById("ac-mapslink").value.trim();
+  if(!pasted){
     showToast("Paste a Google Maps link first","danger","ti-alert-triangle");
     return;
+  }
+  // Google's native "Share" sheet often copies a whole sentence alongside
+  // the link (e.g. "Take a look at X on Google Maps. https://maps.app...").
+  // Always pull out just the actual URL, wherever it appears in the pasted
+  // text, and show that cleaned-up value back in the field.
+  var urlMatch=pasted.match(/https?:\/\/\S+/);
+  var url=urlMatch?urlMatch[0]:pasted;
+  if(url!==pasted){
+    document.getElementById("ac-mapslink").value=url;
   }
   var isShort=url.indexOf("goo.gl")>=0||url.indexOf("maps.app")>=0;
   var btn=this;
