@@ -1270,6 +1270,31 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .tracking-row-name{font-weight:700;font-size:14px;color:var(--text)}
 .tracking-row-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .tracking-empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px}
+.tracking-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 16px 0}
+.tracking-stat-card{
+  border-radius:14px;padding:12px 8px;text-align:center;border:1.5px solid var(--border);background:var(--card);
+}
+.tracking-stat-card.live{border-color:rgba(22,163,74,0.3);background:rgba(22,163,74,0.06)}
+.tracking-stat-card.away{border-color:rgba(217,119,6,0.3);background:rgba(217,119,6,0.06)}
+.tracking-stat-card.offline{border-color:rgba(107,114,128,0.3);background:rgba(107,114,128,0.06)}
+.tracking-stat-n{font-size:22px;font-weight:800;color:var(--text)}
+.tracking-stat-card.live .tracking-stat-n{color:#16a34a}
+.tracking-stat-card.away .tracking-stat-n{color:#d97706}
+.tracking-stat-card.offline .tracking-stat-n{color:#6b7280}
+.tracking-stat-l{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-top:2px}
+.tracking-avatar-wrap{position:relative;flex-shrink:0}
+.tracking-avatar{
+  width:44px;height:44px;border-radius:50%;background:var(--gr2) center/cover no-repeat;
+  display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:16px;
+  border:2px solid var(--card);box-shadow:0 0 0 2px var(--border);
+}
+.tracking-avatar-wrap .tracking-dot{position:absolute;bottom:0;right:0;width:13px;height:13px;border:2px solid var(--card);margin:0}
+@keyframes trackPulse{
+  0%{box-shadow:0 0 0 0 rgba(22,163,74,0.5)}
+  70%{box-shadow:0 0 0 7px rgba(22,163,74,0)}
+  100%{box-shadow:0 0 0 0 rgba(22,163,74,0)}
+}
+.tracking-dot.live{animation:trackPulse 2s infinite}
 @keyframes gfgPulse{
   0%{box-shadow:0 0 0 0 rgba(66,133,244,0.45);border-color:#4285F4}
   70%{box-shadow:0 0 0 8px rgba(66,133,244,0)}
@@ -1894,6 +1919,20 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
         <div class="areas-title" data-i18n="trackingTitle">Live Tracking</div>
         <div class="areas-sub" data-i18n="trackingSub">See where your team is right now</div>
       </div>
+      <div class="tracking-stats" id="tracking-stats">
+        <div class="tracking-stat-card live">
+          <div class="tracking-stat-n" id="tracking-stat-live">0</div>
+          <div class="tracking-stat-l" data-i18n="trackingStatActive">Active Now</div>
+        </div>
+        <div class="tracking-stat-card away">
+          <div class="tracking-stat-n" id="tracking-stat-away">0</div>
+          <div class="tracking-stat-l" data-i18n="trackingStatAway">Away</div>
+        </div>
+        <div class="tracking-stat-card offline">
+          <div class="tracking-stat-n" id="tracking-stat-offline">0</div>
+          <div class="tracking-stat-l" data-i18n="trackingStatOffline">Offline</div>
+        </div>
+      </div>
       <div id="tracking-map" style="width:100%;height:260px;border-radius:14px;margin:14px 16px 0;background:var(--bg);max-width:calc(100% - 32px)"></div>
       <div class="tracking-status" id="tracking-status" style="display:none">
         <i class="ti ti-map-off"></i>
@@ -2481,7 +2520,10 @@ var TRANSLATIONS = {
     trackingEmpty: "No one is currently sharing their location",
     trackingLive: "Active now",
     trackingStaleMinutes: "Last seen {n} min ago",
-    trackingOffline: "Offline"
+    trackingOffline: "Offline",
+    trackingStatActive: "Active Now",
+    trackingStatAway: "Away",
+    trackingStatOffline: "Offline"
   },
   ar: {
     appTagline: "نظام إدارة مسار المبيعات الكامل",
@@ -2569,7 +2611,10 @@ var TRANSLATIONS = {
     trackingEmpty: "لا أحد يشارك موقعه حاليًا",
     trackingLive: "نشط الآن",
     trackingStaleMinutes: "آخر ظهور قبل {n} دقيقة",
-    trackingOffline: "غير متصل"
+    trackingOffline: "غير متصل",
+    trackingStatActive: "نشط الآن",
+    trackingStatAway: "بعيد",
+    trackingStatOffline: "غير متصل"
   }
 };
 var CURRENT_LANG = "en";
@@ -3748,7 +3793,7 @@ function startLiveLocationTracking(){
     if(document.hidden) return;
     navigator.geolocation.getCurrentPosition(function(pos){
       if(window.FB && window.FB.updateLiveLocation){
-        window.FB.updateLiveLocation(pos.coords.latitude, pos.coords.longitude, CURRENT_USER, CURRENT_ROLE);
+        window.FB.updateLiveLocation(pos.coords.latitude, pos.coords.longitude, CURRENT_USER, CURRENT_ROLE, CURRENT_PHOTO);
       }
     }, function(){ /* permission denied or unavailable — skip silently, try again next cycle */ }, {maximumAge:60000,timeout:15000});
   }
@@ -3757,7 +3802,7 @@ function startLiveLocationTracking(){
 }
 
 /* Admin side: live map + list of everyone currently sharing their location. */
-var _gTrackMap=null,_gTrackMarkers={},_trackingUnsub=null,_lastTrackingList=[];
+var _gTrackMap=null,_gTrackMarkers={},_trackingUnsub=null,_lastTrackingList=[],_trackInfoWindow=null;
 function initTrackingMapIfNeeded(){
   if(_gTrackMap) return;
   var mapEl=document.getElementById("tracking-map");
@@ -3769,18 +3814,103 @@ function initTrackingMapIfNeeded(){
     mapTypeControl:false
   });
 }
+function statusForAge(ageMin){
+  if(ageMin>=30) return {color:"#9ca3af",key:"offline"};
+  if(ageMin>=3) return {color:"#d97706",key:"stale"};
+  return {color:"#16a34a",key:"live"};
+}
+function statusLabel(status,ageMin){
+  if(status.key==="offline") return t("trackingOffline");
+  if(status.key==="stale") return t("trackingStaleMinutes").replace("{n}",ageMin);
+  return t("trackingLive");
+}
+/* Builds a small circular marker icon — the rep's own photo cropped into a
+   circle with a colored ring showing their status, or their initial letter
+   on a plain circle if they have no photo. Cached so the same combination
+   (photo + status color) is never redrawn twice. */
+var _avatarIconCache={};
+function buildAvatarMarkerIcon(photo,initial,ringColor){
+  var cacheKey=(photo?photo.slice(0,80):"none")+"|"+initial+"|"+ringColor;
+  if(_avatarIconCache[cacheKey]) return Promise.resolve(_avatarIconCache[cacheKey]);
+  var size=64,ring=5,radius=size/2;
+  var canvas=document.createElement("canvas");
+  canvas.width=size; canvas.height=size;
+  var ctx=canvas.getContext("2d");
+  function drawInitialCircle(){
+    ctx.beginPath();
+    ctx.arc(radius,radius,radius-ring,0,Math.PI*2);
+    ctx.fillStyle="#0d7a40";
+    ctx.fill();
+    ctx.fillStyle="#fff";
+    ctx.font="bold 26px sans-serif";
+    ctx.textAlign="center";
+    ctx.textBaseline="middle";
+    ctx.fillText(initial||"?",radius,radius+2);
+  }
+  function finish(resolve){
+    ctx.beginPath();
+    ctx.arc(radius,radius,radius-ring/2,0,Math.PI*2);
+    ctx.lineWidth=ring;
+    ctx.strokeStyle=ringColor;
+    ctx.stroke();
+    var url=canvas.toDataURL("image/png");
+    _avatarIconCache[cacheKey]=url;
+    resolve(url);
+  }
+  return new Promise(function(resolve){
+    if(photo){
+      var img=new Image();
+      img.onload=function(){
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(radius,radius,radius-ring,0,Math.PI*2);
+        ctx.closePath();
+        ctx.clip();
+        ctx.drawImage(img,ring,ring,size-ring*2,size-ring*2);
+        ctx.restore();
+        finish(resolve);
+      };
+      img.onerror=function(){ drawInitialCircle(); finish(resolve); };
+      img.src=photo;
+    } else {
+      drawInitialCircle();
+      finish(resolve);
+    }
+  });
+}
+function showTrackingInfoWindow(marker,item){
+  if(!_trackInfoWindow) _trackInfoWindow=new google.maps.InfoWindow();
+  var ageMin=Math.floor((Date.now()-(item.updatedAt||0))/60000);
+  var status=statusForAge(ageMin);
+  var html='<div style="font-family:inherit;padding:2px 6px;min-width:150px">'+
+    '<div style="font-weight:700;font-size:14px;color:#0a1628">'+escapeHtml(item.name||"\u2014")+'</div>'+
+    '<div style="font-size:12px;color:'+status.color+';font-weight:700;margin-top:3px">\u25CF '+statusLabel(status,ageMin)+'</div>'+
+  '</div>';
+  _trackInfoWindow.setContent(html);
+  _trackInfoWindow.open(_gTrackMap,marker);
+}
 function renderTrackingMarkers(list){
   if(!_gTrackMap) return;
+  var now=Date.now();
   var seen={};
   list.forEach(function(item){
     if(item.lat==null||item.lng==null) return;
     seen[item.uid]=true;
     var pos={lat:item.lat,lng:item.lng};
-    if(_gTrackMarkers[item.uid]){
-      _gTrackMarkers[item.uid].setPosition(pos);
-    } else {
-      _gTrackMarkers[item.uid]=new google.maps.Marker({map:_gTrackMap,position:pos,title:item.name||""});
-    }
+    var ageMin=Math.floor((now-(item.updatedAt||0))/60000);
+    var status=statusForAge(ageMin);
+    var initial=(item.name||"?").trim().charAt(0).toUpperCase();
+    buildAvatarMarkerIcon(item.photo,initial,status.color).then(function(iconUrl){
+      var iconSpec={url:iconUrl,scaledSize:new google.maps.Size(46,46),anchor:new google.maps.Point(23,23)};
+      if(_gTrackMarkers[item.uid]){
+        _gTrackMarkers[item.uid].setPosition(pos);
+        _gTrackMarkers[item.uid].setIcon(iconSpec);
+      } else {
+        var marker=new google.maps.Marker({map:_gTrackMap,position:pos,title:item.name||"",icon:iconSpec,zIndex:status.key==="live"?100:1});
+        marker.addListener("click",function(){ showTrackingInfoWindow(marker,item); });
+        _gTrackMarkers[item.uid]=marker;
+      }
+    });
   });
   Object.keys(_gTrackMarkers).forEach(function(uid){
     if(!seen[uid]){ _gTrackMarkers[uid].setMap(null); delete _gTrackMarkers[uid]; }
@@ -3799,8 +3929,25 @@ function focusTrackingMarker(uid){
   document.getElementById("tracking-map").scrollIntoView({behavior:"smooth",block:"center"});
   _gTrackMap.panTo(marker.getPosition());
   _gTrackMap.setZoom(15);
+  var item=_lastTrackingList.filter(function(x){return x.uid===uid;})[0];
+  if(item) showTrackingInfoWindow(marker,item);
   marker.setAnimation(google.maps.Animation.BOUNCE);
   setTimeout(function(){ marker.setAnimation(null); },1400);
+}
+function renderTrackingStats(list){
+  var now=Date.now();
+  var live=0,away=0,offline=0;
+  list.forEach(function(item){
+    var ageMin=Math.floor((now-(item.updatedAt||0))/60000);
+    var status=statusForAge(ageMin);
+    if(status.key==="live") live++; else if(status.key==="stale") away++; else offline++;
+  });
+  var liveEl=document.getElementById("tracking-stat-live");
+  var awayEl=document.getElementById("tracking-stat-away");
+  var offEl=document.getElementById("tracking-stat-offline");
+  if(liveEl) liveEl.textContent=live;
+  if(awayEl) awayEl.textContent=away;
+  if(offEl) offEl.textContent=offline;
 }
 function renderTrackingList(list){
   var listEl=document.getElementById("tracking-list");
@@ -3813,11 +3960,16 @@ function renderTrackingList(list){
   var sorted=list.slice().sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); });
   listEl.innerHTML=sorted.map(function(item){
     var ageMin=Math.floor((now-(item.updatedAt||0))/60000);
-    var dotClass="live", subText=t("trackingLive");
-    if(ageMin>=30){ dotClass="offline"; subText=t("trackingOffline"); }
-    else if(ageMin>=3){ dotClass="stale"; subText=t("trackingStaleMinutes").replace("{n}",ageMin); }
+    var status=statusForAge(ageMin);
+    var subText=statusLabel(status,ageMin);
+    var initial=(item.name||"?").trim().charAt(0).toUpperCase();
+    var avatarInner=item.photo
+      ? '<div class="tracking-avatar" style="background-image:url(\''+item.photo.replace(/'/g,"%27")+'\')"></div>'
+      : '<div class="tracking-avatar">'+escapeHtml(initial)+'</div>';
     return '<div class="tracking-row" data-uid="'+escapeHtml(item.uid)+'">'+
-      '<div class="tracking-dot '+dotClass+'"></div>'+
+      '<div class="tracking-avatar-wrap">'+avatarInner+
+        '<div class="tracking-dot '+status.key+'"></div>'+
+      '</div>'+
       '<div class="tracking-row-body">'+
         '<div class="tracking-row-name">'+escapeHtml(item.name||"\u2014")+'</div>'+
         '<div class="tracking-row-sub">'+subText+'</div>'+
@@ -3852,6 +4004,7 @@ function renderTrackingScreen(){
     _trackingUnsub=window.FB.watchLiveLocations(function(list){
       _lastTrackingList=list;
       renderTrackingList(list);
+      renderTrackingStats(list);
       if(_gTrackMap) renderTrackingMarkers(list);
     });
   }
@@ -6223,11 +6376,11 @@ if(db){
      liveLocations/{uid} document — never anyone else's. Only admins are
      shown this data in the app UI (enforced by the Firestore security
      rules, not just hidden client-side). */
-  async function updateLiveLocation(lat,lng,name,role){
+  async function updateLiveLocation(lat,lng,name,role,photo){
     if(!CURRENT_UID_MOD) return;
     try{
       await setDoc(doc(db,"liveLocations",CURRENT_UID_MOD), {
-        lat:lat, lng:lng, name:name||"", role:role||"", updatedAt:serverTimestamp()
+        lat:lat, lng:lng, name:name||"", role:role||"", photo:photo||"", updatedAt:serverTimestamp()
       }, {merge:true});
     }catch(e){ console.warn("[Fastrack] location update failed", e); }
   }
@@ -6238,7 +6391,7 @@ if(db){
         snap.forEach(function(d){
           var x=d.data()||{};
           out.push({
-            uid:d.id, name:x.name||"", role:x.role||"",
+            uid:d.id, name:x.name||"", role:x.role||"", photo:x.photo||"",
             lat:x.lat, lng:x.lng,
             updatedAt:(x.updatedAt && x.updatedAt.toMillis) ? x.updatedAt.toMillis() : 0
           });
