@@ -1252,6 +1252,22 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .gplaces-status i{font-size:38px;color:var(--muted)}
 .gplaces-status-title{margin-top:12px;font-weight:700;color:var(--text);font-size:14px}
 .gplaces-status-msg{margin-top:6px;color:var(--muted);font-size:12.5px;line-height:1.5}
+.tracking-status{padding:34px 16px;text-align:center;display:none}
+.tracking-status i{font-size:38px;color:var(--muted)}
+.tracking-status-title{margin-top:12px;font-weight:700;color:var(--text);font-size:14px}
+.tracking-status-msg{margin-top:6px;color:var(--muted);font-size:12.5px;line-height:1.5}
+.tracking-row{
+  display:flex;align-items:center;gap:12px;background:var(--card);
+  border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px;
+}
+.tracking-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.tracking-dot.live{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,0.18)}
+.tracking-dot.stale{background:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,0.15)}
+.tracking-dot.offline{background:#9ca3af}
+.tracking-row-body{flex:1;min-width:0}
+.tracking-row-name{font-weight:700;font-size:14px;color:var(--text)}
+.tracking-row-sub{font-size:12px;color:var(--muted);margin-top:2px}
+.tracking-empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px}
 @keyframes gfgPulse{
   0%{box-shadow:0 0 0 0 rgba(66,133,244,0.45);border-color:#4285F4}
   70%{box-shadow:0 0 0 8px rgba(66,133,244,0)}
@@ -1867,6 +1883,24 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       </div>
     </div>
   </div>
+  <!-- ===== LIVE TRACKING VIEW (admin only) ===== -->
+  <div class="view" id="v-tracking">
+    <div class="areas-scroll">
+      <div class="areas-hero">
+        <div class="areas-hero-pattern"></div>
+        <div class="areas-eyebrow"><i class="ti ti-shield-lock"></i> <span data-i18n="trackingEyebrow">Admin Only</span></div>
+        <div class="areas-title" data-i18n="trackingTitle">Live Tracking</div>
+        <div class="areas-sub" data-i18n="trackingSub">See where your team is right now</div>
+      </div>
+      <div id="tracking-map" style="width:100%;height:260px;border-radius:14px;margin:14px 16px 0;background:var(--bg);max-width:calc(100% - 32px)"></div>
+      <div class="tracking-status" id="tracking-status" style="display:none">
+        <i class="ti ti-map-off"></i>
+        <div class="tracking-status-title" id="tracking-status-title" data-i18n="gplacesNoKeyTitle">Google search isn't set up yet</div>
+        <div class="tracking-status-msg" id="tracking-status-msg" data-i18n="gplacesNoKeyMsg">Ask your admin to add a Google Places API key to enable this.</div>
+      </div>
+      <div class="tracking-list" id="tracking-list" style="margin:14px 16px 20px"></div>
+    </div>
+  </div>
   <!-- ===== VISIT PLANNER VIEW ===== -->
   <div class="view" id="v-planner">
     <div class="areas-scroll">
@@ -2037,6 +2071,11 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       <i class="ti ti-users-group"></i>
       <div class="nbtn-indicator"></div>
       <span data-i18n="navUsers">Users</span>
+    </button>
+    <button class="nbtn admin-only-nav" id="nb-tracking" style="display:none">
+      <i class="ti ti-map-pin-search"></i>
+      <div class="nbtn-indicator"></div>
+      <span data-i18n="navTracking">Tracking</span>
     </button>
   </nav>
 </div>
@@ -2432,7 +2471,15 @@ var TRANSLATIONS = {
     gplacesFilledToast: "Details filled in — select an area and save",
     gplacesFreeTitle: "Add from Google (Free Method)",
     gplacesFreeMsg: "This opens Google Maps in a new tab. Search for the business there, then long-press its pin to drop a marker showing the exact coordinates as plain numbers — copy those. Come back here, paste them into the Latitude/Longitude fields (or paste a full share link into \"Google Maps Link\" and tap \"Extract Coordinates from Link\"). Type the name and phone number in yourself from the listing.",
-    gplacesFreeBtn: "Open Google Maps"
+    gplacesFreeBtn: "Open Google Maps",
+    navTracking: "Tracking",
+    trackingEyebrow: "Admin Only",
+    trackingTitle: "Live Tracking",
+    trackingSub: "See where your team is right now",
+    trackingEmpty: "No one is currently sharing their location",
+    trackingLive: "Active now",
+    trackingStaleMinutes: "Last seen {n} min ago",
+    trackingOffline: "Offline"
   },
   ar: {
     appTagline: "نظام إدارة مسار المبيعات الكامل",
@@ -2512,7 +2559,15 @@ var TRANSLATIONS = {
     gplacesFilledToast: "تم تعبئة البيانات — اختر المنطقة واحفظ",
     gplacesFreeTitle: "الإضافة من Google (طريقة مجانية)",
     gplacesFreeMsg: "سيتم فتح خرائط Google في تبويب جديد. ابحث عن النشاط التجاري هناك، ثم اضغط مطولاً على العلامة لإسقاط دبوس يعرض الإحداثيات كأرقام مباشرة — انسخها. عد إلى هنا والصقها في حقلي خط العرض وخط الطول (أو الصق رابط مشاركة كامل في \"رابط خرائط Google\" واضغط \"استخراج الإحداثيات من الرابط\"). أدخل الاسم ورقم الهاتف يدويًا من القائمة.",
-    gplacesFreeBtn: "فتح خرائط Google"
+    gplacesFreeBtn: "فتح خرائط Google",
+    navTracking: "التتبع",
+    trackingEyebrow: "للمسؤول فقط",
+    trackingTitle: "التتبع المباشر",
+    trackingSub: "تعرّف على مواقع فريقك الآن",
+    trackingEmpty: "لا أحد يشارك موقعه حاليًا",
+    trackingLive: "نشط الآن",
+    trackingStaleMinutes: "آخر ظهور قبل {n} دقيقة",
+    trackingOffline: "غير متصل"
   }
 };
 var CURRENT_LANG = "en";
@@ -3677,6 +3732,104 @@ function loadGoogleMapsScript(){
   return _gmapsLoadPromise;
 }
 
+/* ===== Live Tracking =====
+   Rep side: while the app is open and in the foreground, capture this
+   device's GPS position roughly every 90 seconds and save it to Firestore
+   under this signed-in user's own document. Tracking stops the instant the
+   app is closed or backgrounded — there is no way for a web app to track
+   location once it's no longer the active tab, unlike a native phone app. */
+var _liveTrackingInterval=null;
+function startLiveLocationTracking(){
+  if(!("geolocation" in navigator)) return;
+  if(_liveTrackingInterval) return;
+  function captureOnce(){
+    if(document.hidden) return;
+    navigator.geolocation.getCurrentPosition(function(pos){
+      if(window.FB && window.FB.updateLiveLocation){
+        window.FB.updateLiveLocation(pos.coords.latitude, pos.coords.longitude, CURRENT_USER, CURRENT_ROLE);
+      }
+    }, function(){ /* permission denied or unavailable — skip silently, try again next cycle */ }, {maximumAge:60000,timeout:15000});
+  }
+  captureOnce();
+  _liveTrackingInterval=setInterval(captureOnce,90000);
+}
+
+/* Admin side: live map + list of everyone currently sharing their location. */
+var _gTrackMap=null,_gTrackMarkers={},_trackingUnsub=null;
+function initTrackingMapIfNeeded(){
+  if(_gTrackMap) return;
+  var mapEl=document.getElementById("tracking-map");
+  _gTrackMap=new google.maps.Map(mapEl,{
+    center:{lat:24.7136,lng:46.6753},
+    zoom:11,
+    fullscreenControl:false,
+    streetViewControl:false,
+    mapTypeControl:false
+  });
+}
+function renderTrackingMarkers(list){
+  if(!_gTrackMap) return;
+  var seen={};
+  list.forEach(function(item){
+    if(item.lat==null||item.lng==null) return;
+    seen[item.uid]=true;
+    var pos={lat:item.lat,lng:item.lng};
+    if(_gTrackMarkers[item.uid]){
+      _gTrackMarkers[item.uid].setPosition(pos);
+    } else {
+      _gTrackMarkers[item.uid]=new google.maps.Marker({map:_gTrackMap,position:pos,title:item.name||""});
+    }
+  });
+  Object.keys(_gTrackMarkers).forEach(function(uid){
+    if(!seen[uid]){ _gTrackMarkers[uid].setMap(null); delete _gTrackMarkers[uid]; }
+  });
+}
+function renderTrackingList(list){
+  var listEl=document.getElementById("tracking-list");
+  if(!listEl) return;
+  if(!list.length){
+    listEl.innerHTML="<div class='tracking-empty'>"+t("trackingEmpty")+"</div>";
+    return;
+  }
+  var now=Date.now();
+  var sorted=list.slice().sort(function(a,b){ return (b.updatedAt||0)-(a.updatedAt||0); });
+  listEl.innerHTML=sorted.map(function(item){
+    var ageMin=Math.floor((now-(item.updatedAt||0))/60000);
+    var dotClass="live", subText=t("trackingLive");
+    if(ageMin>=30){ dotClass="offline"; subText=t("trackingOffline"); }
+    else if(ageMin>=3){ dotClass="stale"; subText=t("trackingStaleMinutes").replace("{n}",ageMin); }
+    return '<div class="tracking-row">'+
+      '<div class="tracking-dot '+dotClass+'"></div>'+
+      '<div class="tracking-row-body">'+
+        '<div class="tracking-row-name">'+escapeHtml(item.name||"\u2014")+'</div>'+
+        '<div class="tracking-row-sub">'+subText+'</div>'+
+      '</div>'+
+    '</div>';
+  }).join("");
+}
+function renderTrackingScreen(){
+  if(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.indexOf("YOUR_")===0){
+    document.getElementById("tracking-map").style.display="none";
+    document.getElementById("tracking-status").style.display="block";
+  } else {
+    document.getElementById("tracking-status").style.display="none";
+    document.getElementById("tracking-map").style.display="block";
+    loadGoogleMapsScript().then(function(){
+      initTrackingMapIfNeeded();
+    }).catch(function(){
+      document.getElementById("tracking-map").style.display="none";
+      document.getElementById("tracking-status").style.display="block";
+    });
+  }
+  if(_trackingUnsub) return;
+  if(window.FB && window.FB.watchLiveLocations){
+    _trackingUnsub=window.FB.watchLiveLocations(function(list){
+      renderTrackingList(list);
+      if(_gTrackMap) renderTrackingMarkers(list);
+    });
+  }
+}
+
 var _gMap=null,_gMarker=null,_gAutocomplete=null,_gSelectedPlace=null,_gPlacesService=null;
 function initGooglePickerMapIfNeeded(){
   if(_gMap) return;
@@ -4148,6 +4301,7 @@ function switchView(v){
 document.getElementById("nb-cust").addEventListener("click",function(){switchView("cust");});
 document.getElementById("nb-report").addEventListener("click",function(){switchView("report");renderReport();});
 document.getElementById("nb-areas").addEventListener("click",function(){switchView("areas");renderAreasScreen();});
+document.getElementById("nb-tracking").addEventListener("click",function(){switchView("tracking");renderTrackingScreen();});
 document.getElementById("area-add-btn").addEventListener("click",function(){
   var input=document.getElementById("area-new-input");
   var name=input.value.trim();
@@ -4324,6 +4478,7 @@ function showApp(profile){
   updateAdminUI();
   renderHeaderIdentity();
   startNotificationWatch();
+  startLiveLocationTracking();
   // iOS never fires beforeinstallprompt — show our banner manually, now that
   // we know (from the just-loaded profile prefs) whether it's been dismissed.
   if(typeof isIOS==="function" && isIOS() && !isStandalone() && !alreadyDismissed()){
@@ -4335,6 +4490,8 @@ function updateAdminUI(){
   if(el)el.style.display=isAdmin()?"":"none";
   var ul=document.getElementById("nb-users");
   if(ul)ul.style.display=isAdmin()?"":"none";
+  var tl=document.getElementById("nb-tracking");
+  if(tl)tl.style.display=isAdmin()?"":"none";
 }
 
 /* Bridges the Firebase module script calls into once it knows whether
@@ -4441,6 +4598,8 @@ document.getElementById("logout-btn").addEventListener("click",function(){
     onConfirm:function(){
       try{ if(window.FB&&window.FB.signOutUser) window.FB.signOutUser(); }catch(e){}
       try{ if(_notifUnsub){ _notifUnsub(); _notifUnsub=null; } }catch(e){}
+      try{ if(_liveTrackingInterval){ clearInterval(_liveTrackingInterval); _liveTrackingInterval=null; } }catch(e){}
+      try{ if(_trackingUnsub){ _trackingUnsub(); _trackingUnsub=null; } }catch(e){}
       _latestNotifs=[];
       renderBellList(); renderBellBadge();
       CURRENT_ROLE="rep";
@@ -6032,6 +6191,36 @@ if(db){
     }catch(e){}
   }
 
+  /* ===== Live Tracking =====
+     Each signed-in device writes its own current position to its own
+     liveLocations/{uid} document — never anyone else's. Only admins are
+     shown this data in the app UI (enforced by the Firestore security
+     rules, not just hidden client-side). */
+  async function updateLiveLocation(lat,lng,name,role){
+    if(!CURRENT_UID_MOD) return;
+    try{
+      await setDoc(doc(db,"liveLocations",CURRENT_UID_MOD), {
+        lat:lat, lng:lng, name:name||"", role:role||"", updatedAt:serverTimestamp()
+      }, {merge:true});
+    }catch(e){ console.warn("[Fastrack] location update failed", e); }
+  }
+  function watchLiveLocations(cb){
+    try{
+      return onSnapshot(collection(db,"liveLocations"), function(snap){
+        var out=[];
+        snap.forEach(function(d){
+          var x=d.data()||{};
+          out.push({
+            uid:d.id, name:x.name||"", role:x.role||"",
+            lat:x.lat, lng:x.lng,
+            updatedAt:(x.updatedAt && x.updatedAt.toMillis) ? x.updatedAt.toMillis() : 0
+          });
+        });
+        cb(out);
+      }, function(err){ console.warn("[Fastrack] tracking watch error", err); });
+    }catch(e){ console.warn("[Fastrack] tracking watch failed", e); return function(){}; }
+  }
+
   var _seedTried=false;
   async function ensureSeed(){
     try{
@@ -6118,7 +6307,8 @@ if(db){
     saveAreas:saveAreasDirect,
     createUser:createUser, listUsers:listUsers, updateUserProfile:updateUserProfile, resetUserPassword:resetUserPassword,
     createNotification:createNotification, watchNotifications:watchNotifications,
-    markNotificationRead:markNotificationRead, markAllNotificationsRead:markAllNotificationsRead
+    markNotificationRead:markNotificationRead, markAllNotificationsRead:markAllNotificationsRead,
+    updateLiveLocation:updateLiveLocation, watchLiveLocations:watchLiveLocations
   };
 }
 </script>
