@@ -1259,7 +1259,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .tracking-row{
   display:flex;align-items:center;gap:12px;background:var(--card);
   border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:10px;
+  cursor:pointer;transition:border-color 0.15s,transform 0.1s;
 }
+.tracking-row:active{transform:scale(0.98)}
 .tracking-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 .tracking-dot.live{background:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,0.18)}
 .tracking-dot.stale{background:#d97706;box-shadow:0 0 0 3px rgba(217,119,6,0.15)}
@@ -3755,7 +3757,7 @@ function startLiveLocationTracking(){
 }
 
 /* Admin side: live map + list of everyone currently sharing their location. */
-var _gTrackMap=null,_gTrackMarkers={},_trackingUnsub=null;
+var _gTrackMap=null,_gTrackMarkers={},_trackingUnsub=null,_lastTrackingList=[];
 function initTrackingMapIfNeeded(){
   if(_gTrackMap) return;
   var mapEl=document.getElementById("tracking-map");
@@ -3784,6 +3786,22 @@ function renderTrackingMarkers(list){
     if(!seen[uid]){ _gTrackMarkers[uid].setMap(null); delete _gTrackMarkers[uid]; }
   });
 }
+function focusTrackingMarker(uid){
+  if(!_gTrackMap){
+    showToast("Map is still loading — try again in a moment","info","ti-map");
+    return;
+  }
+  var marker=_gTrackMarkers[uid];
+  if(!marker){
+    showToast("No location on the map for this person yet","info","ti-map-pin-off");
+    return;
+  }
+  document.getElementById("tracking-map").scrollIntoView({behavior:"smooth",block:"center"});
+  _gTrackMap.panTo(marker.getPosition());
+  _gTrackMap.setZoom(15);
+  marker.setAnimation(google.maps.Animation.BOUNCE);
+  setTimeout(function(){ marker.setAnimation(null); },1400);
+}
 function renderTrackingList(list){
   var listEl=document.getElementById("tracking-list");
   if(!listEl) return;
@@ -3798,14 +3816,18 @@ function renderTrackingList(list){
     var dotClass="live", subText=t("trackingLive");
     if(ageMin>=30){ dotClass="offline"; subText=t("trackingOffline"); }
     else if(ageMin>=3){ dotClass="stale"; subText=t("trackingStaleMinutes").replace("{n}",ageMin); }
-    return '<div class="tracking-row">'+
+    return '<div class="tracking-row" data-uid="'+escapeHtml(item.uid)+'">'+
       '<div class="tracking-dot '+dotClass+'"></div>'+
       '<div class="tracking-row-body">'+
         '<div class="tracking-row-name">'+escapeHtml(item.name||"\u2014")+'</div>'+
         '<div class="tracking-row-sub">'+subText+'</div>'+
       '</div>'+
+      '<i class="ti ti-map-pin" style="color:var(--muted)"></i>'+
     '</div>';
   }).join("");
+  listEl.querySelectorAll(".tracking-row").forEach(function(row){
+    row.addEventListener("click",function(){ focusTrackingMarker(row.getAttribute("data-uid")); });
+  });
 }
 function renderTrackingScreen(){
   if(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.indexOf("YOUR_")===0){
@@ -3816,6 +3838,10 @@ function renderTrackingScreen(){
     document.getElementById("tracking-map").style.display="block";
     loadGoogleMapsScript().then(function(){
       initTrackingMapIfNeeded();
+      // The map may finish loading after the first batch of location data
+      // already arrived — draw whatever we already have right away instead
+      // of waiting for the next Firestore update.
+      renderTrackingMarkers(_lastTrackingList);
     }).catch(function(){
       document.getElementById("tracking-map").style.display="none";
       document.getElementById("tracking-status").style.display="block";
@@ -3824,6 +3850,7 @@ function renderTrackingScreen(){
   if(_trackingUnsub) return;
   if(window.FB && window.FB.watchLiveLocations){
     _trackingUnsub=window.FB.watchLiveLocations(function(list){
+      _lastTrackingList=list;
       renderTrackingList(list);
       if(_gTrackMap) renderTrackingMarkers(list);
     });
