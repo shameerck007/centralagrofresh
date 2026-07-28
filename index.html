@@ -2196,7 +2196,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     </div>
     <div class="login-field">
       <label class="login-label">Google Maps Link</label>
-      <input class="login-input" id="ac-mapslink" placeholder="Paste a Google Maps link (optional)">
+      <input class="login-input" id="ac-mapslink" placeholder="Paste a Google Maps link (optional)" autocapitalize="off" autocorrect="off" spellcheck="false" autocomplete="off" inputmode="url">
     </div>
     <button class="find-loc-btn" id="ac-find-from-link" type="button" style="background:rgba(13,122,64,0.08);border-color:rgba(13,122,64,0.18);color:var(--gr2)">
       <i class="ti ti-map-search"></i>
@@ -2343,7 +2343,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
    and Places API (New) enabled on your Google Cloud project, with billing
    linked. Until a real key is set, the button shows a clear "not set up
    yet" message instead of a broken map. */
-var GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY_HERE";
+var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
 /* Paste your own Cloudflare Worker URL below once deployed (see setup guide)
    to reliably resolve shortened Google Maps links (maps.app.goo.gl) into
@@ -3951,6 +3951,7 @@ function resolveShortMapsLink(shortUrl){
     }
     return resp.json();
   }).then(function(data){
+    if(data && data.error==="blocked-by-google-bot-check"){ throw new Error("Google's own anti-bot check blocked this specific attempt — this happens occasionally and isn't something we can fully control. Try again in a moment, or use the long-press method below."); }
     if(data && data.error){ throw new Error("worker error: "+data.error); }
     var finalUrl=data && data.finalUrl;
     if(!finalUrl) throw new Error("worker responded but sent no finalUrl — raw response: "+JSON.stringify(data).slice(0,150));
@@ -3971,13 +3972,16 @@ document.getElementById("ac-find-from-link").addEventListener("click",function()
   // Google's native "Share" sheet often copies a whole sentence alongside
   // the link (e.g. "Take a look at X on Google Maps. https://maps.app...").
   // Always pull out just the actual URL, wherever it appears in the pasted
-  // text, and show that cleaned-up value back in the field.
-  var urlMatch=pasted.match(/https?:\/\/\S+/);
-  var url=urlMatch?urlMatch[0]:pasted;
+  // text, and show that cleaned-up value back in the field. Case-insensitive
+  // as a safety net against mobile keyboards that auto-capitalize the first
+  // letter of pasted text (e.g. "Https://..."), and the matched scheme is
+  // normalized back to lowercase either way.
+  var urlMatch=pasted.match(/https?:\/\/\S+/i);
+  var url=urlMatch?urlMatch[0].replace(/^https?/i,function(s){return s.toLowerCase();}):pasted;
   if(url!==pasted){
     document.getElementById("ac-mapslink").value=url;
   }
-  var isShort=url.indexOf("goo.gl")>=0||url.indexOf("maps.app")>=0;
+  var isShort=url.toLowerCase().indexOf("goo.gl")>=0||url.toLowerCase().indexOf("maps.app")>=0;
   var btn=this;
   var textEl=document.getElementById("ac-find-from-link-text");
   var originalText=textEl.textContent;
