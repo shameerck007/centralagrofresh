@@ -1235,6 +1235,28 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .cf-btn.cancel{background:var(--bg);color:var(--muted);border:1.5px solid var(--border)}
 .cf-btn.confirm{background:linear-gradient(135deg,var(--gr1),var(--gr3));color:#fff;box-shadow:0 5px 16px rgba(13,122,64,0.28)}
 .cf-btn.confirm.danger{background:linear-gradient(135deg,#7f1d1d,#dc2626);box-shadow:0 5px 16px rgba(220,38,38,0.28)}
+.cf-btn:disabled{opacity:0.45;cursor:not-allowed;box-shadow:none}
+.gplaces-overlay{z-index:200}
+.gplaces-sheet{z-index:201}
+.gfg-btn{
+  width:100%;padding:12px;border-radius:12px;border:1.5px solid rgba(66,133,244,0.28);
+  background:rgba(66,133,244,0.08);color:#4285F4;font-family:inherit;font-size:13.5px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;margin-bottom:16px;
+}
+.gfg-btn:active{transform:scale(0.98)}
+.gplaces-preview{display:none;background:var(--bg);border:1.5px solid var(--border);border-radius:14px;padding:14px;margin-top:10px}
+.gplaces-preview-name{font-weight:800;font-size:15px;color:var(--text)}
+.gplaces-preview-row{margin-top:6px;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.gplaces-status{padding:34px 16px;text-align:center;display:none}
+.gplaces-status i{font-size:38px;color:var(--muted)}
+.gplaces-status-title{margin-top:12px;font-weight:700;color:var(--text);font-size:14px}
+.gplaces-status-msg{margin-top:6px;color:var(--muted);font-size:12.5px;line-height:1.5}
+@keyframes gfgPulse{
+  0%{box-shadow:0 0 0 0 rgba(66,133,244,0.45);border-color:#4285F4}
+  70%{box-shadow:0 0 0 8px rgba(66,133,244,0)}
+  100%{box-shadow:0 0 0 0 rgba(66,133,244,0);border-color:var(--border)}
+}
+.gfg-highlight{animation:gfgPulse 1.1s ease-out 2}
 
 /* ===== TOAST ===== */
 .toast-stack{
@@ -2128,6 +2150,10 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <button class="add-cust-close" id="add-cust-close"><i class="ti ti-x"></i></button>
   </div>
   <div class="add-cust-body">
+    <button class="gfg-btn" id="ac-add-from-google-btn" type="button">
+      <i class="ti ti-brand-google"></i>
+      <span data-i18n="addFromGoogleBtn">Add from Google</span>
+    </button>
     <div class="login-field">
       <label class="login-label">Customer Name <span class="add-cust-req">*</span></label>
       <input class="login-input" id="ac-name" placeholder="e.g. Almas Restaurant">
@@ -2162,7 +2188,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     </div>
     <button class="find-loc-btn" id="ac-find-loc" type="button">
       <i class="ti ti-current-location"></i>
-      <span id="ac-find-loc-text">Find My Location</span>
+      <span id="ac-find-loc-text">Use My Current Location</span>
     </button>
     <div class="find-loc-preview" id="ac-loc-preview" style="display:none">
       <iframe id="ac-loc-frame" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
@@ -2174,7 +2200,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     </div>
     <button class="find-loc-btn" id="ac-find-from-link" type="button" style="background:rgba(13,122,64,0.08);border-color:rgba(13,122,64,0.18);color:var(--gr2)">
       <i class="ti ti-map-search"></i>
-      <span>Find Me (extract GPS from link)</span>
+      <span id="ac-find-from-link-text">Extract Coordinates from Link</span>
     </button>
     <div class="add-cust-hint">
       <i class="ti ti-info-circle"></i>
@@ -2184,6 +2210,39 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
   <div class="add-cust-footer">
     <button class="cf-btn cancel" id="ac-cancel-btn">Cancel</button>
     <button class="cf-btn confirm" id="ac-save-btn">Add Customer</button>
+  </div>
+</div>
+
+<!-- ===== ADD FROM GOOGLE PICKER ===== -->
+<div class="overlay gplaces-overlay" id="gplaces-overlay"></div>
+<div class="sheet gplaces-sheet" id="gplaces-sheet" style="display:flex;flex-direction:column">
+  <div class="sheet-handle"></div>
+  <div class="add-cust-header">
+    <div class="add-cust-title" data-i18n="gplacesTitle">Add from Google</div>
+    <button class="add-cust-close" id="gplaces-close"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="add-cust-body" style="padding-top:4px">
+    <div class="login-field">
+      <div class="login-input-wrap">
+        <input class="login-input" id="gplaces-search-input" placeholder="Search for a business or place..." data-i18n-placeholder="gplacesSearchPlaceholder">
+        <i class="ti ti-search"></i>
+      </div>
+    </div>
+    <div id="gplaces-map" style="width:100%;height:220px;border-radius:14px;margin:10px 0;background:var(--bg)"></div>
+    <div class="gplaces-status" id="gplaces-status">
+      <i class="ti ti-map-off"></i>
+      <div class="gplaces-status-title" id="gplaces-status-title" data-i18n="gplacesNoKeyTitle">Google search isn't set up yet</div>
+      <div class="gplaces-status-msg" id="gplaces-status-msg" data-i18n="gplacesNoKeyMsg">Ask your admin to add a Google Places API key to enable this.</div>
+    </div>
+    <div class="gplaces-preview" id="gplaces-preview">
+      <div class="gplaces-preview-name" id="gplaces-preview-name"></div>
+      <div class="gplaces-preview-row"><i class="ti ti-phone"></i><span id="gplaces-preview-phone"></span></div>
+      <div class="gplaces-preview-row"><i class="ti ti-map-pin"></i><span id="gplaces-preview-coords"></span></div>
+    </div>
+  </div>
+  <div class="add-cust-footer">
+    <button class="cf-btn cancel" id="gplaces-cancel-btn">Cancel</button>
+    <button class="cf-btn confirm" id="gplaces-use-btn" disabled data-i18n="gplacesUseBtn">Use This Place</button>
   </div>
 </div>
 
@@ -2278,6 +2337,21 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 </script>
 <script>
 /* ===== i18n: English / Arabic ===== */
+/* ===== Google Places ("Add from Google") =====
+   Paste your own Google Maps/Places API key below to enable the "Add from
+   Google" button on the Add Customer screen. Needs the Maps JavaScript API
+   and Places API (New) enabled on your Google Cloud project, with billing
+   linked. Until a real key is set, the button shows a clear "not set up
+   yet" message instead of a broken map. */
+var GOOGLE_MAPS_API_KEY = "YOUR_GOOGLE_MAPS_API_KEY_HERE";
+
+/* Paste your own Cloudflare Worker URL below once deployed (see setup guide)
+   to reliably resolve shortened Google Maps links (maps.app.goo.gl) into
+   their real destination, so GPS coordinates can be extracted from them
+   automatically. Until a real URL is set, the app falls back to the manual
+   "long-press to drop a pin" method — nothing breaks either way. */
+var MAPS_LINK_RESOLVER_URL = "https://tiny-pine-8aed.hcmfastrack.workers.dev";
+
 var TRANSLATIONS = {
   en: {
     appTagline: "Complete Sales Route Management System",
@@ -2345,7 +2419,19 @@ var TRANSLATIONS = {
     reportAll: "All Time",
     reportVisits: "Visits",
     reportCustomers: "Customers",
-    reportNotes: "With Notes"
+    reportNotes: "With Notes",
+    addFromGoogleBtn: "Add from Google",
+    gplacesTitle: "Add from Google",
+    gplacesSearchPlaceholder: "Search for a business or place...",
+    gplacesUseBtn: "Use This Place",
+    gplacesNoKeyTitle: "Google search isn't set up yet",
+    gplacesNoKeyMsg: "Ask your admin to add a Google Places API key to enable this.",
+    gplacesLoading: "Loading Google Maps...",
+    gplacesNoPhone: "No phone number on file — you can add one manually after",
+    gplacesFilledToast: "Details filled in — select an area and save",
+    gplacesFreeTitle: "Add from Google (Free Method)",
+    gplacesFreeMsg: "This opens Google Maps in a new tab. Search for the business there, then long-press its pin to drop a marker showing the exact coordinates as plain numbers — copy those. Come back here, paste them into the Latitude/Longitude fields (or paste a full share link into \"Google Maps Link\" and tap \"Extract Coordinates from Link\"). Type the name and phone number in yourself from the listing.",
+    gplacesFreeBtn: "Open Google Maps"
   },
   ar: {
     appTagline: "نظام إدارة مسار المبيعات الكامل",
@@ -2413,7 +2499,19 @@ var TRANSLATIONS = {
     reportAll: "كل الوقت",
     reportVisits: "الزيارات",
     reportCustomers: "العملاء",
-    reportNotes: "بها ملاحظات"
+    reportNotes: "بها ملاحظات",
+    addFromGoogleBtn: "الإضافة من Google",
+    gplacesTitle: "الإضافة من Google",
+    gplacesSearchPlaceholder: "ابحث عن نشاط تجاري أو مكان...",
+    gplacesUseBtn: "استخدام هذا المكان",
+    gplacesNoKeyTitle: "البحث عبر Google غير مُفعّل بعد",
+    gplacesNoKeyMsg: "اطلب من المسؤول إضافة مفتاح Google Places API لتفعيل هذه الميزة.",
+    gplacesLoading: "جارٍ تحميل خرائط Google...",
+    gplacesNoPhone: "لا يوجد رقم هاتف مسجل — يمكنك إضافته يدويًا لاحقًا",
+    gplacesFilledToast: "تم تعبئة البيانات — اختر المنطقة واحفظ",
+    gplacesFreeTitle: "الإضافة من Google (طريقة مجانية)",
+    gplacesFreeMsg: "سيتم فتح خرائط Google في تبويب جديد. ابحث عن النشاط التجاري هناك، ثم اضغط مطولاً على العلامة لإسقاط دبوس يعرض الإحداثيات كأرقام مباشرة — انسخها. عد إلى هنا والصقها في حقلي خط العرض وخط الطول (أو الصق رابط مشاركة كامل في \"رابط خرائط Google\" واضغط \"استخراج الإحداثيات من الرابط\"). أدخل الاسم ورقم الهاتف يدويًا من القائمة.",
+    gplacesFreeBtn: "فتح خرائط Google"
   }
 };
 var CURRENT_LANG = "en";
@@ -3535,11 +3633,11 @@ function openAddCustomerSheet(editCust){
   if(editCust&&editCust.lat&&editCust.lng){
     frameEl.src="https://www.google.com/maps?q="+editCust.lat+","+editCust.lng+"&output=embed";
     previewEl.style.display="block";
-    findBtnText.textContent="Location Found — Tap to Refresh";
+    findBtnText.textContent="Location Set — Refresh via GPS";
   } else {
     previewEl.style.display="none";
     frameEl.src="";
-    findBtnText.textContent="Find My Location";
+    findBtnText.textContent="Use My Current Location";
   }
 
   setTimeout(function(){document.getElementById("ac-name").focus();},300);
@@ -3557,6 +3655,147 @@ document.getElementById("fab-add-customer").addEventListener("click",function(){
 document.getElementById("add-cust-close").addEventListener("click",closeAddCustomerSheet);
 document.getElementById("ac-cancel-btn").addEventListener("click",closeAddCustomerSheet);
 document.getElementById("add-overlay").addEventListener("click",closeAddCustomerSheet);
+
+/* ===== Add from Google ===== */
+var _gmapsLoadPromise=null;
+function loadGoogleMapsScript(){
+  if(window.google && window.google.maps && window.google.maps.places) return Promise.resolve();
+  if(_gmapsLoadPromise) return _gmapsLoadPromise;
+  _gmapsLoadPromise=new Promise(function(resolve,reject){
+    if(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.indexOf("YOUR_")===0){
+      reject(new Error("no-api-key"));
+      return;
+    }
+    window.__gmapsReady=function(){ resolve(); };
+    var script=document.createElement("script");
+    script.src="https://maps.googleapis.com/maps/api/js?key="+encodeURIComponent(GOOGLE_MAPS_API_KEY)+"&libraries=places&callback=__gmapsReady";
+    script.async=true;
+    script.onerror=function(){ reject(new Error("script-load-failed")); };
+    document.head.appendChild(script);
+  });
+  return _gmapsLoadPromise;
+}
+
+var _gMap=null,_gMarker=null,_gAutocomplete=null,_gSelectedPlace=null;
+function initGooglePickerMapIfNeeded(){
+  if(_gMap) return;
+  var mapEl=document.getElementById("gplaces-map");
+  _gMap=new google.maps.Map(mapEl,{
+    center:{lat:24.7136,lng:46.6753},
+    zoom:11,
+    fullscreenControl:false,
+    streetViewControl:false,
+    mapTypeControl:false
+  });
+  _gMarker=new google.maps.Marker({map:_gMap});
+  var input=document.getElementById("gplaces-search-input");
+  _gAutocomplete=new google.maps.places.Autocomplete(input,{
+    fields:["place_id","name","formatted_phone_number","international_phone_number","geometry","formatted_address"]
+  });
+  _gAutocomplete.bindTo("bounds",_gMap);
+  _gAutocomplete.addListener("place_changed",function(){
+    var place=_gAutocomplete.getPlace();
+    if(!place||!place.geometry||!place.geometry.location){
+      showToast("No details available for that search","danger","ti-alert-triangle");
+      return;
+    }
+    _gSelectedPlace=place;
+    _gMap.setCenter(place.geometry.location);
+    _gMap.setZoom(16);
+    _gMarker.setPosition(place.geometry.location);
+    renderGooglePlacePreview(place);
+  });
+}
+function renderGooglePlacePreview(place){
+  var lat=place.geometry.location.lat();
+  var lng=place.geometry.location.lng();
+  var phone=place.formatted_phone_number||place.international_phone_number||"";
+  document.getElementById("gplaces-preview").style.display="block";
+  document.getElementById("gplaces-preview-name").textContent=place.name||"";
+  document.getElementById("gplaces-preview-phone").textContent=phone||t("gplacesNoPhone");
+  document.getElementById("gplaces-preview-coords").textContent=lat.toFixed(6)+", "+lng.toFixed(6);
+  document.getElementById("gplaces-use-btn").disabled=false;
+}
+function showGplacesStatus(titleKey,msgKey,iconClass){
+  var statusEl=document.getElementById("gplaces-status");
+  document.getElementById("gplaces-status-title").textContent=t(titleKey);
+  document.getElementById("gplaces-status-msg").textContent=msgKey?t(msgKey):"";
+  var iconEl=statusEl.querySelector("i");
+  if(iconEl) iconEl.className="ti "+(iconClass||"ti-map-off");
+  statusEl.style.display="block";
+  document.getElementById("gplaces-map").style.display="none";
+}
+function openGooglePicker(){
+  if(!GOOGLE_MAPS_API_KEY || GOOGLE_MAPS_API_KEY.indexOf("YOUR_")===0){
+    showConfirm({
+      title:t("gplacesFreeTitle"),
+      message:t("gplacesFreeMsg"),
+      icon:"ti-brand-google",
+      showNote:false,
+      confirmLabel:t("gplacesFreeBtn"),
+      onConfirm:function(){
+        window.open("https://www.google.com/maps","_blank");
+        var linkField=document.getElementById("ac-mapslink");
+        if(linkField){
+          setTimeout(function(){
+            linkField.scrollIntoView({behavior:"smooth",block:"center"});
+            linkField.focus();
+            linkField.classList.add("gfg-highlight");
+            setTimeout(function(){ linkField.classList.remove("gfg-highlight"); },2300);
+          },300);
+        }
+      }
+    });
+    return;
+  }
+  _gSelectedPlace=null;
+  document.getElementById("gplaces-search-input").value="";
+  document.getElementById("gplaces-preview").style.display="none";
+  document.getElementById("gplaces-use-btn").disabled=true;
+  document.getElementById("gplaces-status").style.display="none";
+  document.getElementById("gplaces-map").style.display="block";
+  document.getElementById("gplaces-overlay").classList.add("open");
+  document.getElementById("gplaces-sheet").classList.add("open");
+
+  if(window.google && window.google.maps && window.google.maps.places){
+    initGooglePickerMapIfNeeded();
+    return;
+  }
+  showGplacesStatus("gplacesLoading",null,"ti-loader");
+  loadGoogleMapsScript().then(function(){
+    document.getElementById("gplaces-status").style.display="none";
+    document.getElementById("gplaces-map").style.display="block";
+    initGooglePickerMapIfNeeded();
+  }).catch(function(){
+    showGplacesStatus("gplacesNoKeyTitle","gplacesNoKeyMsg","ti-map-off");
+  });
+}
+function closeGooglePicker(){
+  document.getElementById("gplaces-overlay").classList.remove("open");
+  document.getElementById("gplaces-sheet").classList.remove("open");
+}
+document.getElementById("ac-add-from-google-btn").addEventListener("click",openGooglePicker);
+document.getElementById("gplaces-close").addEventListener("click",closeGooglePicker);
+document.getElementById("gplaces-cancel-btn").addEventListener("click",closeGooglePicker);
+document.getElementById("gplaces-overlay").addEventListener("click",closeGooglePicker);
+document.getElementById("gplaces-use-btn").addEventListener("click",function(){
+  if(!_gSelectedPlace||!_gSelectedPlace.geometry) return;
+  var place=_gSelectedPlace;
+  var lat=place.geometry.location.lat();
+  var lng=place.geometry.location.lng();
+  var phone=place.formatted_phone_number||place.international_phone_number||"";
+  document.getElementById("ac-name").value=place.name||"";
+  document.getElementById("ac-phone").value=phone;
+  document.getElementById("ac-lat").value=lat;
+  document.getElementById("ac-lng").value=lng;
+  document.getElementById("ac-mapslink").value="https://www.google.com/maps?q="+lat+","+lng;
+  var frame=document.getElementById("ac-loc-frame");
+  frame.src="https://www.google.com/maps?q="+lat+","+lng+"&output=embed";
+  document.getElementById("ac-loc-preview").style.display="block";
+  closeGooglePicker();
+  showToast(t("gplacesFilledToast"),"success","ti-brand-google");
+  setTimeout(function(){ document.getElementById("ac-area-search").focus(); },300);
+});
 
 document.getElementById("ac-find-loc").addEventListener("click",function(){
   if(!("geolocation" in navigator)){
@@ -3598,13 +3837,13 @@ function requestCurrentLocation(){
 
       btn.disabled=false;
       icon.className="ti ti-current-location";
-      btnText.textContent="Location Found — Tap to Refresh";
+      btnText.textContent="Location Set — Refresh via GPS";
       showToast("Current location detected","success","ti-map-pin-check");
     },
     function(err){
       btn.disabled=false;
       icon.className="ti ti-current-location";
-      btnText.textContent="Find My Location";
+      btnText.textContent="Use My Current Location";
       var msg="Couldn't get your location.";
       if(err.code===1)msg="Location permission denied. Enable it in browser settings.";
       else if(err.code===2)msg="Location unavailable right now.";
@@ -3618,10 +3857,10 @@ function requestCurrentLocation(){
 function extractCoordsFromMapsUrl(url){
   if(!url)return null;
   var patterns=[
-    /@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,           // .../@24.7136,46.6753,15z
-    /[?&]q=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,       // ?q=24.7136,46.6753
-    /[?&]ll=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,      // ?ll=24.7136,46.6753
-    /!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/          // ...!3d24.7136!4d46.6753 (embed pb format)
+    /!3d(-?\d{1,3}\.\d+)!4d(-?\d{1,3}\.\d+)/,         // ...!3d24.7136!4d46.6753 — exact place pin (most accurate, check first)
+    /[?&]q=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,        // ?q=24.7136,46.6753
+    /[?&]ll=(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/,       // ?ll=24.7136,46.6753
+    /@(-?\d{1,3}\.\d+),(-?\d{1,3}\.\d+)/              // .../@24.7136,46.6753,15z — map viewport center (least accurate, last resort)
   ];
   for(var i=0;i<patterns.length;i++){
     var m=url.match(patterns[i]);
@@ -3630,39 +3869,132 @@ function extractCoordsFromMapsUrl(url){
   return null;
 }
 
+/* The business name is embedded right in a Google Maps place URL's path
+   (e.g. .../maps/place/Nesto+Hypermarket/@lat,lng...) — no page content or
+   API call needed, just decoding that URL segment. Phone numbers are NOT
+   embedded in the URL; they only exist in the live rendered page, which
+   would require either scraping Google's page content (unreliable, and not
+   something worth building on) or the official Places API. */
+function extractNameFromMapsUrl(url){
+  if(!url) return null;
+  var m=url.match(/\/maps\/place\/([^\/@]+)/);
+  if(!m) return null;
+  try{
+    var raw=decodeURIComponent(m[1]);
+    raw=raw.replace(/\+/g," ");
+    raw=raw.replace(/[\u200e\u200f\u202a-\u202e\u2066-\u2069]/g,"");
+    raw=raw.replace(/\(\s+/g,"(").replace(/\s+\)/g,")").replace(/\s{2,}/g," ").trim();
+    return raw||null;
+  }catch(e){ return null; }
+}
+function fillInExtractedCoords(coords,name,phone){
+  document.getElementById("ac-lat").value=coords.lat;
+  document.getElementById("ac-lng").value=coords.lng;
+  var frame=document.getElementById("ac-loc-frame");
+  frame.src="https://www.google.com/maps?q="+coords.lat+","+coords.lng+"&output=embed";
+  document.getElementById("ac-loc-preview").style.display="block";
+  document.getElementById("ac-find-from-link-text").textContent="Coordinates Extracted — Tap to Re-extract";
+  if(name) document.getElementById("ac-name").value=name;
+  if(phone) document.getElementById("ac-phone").value=phone;
+  var msg;
+  if(name&&phone) msg="Name, phone & coordinates filled in — please double-check the phone number";
+  else if(name) msg="Coordinates and name extracted — add the phone number and area";
+  else msg="GPS coordinates extracted from link";
+  showToast(msg,"success","ti-map-pin-check");
+}
+function showShortLinkDialog(url){
+  showConfirm({
+    title:"This Is a Shortened Link",
+    message:"Couldn't automatically resolve this short link right now. Fastest fix: on Google Maps, long-press the exact spot instead of using Share — it drops a pin and shows the coordinates as plain numbers you can copy straight into the Latitude/Longitude fields above. Or, to get the full link: open this link in your browser, wait for Google Maps to load, then copy the long URL from the address bar and paste that here instead.",
+    icon:"ti-link",
+    iconType:"warn",
+    showNote:false,
+    confirmLabel:"Open Link Now",
+    cancelLabel:"OK, Got It",
+    onConfirm:function(){
+      window.open(url,"_blank");
+    }
+  });
+}
+/* Short links (maps.app.goo.gl) don't contain coordinates themselves — only
+   where they redirect to does. Browsers won't let our own JS read a
+   cross-origin redirect directly, so this calls your own small Cloudflare
+   Worker (see setup guide) that follows the redirect server-side and hands
+   back the real URL, plus a best-effort phone number if one was found in
+   the page (this part is NOT reliable — always shown to the user as
+   something to verify, never treated as guaranteed correct). If no Worker
+   is configured yet, or the call fails for any reason, we fall back to the
+   manual dialog below — nothing breaks, it just asks for a couple extra
+   taps. */
+function resolveShortMapsLink(shortUrl){
+  if(!MAPS_LINK_RESOLVER_URL || MAPS_LINK_RESOLVER_URL.indexOf("YOUR_")===0){
+    return Promise.reject(new Error("no-resolver-configured"));
+  }
+  var resolverUrl=MAPS_LINK_RESOLVER_URL+"?url="+encodeURIComponent(shortUrl);
+  return fetch(resolverUrl).then(function(resp){
+    if(!resp.ok) throw new Error("resolver-failed");
+    return resp.json();
+  }).then(function(data){
+    var finalUrl=data && data.finalUrl;
+    if(!finalUrl) throw new Error("no-final-url");
+    return {finalUrl:finalUrl,phone:(data&&data.phone)||null};
+  });
+}
 document.getElementById("ac-find-from-link").addEventListener("click",function(){
   var url=document.getElementById("ac-mapslink").value.trim();
   if(!url){
     showToast("Paste a Google Maps link first","danger","ti-alert-triangle");
     return;
   }
-  if(url.indexOf("goo.gl")>=0||url.indexOf("maps.app")>=0){
-    showConfirm({
-      title:"This Is a Shortened Link",
-      message:"Short links (maps.app.goo.gl) don't contain coordinates. To get the full link: open this link in your browser, wait for Google Maps to load, then copy the long URL from the address bar and paste that here instead. Or if you're standing at the location, just use \"Find My Location\" above.",
-      icon:"ti-link",
-      iconType:"warn",
-      showNote:false,
-      confirmLabel:"Open Link Now",
-      cancelLabel:"OK, Got It",
-      onConfirm:function(){
-        window.open(url,"_blank");
+  var isShort=url.indexOf("goo.gl")>=0||url.indexOf("maps.app")>=0;
+  var btn=this;
+  var textEl=document.getElementById("ac-find-from-link-text");
+  var originalText=textEl.textContent;
+
+  if(isShort){
+    btn.disabled=true;
+    textEl.textContent="Resolving short link...";
+    resolveShortMapsLink(url).then(function(result){
+      btn.disabled=false;
+      var coords=extractCoordsFromMapsUrl(result.finalUrl);
+      if(coords){
+        fillInExtractedCoords(coords,extractNameFromMapsUrl(result.finalUrl),result.phone);
+      } else {
+        textEl.textContent=originalText;
+        showShortLinkDialog(url);
       }
+    }).catch(function(){
+      btn.disabled=false;
+      textEl.textContent=originalText;
+      showShortLinkDialog(url);
     });
     return;
   }
+
+  // Already a full link — coordinates and name can be read straight from
+  // the URL text with no network call. Phone numbers can't, so if a
+  // resolver Worker is configured, also ask it to check the page content
+  // for one (best-effort); if not configured or it fails, we still have
+  // coordinates and name from the URL itself, so nothing is lost.
   var coords=extractCoordsFromMapsUrl(url);
   if(!coords){
     showToast("Couldn't find coordinates in that link","danger","ti-map-pin-x");
     return;
   }
-  document.getElementById("ac-lat").value=coords.lat;
-  document.getElementById("ac-lng").value=coords.lng;
-  var frame=document.getElementById("ac-loc-frame");
-  frame.src="https://www.google.com/maps?q="+coords.lat+","+coords.lng+"&output=embed";
-  document.getElementById("ac-loc-preview").style.display="block";
-  document.getElementById("ac-find-loc-text").textContent="Location Found — Tap to Refresh";
-  showToast("GPS coordinates extracted from link","success","ti-map-pin-check");
+  var name=extractNameFromMapsUrl(url);
+  if(MAPS_LINK_RESOLVER_URL && MAPS_LINK_RESOLVER_URL.indexOf("YOUR_")!==0){
+    btn.disabled=true;
+    textEl.textContent="Checking for a phone number...";
+    resolveShortMapsLink(url).then(function(result){
+      btn.disabled=false;
+      fillInExtractedCoords(coords,name,result.phone);
+    }).catch(function(){
+      btn.disabled=false;
+      fillInExtractedCoords(coords,name);
+    });
+    return;
+  }
+  fillInExtractedCoords(coords,name);
 });
 
 
