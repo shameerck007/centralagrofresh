@@ -1470,6 +1470,60 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .user-name{font-size:11px;color:rgba(255,255,255,0.8);font-weight:600}
 
 /* ===== DESKTOP LAYOUT ===== */
+/* ===== PHONE LAYOUT POLISH =====
+   On narrow screens the long tagline wraps into several cramped lines
+   beside the logo, and six bottom-nav items squeeze their labels until
+   they clip. Both are handled here rather than by shrinking things
+   globally, so tablet/desktop keep the fuller layout. */
+@media(max-width:499px){
+  .hdr-top{padding:8px 12px 0;gap:8px}
+  .tagline{display:none}
+  .logo-wrap,.logo-wrap img{height:30px}
+  .hdr-right{gap:5px}
+  .hdr-date{padding:5px 8px;font-size:10px;border-radius:10px}
+  .hdr-date .ti{font-size:12px}
+  .hdr-icon-btn{width:36px;height:36px}
+  .profile-av{width:36px;height:36px;font-size:13.5px}
+
+  .bnav{padding-left:2px;padding-right:2px}
+  .nbtn{padding-left:0;padding-right:0;min-width:0}
+  .nbtn span{
+    font-size:9.5px;letter-spacing:0;line-height:1.15;
+    max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+    padding:0 1px;
+  }
+  .nbtn i{font-size:19px}
+
+  /* --- Live Tracking: fleet-management layout on phones ---
+     The map is the point of this screen, so give it the space. The header
+     shrinks to a single compact line and the KPI cards become slim pills
+     instead of tall boxes. */
+  #v-tracking .areas-hero{padding:12px 16px 12px}
+  #v-tracking .areas-eyebrow{font-size:9px;letter-spacing:1.2px}
+  #v-tracking .areas-title{font-size:16px;margin-top:1px}
+  #v-tracking .areas-sub{display:none}
+
+  #v-tracking .tracking-stats{gap:7px;margin:10px 12px 0}
+  #v-tracking .tracking-stat-card{
+    padding:7px 4px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  #v-tracking .tracking-stat-n{font-size:15px;line-height:1}
+  #v-tracking .tracking-stat-l{font-size:9px;letter-spacing:0.2px;margin-top:0;line-height:1.1}
+
+  #tracking-map{
+    height:44vh!important;min-height:240px;
+    margin:10px 12px 0!important;max-width:calc(100% - 24px)!important;
+    border-radius:16px;box-shadow:0 6px 20px rgba(10,22,40,0.12);
+    border:1px solid var(--border);
+  }
+  #v-tracking .tracking-list{margin:12px 12px 20px!important}
+  #v-tracking .tracking-row{padding:10px 12px;border-radius:13px;margin-bottom:8px}
+  #v-tracking .tracking-avatar{width:38px;height:38px;font-size:14px}
+  #v-tracking .tracking-row-name{font-size:13.5px}
+  #v-tracking .tracking-row-sub{font-size:11.5px}
+}
+
 @media(min-width:500px){
   body{
     background:linear-gradient(140deg,#eef1f7 0%,#e6ebf5 50%,#eef1f7 100%);
@@ -2526,7 +2580,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r8";
+var APP_VERSION = "2026-07-29-r10";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -3107,10 +3161,10 @@ function relTime(ts){
   if(hr<24)return hr+"h ago";
   var d=Math.floor(hr/24);
   if(d<7)return d+"d ago";
-  return new Date(ts).toLocaleDateString("en-SA",{month:"short",day:"numeric"});
+  return new Date(ts).toLocaleDateString("en-GB",{month:"short",day:"numeric"});
 }
 function fullDateTime(ts){
-  return new Date(ts).toLocaleString("en-SA",{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+  return new Date(ts).toLocaleString("en-GB",{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
 }
 function updateStatsBar(){
   var store=loadVisitStore();
@@ -3162,14 +3216,14 @@ function dayLabel(ts){
   var dd=new Date(d.getFullYear(),d.getMonth(),d.getDate());
   if(dd.getTime()===today.getTime())return"Today";
   if(dd.getTime()===y.getTime())return"Yesterday";
-  return d.toLocaleDateString("en-SA",{weekday:"long",month:"short",day:"numeric"});
+  return d.toLocaleDateString("en-GB",{weekday:"long",month:"short",day:"numeric"});
 }
 function formatDMY(ts){
   var d=new Date(ts);
   var dd=String(d.getDate()).padStart(2,"0");
   var mmm=d.toLocaleDateString("en-US",{month:"short"});
   var yy=String(d.getFullYear()).slice(-2);
-  var time=d.toLocaleTimeString("en-SA",{hour:"2-digit",minute:"2-digit"});
+  var time=d.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
   return dd+"-"+mmm+"-"+yy+" "+time;
 }
 
@@ -3292,7 +3346,7 @@ function exportReportPDF(range){
     doc.setFont("helvetica","normal");
     doc.setFontSize(9);
     doc.setTextColor(90,107,138);
-    doc.text("Range: "+label+"  •  Generated "+new Date().toLocaleString("en-SA",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"}),pageW-marginX,y+11,{align:"right"});
+    doc.text("Range: "+label+"  •  Generated "+new Date().toLocaleString("en-GB",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"}),pageW-marginX,y+11,{align:"right"});
     y+=42;
     doc.setDrawColor(228,233,244);
     doc.setLineWidth(1);
@@ -3366,7 +3420,7 @@ function exportReportPDF(range){
       var dd=String(t.getDate()).padStart(2,"0");
       var mmm=t.toLocaleDateString("en-US",{month:"short"});
       var yy=String(t.getFullYear()).slice(-2);
-      var timeStr=t.toLocaleTimeString("en-SA",{hour:"2-digit",minute:"2-digit"});
+      var timeStr=t.toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"});
       var dateStr=dd+"-"+mmm+"-"+yy;
       var commentsText=e.note?e.note:"—";
       var commentLines=doc.splitTextToSize(commentsText,commentsWidth-6);
@@ -4067,6 +4121,19 @@ function focusTrackingMarker(uid){
   marker.setAnimation(google.maps.Animation.BOUNCE);
   setTimeout(function(){ marker.setAnimation(null); },1400);
 }
+function fitTrackingBounds(){
+  if(!_gTrackMap) return;
+  var uids=Object.keys(_gTrackMarkers);
+  if(!uids.length) return;
+  if(uids.length===1){
+    _gTrackMap.setCenter(_gTrackMarkers[uids[0]].getPosition());
+    _gTrackMap.setZoom(14);
+    return;
+  }
+  var bounds=new google.maps.LatLngBounds();
+  uids.forEach(function(uid){ bounds.extend(_gTrackMarkers[uid].getPosition()); });
+  _gTrackMap.fitBounds(bounds,{top:40,right:40,bottom:40,left:40});
+}
 function renderTrackingStats(list){
   var now=Date.now();
   var live=0,away=0,offline=0;
@@ -4127,6 +4194,14 @@ function renderTrackingScreen(){
       // already arrived — draw whatever we already have right away instead
       // of waiting for the next Firestore update.
       renderTrackingMarkers(_lastTrackingList);
+      // The map container is hidden while this view is inactive, and its
+      // height differs between phone and desktop — tell Google Maps to
+      // recalculate, then frame everyone currently on the map.
+      setTimeout(function(){
+        if(!_gTrackMap) return;
+        google.maps.event.trigger(_gTrackMap,"resize");
+        fitTrackingBounds();
+      },250);
     }).catch(function(){
       document.getElementById("tracking-map").style.display="none";
       document.getElementById("tracking-status").style.display="block";
@@ -4740,7 +4815,7 @@ document.getElementById("ds-vadd").addEventListener("click",function(){
   showToast("Visit logged for "+custRef.name,"success","ti-circle-check");
 });
 
-document.getElementById("hdate").textContent=new Date().toLocaleDateString("en-SA",{weekday:"short",month:"short",day:"numeric"});
+document.getElementById("hdate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"short",month:"short",day:"numeric"});
 
 var CURRENT_ROLE="rep";
 var CURRENT_USER="";
@@ -4754,7 +4829,7 @@ function isAdmin(){return CURRENT_ROLE==="admin";}
 function formatSessionTime(ts){
   if(!ts)return"";
   try{
-    return new Date(Number(ts)).toLocaleString("en-SA",{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
+    return new Date(Number(ts)).toLocaleString("en-GB",{weekday:"short",month:"short",day:"numeric",hour:"2-digit",minute:"2-digit"});
   }catch(e){return"";}
 }
 
@@ -5227,7 +5302,7 @@ function vpTodayStr(){
 function vpFormatDate(dateStr){
   var parts=dateStr.split("-");
   var d=new Date(parseInt(parts[0],10),parseInt(parts[1],10)-1,parseInt(parts[2],10));
-  return d.toLocaleDateString("en-SA",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
+  return d.toLocaleDateString("en-GB",{weekday:"short",day:"numeric",month:"short",year:"numeric"});
 }
 function vpShowSection(which){
   document.getElementById("vp-home").style.display=(which==="home")?"":"none";
@@ -5289,10 +5364,7 @@ function renderPlansList(){
   var listEl=document.getElementById("vp-plans-list");
   var plans=loadPlans();
   var ctxUid=vpEffectiveUid();
-  console.log("[DIAG-RENDER] ctxUid=",ctxUid,"CURRENT_UID=",CURRENT_UID,"vpContextUid=",vpContextUid,
-              "| uids that own plans per date:",Object.keys(plans).map(function(d){return d+" -> "+Object.keys(plans[d]||{}).join(",");}));
   var dates=Object.keys(plans).filter(function(d){return plans[d]&&plans[d][ctxUid]&&plans[d][ctxUid].length;});
-  console.log("[DIAG-RENDER] matching dates for ctxUid:",dates);
   if(!dates.length){
     listEl.innerHTML="<div class='areas-empty'><i class='ti ti-calendar-off'></i><p>No visit plans yet</p><span style='font-size:12px'>Tap \"New Visit Plan\" to plan your first day of visits</span></div>";
     return;
@@ -5401,20 +5473,16 @@ document.getElementById("vp-save").addEventListener("click",function(){
     if(vpEditingDate&&vpEditingDate!==dateStr&&plans[vpEditingDate]) delete plans[vpEditingDate][ctxUid];
     if(!plans[dateStr]) plans[dateStr]={};
     plans[dateStr][ctxUid]=vpSelected.slice();
-    console.log("[DIAG-SAVE] ctxUid=",ctxUid,"dateStr=",dateStr,"savingArray=",plans[dateStr][ctxUid],"fullPlansBeforeSave=",JSON.parse(JSON.stringify(plans)));
     var btn=document.getElementById("vp-save");
     btn.disabled=true;
     savePlans(plans).then(function(){
       btn.disabled=false;
-      var reloaded=loadPlans();
-      console.log("[DIAG-SAVE] immediately after save resolved — reloaded plans from loadPlans():",JSON.parse(JSON.stringify(reloaded)),"ctxUid used=",ctxUid,"reloaded[dateStr][ctxUid]=",reloaded[dateStr]&&reloaded[dateStr][ctxUid]);
       showToast("Plan saved for "+vpFormatDate(dateStr),"success","ti-calendar-check");
       vpEditingDate=null;
       vpShowSection("home");
       renderPlansList();
     }).catch(function(e){
       btn.disabled=false;
-      console.log("[DIAG-SAVE] savePlans REJECTED:",e);
       showToast("Couldn't save — check your connection and try again","danger","ti-alert-triangle");
     });
   };
@@ -5820,7 +5888,7 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
   if(apStFilter!=="all")fbits.push("Status: "+stLabel[apStFilter]);
   if(apAreaFilter)fbits.push("Area: "+apAreaFilter);
   if(apRepFilter)fbits.push("Rep: "+apRepFilter);
-  doc.text("Generated "+new Date().toLocaleString("en-SA",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"})+(fbits.length?"  \u2022  "+fbits.join("  \u2022  "):""),mx,y);
+  doc.text("Generated "+new Date().toLocaleString("en-GB",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"})+(fbits.length?"  \u2022  "+fbits.join("  \u2022  "):""),mx,y);
   y+=8;
   doc.setDrawColor(210,214,222);doc.setLineWidth(0.8);
   doc.line(mx,y,pageW-mx,y);
@@ -6588,7 +6656,6 @@ if(db){
           var v = d.data() && d.data().v;
           if(v!=null) DATA[d.id] = v;
         });
-        console.log("[DIAG-BOOT] loaded",snap.size,"appState docs. keys in memory:",Object.keys(DATA));
         recordDiag(snap.size,DATA,snap.size===0?"server returned 0 records":null);
         if(snap.size===0){
           /* Don't pretend this worked — the app would silently fall back to
