@@ -1270,6 +1270,19 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .tracking-row-name{font-weight:700;font-size:14px;color:var(--text)}
 .tracking-row-sub{font-size:12px;color:var(--muted);margin-top:2px}
 .tracking-empty{padding:30px 16px;text-align:center;color:var(--muted);font-size:13px}
+.vp-rep-picker{display:flex;gap:8px;overflow-x:auto;padding:2px 16px 10px;margin-top:2px}
+.vp-rep-picker::-webkit-scrollbar{display:none}
+.vp-rep-chip{
+  flex-shrink:0;display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:20px;
+  border:1.5px solid var(--border);background:var(--card);font-size:12.5px;font-weight:700;
+  color:var(--muted);cursor:pointer;white-space:nowrap;
+}
+.vp-rep-chip.active{background:linear-gradient(135deg,var(--gr1),var(--gr3));border-color:transparent;color:#fff}
+.vp-viewing-banner{
+  margin:0 16px 12px;padding:10px 14px;border-radius:12px;background:rgba(13,122,64,0.08);
+  border:1.5px solid rgba(13,122,64,0.2);font-size:12.5px;font-weight:600;color:var(--gr2);
+  display:flex;align-items:center;gap:8px;
+}
 .tracking-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 16px 0}
 .tracking-stat-card{
   border-radius:14px;padding:12px 8px;text-align:center;border:1.5px solid var(--border);background:var(--card);
@@ -1958,6 +1971,8 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
           <button class="areas-add-btn" id="vp-new-btn" style="width:100%;padding:12px;justify-content:center;display:flex;align-items:center;gap:7px"><i class="ti ti-calendar-plus"></i> <span data-i18n="plannerNewBtn">New Visit Plan</span></button>
           <button class="vp-ap-btn" id="vp-ap-open"><i class="ti ti-target-arrow"></i> <span data-i18n="plannerActionPlan">Action Plan</span> <span class="vp-ap-badge" id="vp-ap-badge" style="display:none">0</span></button>
         </div>
+        <div class="vp-rep-picker" id="vp-rep-picker" style="display:none"></div>
+        <div class="vp-viewing-banner" id="vp-viewing-banner" style="display:none"></div>
         <div class="areas-list" id="vp-plans-list"></div>
       </div>
 
@@ -2801,12 +2816,19 @@ function loadAreas(){
   try{
     list=JSON.parse(localStorage.getItem(AREAS_KEY)||"[]");
   }catch(e){list=[];}
-  if(!list.length)list=["Malaz"];
+  var changed=false;
+  if(!list.length){ list=["Malaz"]; changed=true; }
   // self-heal: make sure every area currently used by a customer is represented
   for(var i=0;i<CUSTS.length;i++){
-    if(list.indexOf(CUSTS[i].area)===-1)list.push(CUSTS[i].area);
+    if(list.indexOf(CUSTS[i].area)===-1){ list.push(CUSTS[i].area); changed=true; }
   }
-  try{localStorage.setItem(AREAS_KEY,JSON.stringify(list));}catch(e){}
+  // Only write back when something actually needed fixing — this function
+  // runs constantly throughout the app (tabs, customer list, etc.), and
+  // writing back unconditionally on every single read could race with and
+  // clobber a freshly-synced update from another device with a stale copy.
+  if(changed){
+    try{localStorage.setItem(AREAS_KEY,JSON.stringify(list));}catch(e){}
+  }
   return list;
 }
 async function addArea(name){
@@ -5018,15 +5040,39 @@ var vpSelected=[];        // customer numbers selected in the editor
 var vpEditingDate=null;   // date being edited (null = new plan)
 var vpDetailDate=null;    // date currently shown in detail view
 var vpSearch="";
+var vpContextUid=null;    // whose plans we're currently viewing/editing — null = "my own"
+var vpTeamCache=null;     // cached {uid:{name,role}} for the admin rep-picker
 
 function loadPlans(){
   try{
     var raw=localStorage.getItem(PLAN_KEY);
-    return raw?JSON.parse(raw):{};
+    var plans=raw?JSON.parse(raw):{};
+    // Migrate old data: plans used to be stored as a flat {dateStr:[custNos]}
+    // shared by everyone. Now each date holds {uid:[custNos]} so different
+    // people's plans never overwrite each other. Any plan still in the old
+    // flat-array shape gets attributed to whoever's logged in when this
+    // migration first runs, since the original data never recorded an owner.
+    var migrated=false;
+    Object.keys(plans).forEach(function(d){
+      if(Array.isArray(plans[d])){
+        var wrapped={};
+        wrapped[CURRENT_UID||"_legacy"]=plans[d];
+        plans[d]=wrapped;
+        migrated=true;
+      }
+    });
+    if(migrated){ try{localStorage.setItem(PLAN_KEY,JSON.stringify(plans));}catch(e){} }
+    return plans;
   }catch(e){return {};}
 }
-function savePlans(plans){
-  try{localStorage.setItem(PLAN_KEY,JSON.stringify(plans));}catch(e){}
+async function savePlans(plans){
+  if(!(window.FB && window.FB.saveVisitPlans)){
+    // Extremely unlikely (means Firebase itself failed to load) — fall back
+    // to the old path rather than losing the save entirely.
+    try{localStorage.setItem(PLAN_KEY,JSON.stringify(plans));}catch(e){}
+    throw new Error("offline");
+  }
+  await window.FB.saveVisitPlans(plans);
 }
 function vpTodayStr(){
   var d=new Date();
@@ -5046,10 +5092,51 @@ function vpShowSection(which){
 }
 
 // ---- Saved plans list ----
+function vpEffectiveUid(){ return vpContextUid||CURRENT_UID; }
+function renderRepPicker(){
+  var pickerEl=document.getElementById("vp-rep-picker");
+  var bannerEl=document.getElementById("vp-viewing-banner");
+  if(!isAdmin()){
+    pickerEl.style.display="none";
+    bannerEl.style.display="none";
+    return;
+  }
+  function draw(team){
+    var chips="<div class=\"vp-rep-chip"+(!vpContextUid||vpContextUid===CURRENT_UID?" active":"")+"\" data-uid=\""+CURRENT_UID+"\"><i class=\"ti ti-user\"></i> My Plans</div>";
+    team.forEach(function(u){
+      if(u.uid===CURRENT_UID) return;
+      chips+="<div class=\"vp-rep-chip"+(vpContextUid===u.uid?" active":"")+"\" data-uid=\""+u.uid+"\">"+escapeHtml(u.name||u.email||"—")+"</div>";
+    });
+    pickerEl.innerHTML=chips;
+    pickerEl.style.display="flex";
+    pickerEl.querySelectorAll(".vp-rep-chip").forEach(function(chip){
+      chip.addEventListener("click",function(){
+        var uid=chip.getAttribute("data-uid");
+        vpContextUid=(uid===CURRENT_UID)?null:uid;
+        renderRepPicker();
+        renderPlansList();
+      });
+    });
+    if(vpContextUid && vpContextUid!==CURRENT_UID){
+      var person=team.filter(function(u){return u.uid===vpContextUid;})[0];
+      bannerEl.innerHTML="<i class=\"ti ti-eye\"></i> Viewing and editing <b>"+escapeHtml((person&&person.name)||"this team member")+"</b>'s visit plans";
+      bannerEl.style.display="flex";
+    } else {
+      bannerEl.style.display="none";
+    }
+  }
+  if(vpTeamCache){ draw(vpTeamCache); return; }
+  if(window.FB && window.FB.listUsers){
+    window.FB.listUsers().then(function(users){ vpTeamCache=users||[]; draw(vpTeamCache); }).catch(function(){ pickerEl.style.display="none"; });
+  } else {
+    pickerEl.style.display="none";
+  }
+}
 function renderPlansList(){
   var listEl=document.getElementById("vp-plans-list");
   var plans=loadPlans();
-  var dates=Object.keys(plans).filter(function(d){return plans[d]&&plans[d].length;});
+  var ctxUid=vpEffectiveUid();
+  var dates=Object.keys(plans).filter(function(d){return plans[d]&&plans[d][ctxUid]&&plans[d][ctxUid].length;});
   if(!dates.length){
     listEl.innerHTML="<div class='areas-empty'><i class='ti ti-calendar-off'></i><p>No visit plans yet</p><span style='font-size:12px'>Tap \"New Visit Plan\" to plan your first day of visits</span></div>";
     return;
@@ -5061,7 +5148,7 @@ function renderPlansList(){
   var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   var html="";
   upcoming.concat(past).forEach(function(d){
-    var custNos=plans[d];
+    var custNos=plans[d][ctxUid];
     var vc=0;custNos.forEach(function(n){if(vpVisitsOn(n,d).length)vc++;});
     var parts=d.split("-");
     var day=parseInt(parts[2],10);
@@ -5091,7 +5178,7 @@ function openPlanEditor(dateStr){
   var dateInput=document.getElementById("vp-date");
   if(dateStr){
     dateInput.value=dateStr;
-    vpSelected=(loadPlans()[dateStr]||[]).slice();
+    vpSelected=((loadPlans()[dateStr]||{})[vpEffectiveUid()]||[]).slice();
   } else {
     dateInput.value=vpTodayStr();
     vpSelected=[];
@@ -5151,16 +5238,25 @@ document.getElementById("vp-save").addEventListener("click",function(){
   var dateStr=document.getElementById("vp-date").value;
   if(!dateStr){showToast("Please pick a visit date","info","ti-calendar-question");return;}
   if(!vpSelected.length){showToast("Select at least one customer","info","ti-user-question");return;}
+  var ctxUid=vpEffectiveUid();
   var plans=loadPlans();
-  var overwriting=!vpEditingDate&&plans[dateStr]&&plans[dateStr].length;
+  var overwriting=!vpEditingDate&&plans[dateStr]&&plans[dateStr][ctxUid]&&plans[dateStr][ctxUid].length;
   var doSave=function(){
-    if(vpEditingDate&&vpEditingDate!==dateStr)delete plans[vpEditingDate];
-    plans[dateStr]=vpSelected.slice();
-    savePlans(plans);
-    showToast("Plan saved for "+vpFormatDate(dateStr),"success","ti-calendar-check");
-    vpEditingDate=null;
-    vpShowSection("home");
-    renderPlansList();
+    if(vpEditingDate&&vpEditingDate!==dateStr&&plans[vpEditingDate]) delete plans[vpEditingDate][ctxUid];
+    if(!plans[dateStr]) plans[dateStr]={};
+    plans[dateStr][ctxUid]=vpSelected.slice();
+    var btn=document.getElementById("vp-save");
+    btn.disabled=true;
+    savePlans(plans).then(function(){
+      btn.disabled=false;
+      showToast("Plan saved for "+vpFormatDate(dateStr),"success","ti-calendar-check");
+      vpEditingDate=null;
+      vpShowSection("home");
+      renderPlansList();
+    }).catch(function(){
+      btn.disabled=false;
+      showToast("Couldn't save — check your connection and try again","danger","ti-alert-triangle");
+    });
   };
   if(overwriting){
     showConfirm({
@@ -5227,8 +5323,9 @@ function nearestNeighborOrder(items,start){
   return ordered;
 }
 function optimizePlanRoute(dateStr,startCoord){
+  var ctxUid=vpEffectiveUid();
   var plans=loadPlans();
-  var nos=plans[dateStr]||[];
+  var nos=(plans[dateStr]&&plans[dateStr][ctxUid])||[];
   var withC=[],without=[];
   nos.forEach(function(n){
     var coord=custCoords(getCustomerByNumber(n));
@@ -5236,10 +5333,14 @@ function optimizePlanRoute(dateStr,startCoord){
   });
   if(withC.length<2){showToast("Need at least 2 stops with GPS to optimize","danger","ti-map-pin-x");return;}
   var ordered=nearestNeighborOrder(withC,startCoord||withC[0].coord);
-  plans[dateStr]=ordered.map(function(x){return x.n;}).concat(without);
-  savePlans(plans);
-  openPlanDetail(dateStr);
-  showToast("Route optimized"+(without.length?" \u2014 "+without.length+" stop"+(without.length>1?"s":"")+" without GPS kept last":""),"success","ti-route-2");
+  if(!plans[dateStr]) plans[dateStr]={};
+  plans[dateStr][ctxUid]=ordered.map(function(x){return x.n;}).concat(without);
+  savePlans(plans).then(function(){
+    openPlanDetail(dateStr);
+    showToast("Route optimized"+(without.length?" \u2014 "+without.length+" stop"+(without.length>1?"s":"")+" without GPS kept last":""),"success","ti-route-2");
+  }).catch(function(){
+    showToast("Couldn't save the optimized route — check your connection and try again","danger","ti-alert-triangle");
+  });
 }
 function optimizePlanRouteWithLocation(dateStr){
   if(!navigator.geolocation){optimizePlanRoute(dateStr,null);return;}
@@ -5252,7 +5353,7 @@ function optimizePlanRouteWithLocation(dateStr){
 }
 function startPlanRoute(dateStr){
   var plans=loadPlans();
-  var nos=plans[dateStr]||[];
+  var nos=(plans[dateStr]&&plans[dateStr][vpEffectiveUid()])||[];
   var coords=[];
   nos.forEach(function(n){var coord=custCoords(getCustomerByNumber(n));if(coord)coords.push(coord);});
   if(!coords.length){showToast("No stops have GPS coordinates for directions","danger","ti-map-pin-x");return;}
@@ -5270,7 +5371,7 @@ function startPlanRoute(dateStr){
 function openPlanDetail(dateStr){
   vpDetailDate=dateStr;
   var plans=loadPlans();
-  var custNos=plans[dateStr]||[];
+  var custNos=(plans[dateStr]&&plans[dateStr][vpEffectiveUid()])||[];
   var listEl=document.getElementById("vp-detail-list");
   var html="";
   var stop=1;
@@ -5392,17 +5493,26 @@ document.getElementById("vp-delete-plan").addEventListener("click",function(){
     confirmLabel:"Delete",
     onConfirm:function(){
       var plans=loadPlans();
-      delete plans[d];
-      savePlans(plans);
-      showToast("Visit plan deleted","danger","ti-trash");
-      vpShowSection("home");
-      renderPlansList();
+      var ctxUid=vpEffectiveUid();
+      if(plans[d]){
+        delete plans[d][ctxUid];
+        if(!Object.keys(plans[d]).length) delete plans[d];
+      }
+      savePlans(plans).then(function(){
+        showToast("Visit plan deleted","danger","ti-trash");
+        vpShowSection("home");
+        renderPlansList();
+      }).catch(function(){
+        showToast("Couldn't delete — check your connection and try again","danger","ti-alert-triangle");
+      });
     }
   });
 });
 document.getElementById("nb-planner").addEventListener("click",function(){
   switchView("planner");
   vpShowSection("home");
+  vpContextUid=null;
+  renderRepPicker();
   renderPlansList();
 });
 
@@ -5892,6 +6002,13 @@ document.getElementById("vp-ap-pdf").addEventListener("click",function(){
         try{
           var av = document.getElementById("v-areas");
           if(av && av.classList.contains("active") && typeof window.renderAreasScreen==="function") window.renderAreasScreen();
+        }catch(e){}
+        try{
+          var pv = document.getElementById("v-planner");
+          var vpHome = document.getElementById("vp-home");
+          if(pv && pv.classList.contains("active") && vpHome && vpHome.style.display!=="none" && typeof window.renderPlansList==="function"){
+            window.renderPlansList();
+          }
         }catch(e){}
         var v = document.getElementById("v-users");
         if(v && v.classList.contains("active")) load();
@@ -6481,10 +6598,19 @@ if(db){
     DATA["af_areas"] = JSON.stringify(list);
   }
 
+  /* Same direct-write approach for visit plans — a rep's plan needs to be
+     confirmed in the database the moment they save it, and an admin
+     checking moments later needs to be able to trust what they see. */
+  async function saveVisitPlansDirect(plansObj){
+    await setDoc(doc(db, COLLECTION, "af_visit_plans"), { v: JSON.stringify(plansObj), at: serverTimestamp() });
+    var DATA = (window.__AF_SYNC__ && window.__AF_SYNC__.data) || {};
+    DATA["af_visit_plans"] = JSON.stringify(plansObj);
+  }
+
   window.FB = {
     ready:true,
     signIn:signIn, signOutUser:signOutUser, pushKey:pushKey, runBoot:runBoot,
-    saveAreas:saveAreasDirect,
+    saveAreas:saveAreasDirect, saveVisitPlans:saveVisitPlansDirect,
     createUser:createUser, listUsers:listUsers, updateUserProfile:updateUserProfile, resetUserPassword:resetUserPassword,
     createNotification:createNotification, watchNotifications:watchNotifications,
     markNotificationRead:markNotificationRead, markAllNotificationsRead:markAllNotificationsRead,
