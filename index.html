@@ -2506,7 +2506,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r6";
+var APP_VERSION = "2026-07-29-r7";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -4798,6 +4798,16 @@ function updateAdminUI(){
 window.afShowApp = showApp;
 window.afShowLogin = showLoginScreen;
 window.afShowOffline = showOfflineScreen;
+/* Called when the app couldn't load your data from the cloud. Without this
+   the app would quietly fall back to hardcoded defaults, making it look
+   like areas/plans had disappeared when they're actually safe in the
+   database — exactly the confusing situation we want to avoid. */
+window.afDataLoadFailed = function(reason){
+  setTimeout(function(){
+    showToast("Couldn't load your latest data — showing defaults. Open Settings \u2192 Reload Data from Cloud.","danger","ti-cloud-off");
+    console.warn("[Fastrack] app data load failed:",reason);
+  },1200);
+};
 window.afHideOffline = hideOfflineScreen;
 
 document.getElementById("offline-retry-btn").addEventListener("click",function(){
@@ -4996,8 +5006,9 @@ function renderAboutDataRow(){
   if(!dataEl) return;
   var d=window.__AF_DIAG__;
   if(!d){ dataEl.textContent="—"; return; }
-  var ok=d.areasOk&&d.plansOk;
-  dataEl.innerHTML="<span class='about-status-dot' style='background:"+(ok?"#16a34a":"#d97706")+";box-shadow:0 0 0 3px "+(ok?"rgba(22,163,74,0.15)":"rgba(217,119,6,0.15)")+"'></span> "+d.keys+" records";
+  var ok=d.areasOk&&d.plansOk&&!d.err;
+  var label=d.err?("failed: "+String(d.err).slice(0,40)):(d.keys+" records");
+  dataEl.innerHTML="<span class='about-status-dot' style='background:"+(ok?"#16a34a":"#dc2626")+";box-shadow:0 0 0 3px "+(ok?"rgba(22,163,74,0.15)":"rgba(220,38,38,0.15)")+"'></span> "+escapeHtml(label);
 }
 document.getElementById("profile-dd-settings").addEventListener("click",function(){
   document.getElementById("profile-dropdown").classList.remove("open");
@@ -6522,44 +6533,52 @@ if(db){
   /* Pulls every appState doc straight into memory. There's no "push local
      values up" step anymore — nothing persists locally between reloads, so
      there's nothing local that Firestore wouldn't already have. */
+  function recordDiag(docs,DATA,errText){
+    try{
+      window.__AF_DIAG__ = {
+        docs: docs,
+        keys: Object.keys(DATA).length,
+        areasOk: localStorage.getItem("af_areas")!=null,
+        plansOk: localStorage.getItem("af_visit_plans")!=null,
+        err: errText||null,
+        at: Date.now()
+      };
+    }catch(e){}
+  }
   async function fetchAppStateIntoMemory(){
     if(!db) return;
     var DATA = afData();
     var lastErr = null;
-    for(var attempt=0; attempt<3; attempt++){
+    for(var attempt=0; attempt<4; attempt++){
       try{
         var snap = await getDocs(collection(db, COLLECTION));
         if(snap.size === 0){
           /* An empty result here is suspicious (this app always has at least
              a few appState keys once anyone has used it) rather than a sign
-             of a genuinely brand-new install — retry a couple of times
-             before giving up, since this can happen transiently in
-             restrictive network/browser environments (e.g. Safari private
-             browsing) on the very first request of a session. */
-          if(attempt < 2){ await new Promise(function(r){ setTimeout(r, 700); }); continue; }
+             of a genuinely brand-new install — retry a few times, since this
+             can happen transiently in restrictive network/browser
+             environments on the first request of a session. */
+          if(attempt < 3){ await new Promise(function(r){ setTimeout(r, 800); }); continue; }
         }
         snap.forEach(function(d){
           var v = d.data() && d.data().v;
           if(v!=null) DATA[d.id] = v;
         });
-        console.log("[DIAG-BOOT] loaded",snap.size,"appState docs. keys now in memory:",Object.keys(DATA),
-                    "| shim can read af_visit_plans:", localStorage.getItem("af_visit_plans")!=null,
-                    "| shim can read af_areas:", localStorage.getItem("af_areas")!=null);
-        try{
-          window.__AF_DIAG__ = {
-            docs: snap.size,
-            keys: Object.keys(DATA).length,
-            areasOk: localStorage.getItem("af_areas")!=null,
-            plansOk: localStorage.getItem("af_visit_plans")!=null,
-            at: Date.now()
-          };
-        }catch(e){}
+        console.log("[DIAG-BOOT] loaded",snap.size,"appState docs. keys in memory:",Object.keys(DATA));
+        recordDiag(snap.size,DATA,snap.size===0?"server returned 0 records":null);
+        if(snap.size===0){
+          /* Don't pretend this worked — the app would silently fall back to
+             hardcoded defaults and look like data had vanished. */
+          try{ if(typeof window.afDataLoadFailed==="function") window.afDataLoadFailed("no-records"); }catch(e){}
+        }
         return;
       }catch(e){
         lastErr = e;
-        if(attempt < 2){ await new Promise(function(r){ setTimeout(r, 700); }); continue; }
+        if(attempt < 3){ await new Promise(function(r){ setTimeout(r, 800); }); continue; }
       }
     }
+    recordDiag(0,DATA,lastErr?String(lastErr&&lastErr.message||lastErr):"unknown failure");
+    try{ if(typeof window.afDataLoadFailed==="function") window.afDataLoadFailed(String(lastErr&&lastErr.message||lastErr)); }catch(e){}
     if(lastErr) throw lastErr;
   }
 
