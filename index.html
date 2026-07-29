@@ -770,6 +770,13 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* ===== VISIT LOG SECTION ===== */
 .vsec{padding:6px 18px 4px}
 .vsec-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.vsec-hint{
+  display:flex;align-items:center;gap:7px;margin-bottom:12px;
+  padding:9px 12px;border-radius:11px;
+  background:var(--bg);border:1px solid var(--border);
+  font-size:11.5px;color:var(--muted);font-weight:600;
+}
+.vsec-hint i{font-size:14px;color:var(--ab1);flex-shrink:0}
 .vsec-title{font-size:10px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:1px;display:flex;align-items:center;gap:6px}
 .vsec-title i{font-size:14px;color:var(--gr2)}
 .vsec-count{font-size:10px;font-weight:800;color:var(--gr2);background:rgba(13,122,64,0.09);border-radius:8px;padding:2px 8px}
@@ -1419,6 +1426,19 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .login-label{display:block;font-size:11px;font-weight:700;color:var(--muted);letter-spacing:1.2px;text-transform:uppercase;margin-bottom:7px}
 .login-input-wrap{position:relative}
 .login-input-wrap i{position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:17px;color:var(--light);pointer-events:none;transition:color 0.2s}
+.login-field-ico{
+  position:absolute;left:14px;top:50%;transform:translateY(-50%);
+  width:18px;height:18px;color:var(--light);pointer-events:none;transition:color 0.2s;
+}
+.login-input-wrap:focus-within .login-field-ico{color:var(--gr3)}
+.eye-btn svg{width:18px;height:18px;display:block}
+.login-forgot{
+  display:block;width:100%;margin-top:14px;padding:6px;
+  background:none;border:none;font-family:inherit;
+  font-size:12.5px;font-weight:700;color:var(--gr2);
+  cursor:pointer;text-align:center;
+}
+.login-forgot:active{opacity:0.6}
 .login-input{
   width:100%;padding:14px 14px 14px 44px;
   background:var(--bg);border:1.5px solid var(--border);
@@ -1817,6 +1837,14 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .vp-ap-item-note{font-size:12.5px;color:var(--text);line-height:1.45;font-weight:500}
 .vp-ap-item.st-done .vp-ap-item-note{text-decoration:line-through}
 .vp-ap-sts{display:flex;gap:6px;margin-top:9px}
+.vp-ap-st-ro{
+  display:inline-flex;align-items:center;gap:5px;
+  padding:6px 12px;border-radius:20px;font-size:11.5px;font-weight:800;
+  border:1.5px solid var(--border);background:var(--bg);color:var(--muted);
+}
+.vp-ap-st-ro.pending{background:#fff7ed;border-color:#fed7aa;color:#c2410c}
+.vp-ap-st-ro.progress{background:#eff6ff;border-color:#bfdbfe;color:#1d4ed8}
+.vp-ap-st-ro.done{background:#ecfdf5;border-color:#a7f3d0;color:#047857}
 .vp-ap-st{
   flex:1;border:1.5px solid var(--border);background:var(--bg);color:var(--muted);
   font-size:10.5px;font-weight:800;border-radius:9px;padding:7px 4px;cursor:pointer;
@@ -1845,6 +1873,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 [dir="rtl"] .bell-item.unread::before{ left:auto; right:5px; }
 [dir="rtl"] .bell-item-title,[dir="rtl"] .bell-item-body,[dir="rtl"] .bell-item-time{ margin-left:0; margin-right:10px; }
 [dir="rtl"] .login-input-wrap i{ left:auto; right:14px; }
+[dir="rtl"] .login-field-ico{ left:auto; right:14px; }
 [dir="rtl"] .login-input{ padding:14px 44px 14px 14px; }
 [dir="rtl"] .eye-btn{ right:auto; left:12px; }
 [dir="rtl"] .search-inner i{ left:auto; right:13px; }
@@ -1873,23 +1902,25 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       <label class="login-label" for="l-user" data-i18n="loginEmailLabel">Email</label>
       <div class="login-input-wrap">
         <input class="login-input" type="email" id="l-user" name="email" placeholder="Enter your email" data-i18n-placeholder="loginEmailPlaceholder" autocomplete="username" autocapitalize="none" autocorrect="off" spellcheck="false" inputmode="email">
-        <i class="ti ti-user"></i>
+        <svg class="login-field-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
       </div>
     </div>
     <div class="login-field">
       <label class="login-label" for="l-pass" data-i18n="loginPasswordLabel">Password</label>
       <div class="login-input-wrap">
         <input class="login-input" type="password" id="l-pass" name="password" placeholder="Enter your password" data-i18n-placeholder="loginPasswordPlaceholder" autocomplete="current-password">
-        <i class="ti ti-lock"></i>
-        <button class="eye-btn" id="eye-btn" type="button" tabindex="-1">
-          <i class="ti ti-eye" id="eye-icon"></i>
+        <svg class="login-field-ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+        <button class="eye-btn" id="eye-btn" type="button" tabindex="-1" aria-label="Show password">
+          <svg id="eye-svg-show" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg id="eye-svg-hide" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display:none"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.9 10.9 0 0 1 12 5c6.4 0 10 7 10 7a18.5 18.5 0 0 1-3.2 4.2M6.6 6.6A18.5 18.5 0 0 0 2 12s3.6 7 10 7a10.7 10.7 0 0 0 4.2-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
         </button>
       </div>
     </div>
     <button class="login-btn" id="login-btn" type="submit">
       <div class="spinner"></div>
-      <span class="btn-text"><i class="ti ti-login"></i>&nbsp; <span data-i18n="loginSignIn">Sign In</span></span>
+      <span class="btn-text"><span data-i18n="loginSignIn">Sign In</span></span>
     </button>
+    <button class="login-forgot" id="login-forgot-btn" type="button" data-i18n="loginForgot">Forgot your password?</button>
     </form>
     <div class="login-footer" data-i18n="loginFooter">Fastrack &copy; 2024 &mdash; Complete Sales Route Management System</div>
   </div>
@@ -2297,10 +2328,6 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       <div class="dico bl"><i class="ti ti-map-2"></i></div>
       <div class="dtxt"><div class="dlbl">Area</div><div class="dval" id="ds-area2"></div></div>
     </div>
-    <div class="drow">
-      <div class="dico go"><i class="ti ti-location"></i></div>
-      <div class="dtxt"><div class="dlbl">Google Maps</div><div class="dval"><a id="ds-mlink" href="#" target="_blank">Open Location in Maps &#8599;</a></div></div>
-    </div>
   </div>
   <div class="sacts">
     <button class="sbtn dis" id="ds-call"><i class="ti ti-phone-call"></i> Call Customer</button>
@@ -2316,22 +2343,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       <div class="vsec-title"><i class="ti ti-clipboard-check"></i> Visit History</div>
       <div class="vsec-count" id="ds-vcount">0 visits</div>
     </div>
-    <div class="vadd-box">
-      <div class="vout-label"><i class="ti ti-flag"></i> Visit outcome</div>
-      <div class="vout-chips" id="ds-outcome">
-        <button class="vout-chip oc-order" type="button" data-oc="order"><i class="ti ti-shopping-cart"></i> Order</button>
-        <button class="vout-chip oc-followup" type="button" data-oc="followup"><i class="ti ti-clock-hour-4"></i> Follow-up</button>
-        <button class="vout-chip oc-noanswer" type="button" data-oc="noanswer"><i class="ti ti-phone-off"></i> No answer</button>
-        <button class="vout-chip oc-declined" type="button" data-oc="declined"><i class="ti ti-ban"></i> Not interested</button>
-      </div>
-      <textarea id="ds-vnote" placeholder="Add a note about this visit (optional)..."></textarea>
-      <div class="vfollow-row" id="ds-follow-row" style="display:none">
-        <label class="vfollow-label" for="ds-follow-date"><i class="ti ti-calendar-due"></i> Follow-up date</label>
-        <input type="date" id="ds-follow-date" class="vfollow-date">
-      </div>
-      <button class="vcheck-btn" id="ds-checkin" type="button"><i class="ti ti-map-pin" id="ds-checkin-ic"></i> <span id="ds-checkin-txt">Check in with GPS</span></button>
-      <button class="vadd-btn" id="ds-vadd"><i class="ti ti-circle-check"></i> Mark Visited Now</button>
-    </div>
+    <div class="vsec-hint"><i class="ti ti-info-circle"></i> Visits are recorded from the Visit Planner</div>
     <div class="vlist" id="ds-vlist"></div>
   </div>
 </div>
@@ -2580,7 +2592,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r10";
+var APP_VERSION = "2026-07-29-r14";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -2626,6 +2638,7 @@ var TRANSLATIONS = {
     signedInAs: "Signed in as",
     roleAdmin: "Admin",
     roleRep: "Sales Executive",
+    roleManager: "Team Manager",
     sessionStarted: "Session started",
     sessionUnavailable: "Session start time unavailable",
     profileSettings: "Settings",
@@ -2692,7 +2705,15 @@ var TRANSLATIONS = {
     aboutUpdateToast: "A new version is available — tap the banner to refresh",
     aboutData: "Cloud data",
     aboutReloadData: "Reload Data from Cloud",
-    aboutReloadedToast: "Data reloaded from the cloud"
+    aboutReloadedToast: "Data reloaded from the cloud",
+    loginForgot: "Forgot your password?",
+    loginForgotTitle: "Reset your password",
+    loginForgotMsg: "Enter your account email and we'll send you a link to set a new password.",
+    loginForgotPlaceholder: "your.email@example.com",
+    loginForgotSend: "Send Reset Link",
+    loginForgotInvalid: "Please enter a valid email address",
+    loginForgotOffline: "Can't reach the server right now — check your connection",
+    loginForgotSent: "If that email has an account, a reset link is on its way. Check your inbox and spam folder."
   },
   ar: {
     appTagline: "نظام إدارة مسار المبيعات الكامل",
@@ -2728,6 +2749,7 @@ var TRANSLATIONS = {
     signedInAs: "تم تسجيل الدخول باسم",
     roleAdmin: "مسؤول",
     roleRep: "مندوب مبيعات",
+    roleManager: "مدير فريق",
     sessionStarted: "بدأت الجلسة في",
     sessionUnavailable: "وقت بدء الجلسة غير متاح",
     profileSettings: "الإعدادات",
@@ -2794,7 +2816,15 @@ var TRANSLATIONS = {
     aboutUpdateToast: "يتوفر إصدار جديد — اضغط على الشريط للتحديث",
     aboutData: "بيانات السحابة",
     aboutReloadData: "إعادة تحميل البيانات",
-    aboutReloadedToast: "تم إعادة تحميل البيانات"
+    aboutReloadedToast: "تم إعادة تحميل البيانات",
+    loginForgot: "نسيت كلمة المرور؟",
+    loginForgotTitle: "إعادة تعيين كلمة المرور",
+    loginForgotMsg: "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لتعيين كلمة مرور جديدة.",
+    loginForgotPlaceholder: "your.email@example.com",
+    loginForgotSend: "إرسال الرابط",
+    loginForgotInvalid: "يرجى إدخال بريد إلكتروني صحيح",
+    loginForgotOffline: "تعذّر الوصول إلى الخادم — تحقق من اتصالك",
+    loginForgotSent: "إذا كان هذا البريد مسجلاً، فسيصلك رابط إعادة التعيين. تحقق من صندوق الوارد ومجلد الرسائل غير المرغوب فيها."
   }
 };
 var CURRENT_LANG = "en";
@@ -3089,17 +3119,9 @@ var curFilter="all", curSearch="";
 // ===== VISIT TRACKING (localStorage) =====
 var VISIT_KEY="af_visit_log";
 var curDetail=null;
-var dsOutcome="";      // selected outcome in the detail visit box
-var dsCheckIn=null;    // {lat,lng} captured via GPS check-in
-function resetVisitBox(){
-  dsOutcome="";dsCheckIn=null;
-  var chips=document.querySelectorAll("#ds-outcome .vout-chip");
-  for(var i=0;i<chips.length;i++)chips[i].classList.remove("active");
-  var fr=document.getElementById("ds-follow-row");if(fr)fr.style.display="none";
-  var fd=document.getElementById("ds-follow-date");if(fd)fd.value="";
-  var cb=document.getElementById("ds-checkin");
-  if(cb){cb.classList.remove("done");document.getElementById("ds-checkin-txt").textContent="Check in with GPS";document.getElementById("ds-checkin-ic").className="ti ti-map-pin";cb.disabled=false;}
-}
+/* Visits are recorded from the Visit Planner only — the customer detail
+   sheet is read-only reference, so there is no visit-entry box here to
+   reset any more. */
 
 function loadVisitStore(){
   try{
@@ -3124,7 +3146,7 @@ function getVisits(sno){
 function addVisit(sno,note){
   var store=loadVisitStore();
   if(!store[sno])store[sno]=[];
-  store[sno].push({ts:Date.now(),note:(note||"").trim(),user:CURRENT_USER||"Unknown"});
+  store[sno].push({ts:Date.now(),note:(note||"").trim(),user:CURRENT_USER||"Unknown",uid:CURRENT_UID||""});
   saveVisitStore(store);
   updateStatsBar();
 }
@@ -3138,7 +3160,7 @@ function deleteVisit(sno,ts){
 function addVisitDetailed(sno,data){
   var store=loadVisitStore();
   if(!store[sno])store[sno]=[];
-  var v={ts:Date.now(),note:(data.note||"").trim(),user:CURRENT_USER||"Unknown"};
+  var v={ts:Date.now(),note:(data.note||"").trim(),user:CURRENT_USER||"Unknown",uid:CURRENT_UID||""};
   if(data.outcome)v.outcome=data.outcome;
   if(data.followUpDate)v.followUpDate=data.followUpDate;
   if(data.checkIn)v.checkIn=data.checkIn;
@@ -3604,7 +3626,7 @@ function renderList(){
     html+="<div class='sbadge'>"+c.n+"</div>";
     html+="<div class='ci'>";
     html+="<div class='cn'>"+c.name+"</div>";
-    html+="<div class='cm'><span class='apill'>"+c.area+"</span><span class='"+(noPhone?"vfy":"ok")+"'>"+( noPhone?"&#9651; Verify":"&#10003; Ready")+"</span>"+(isVisited?"<span class='visited-tag'><i class='ti ti-checks'></i> "+relTime(visits[0].ts)+"</span>":"")+"</div>";
+    html+="<div class='cm'><span class='apill'>"+c.area+"</span>"+(noPhone?"<span class='vfy'>&#9651; No phone</span>":"")+(isVisited?"<span class='visited-tag'><i class='ti ti-checks'></i> "+relTime(visits[0].ts)+"</span>":"")+"</div>";
     html+="<div class='ph'><i class='ti ti-phone'></i>&nbsp;"+(c.ph||"Phone to verify")+"</div>";
     html+="</div>";
     html+="<div class='cacts'>";
@@ -3725,7 +3747,6 @@ function wireAutoGrow(id,maxH){
   });
 }
 wireAutoGrow("cf-note",220);
-wireAutoGrow("ds-vnote",200);
 
 function showConfirm(opts){
   if(typeof hideInstallBanner==="function")hideInstallBanner();
@@ -3739,6 +3760,15 @@ function showConfirm(opts){
   if(opts.showNote){
     noteWrap.style.display="block";
     noteInput.placeholder=opts.notePlaceholder||"Add a note (optional)...";
+    // Allow this shared dialog to collect a single-line email as well as a
+    // multi-line note, so mobile shows the right keyboard and doesn't
+    // auto-capitalise an address.
+    var isEmail=(opts.noteInputMode==="email");
+    noteInput.rows=opts.noteRows||(isEmail?1:3);
+    noteInput.setAttribute("inputmode",isEmail?"email":"text");
+    noteInput.setAttribute("autocapitalize",isEmail?"none":"sentences");
+    noteInput.setAttribute("autocorrect",isEmail?"off":"on");
+    noteInput.setAttribute("spellcheck",isEmail?"false":"true");
   } else {
     noteWrap.style.display="none";
   }
@@ -3792,10 +3822,8 @@ function openDetail(c){
   document.getElementById("ds-area2").textContent=c.area;
   document.getElementById("ds-sno").textContent="#"+c.n+" of "+CUSTS.length;
   document.getElementById("ds-phone").textContent=c.ph||"Not yet verified";
-  document.getElementById("ds-mlink").href=c.maps;
   document.getElementById("ds-nav").href=c.maps;
-  document.getElementById("ds-vnote").value="";
-  resetVisitBox();
+
   var cb=document.getElementById("ds-call");
   if(c.ph){
     cb.className="sbtn pr";
@@ -4764,56 +4792,8 @@ document.getElementById("rpt-share-btn").addEventListener("click",function(){
 document.getElementById("overlay").addEventListener("click",closeSheet);
 document.getElementById("sclose").addEventListener("click",closeSheet);
 
-// Outcome chip selection
-document.getElementById("ds-outcome").addEventListener("click",function(e){
-  var chip=e.target.closest(".vout-chip");
-  if(!chip)return;
-  var oc=chip.getAttribute("data-oc");
-  var chips=this.querySelectorAll(".vout-chip");
-  if(dsOutcome===oc){
-    dsOutcome="";
-    chip.classList.remove("active");
-  } else {
-    dsOutcome=oc;
-    for(var i=0;i<chips.length;i++)chips[i].classList.remove("active");
-    chip.classList.add("active");
-  }
-  document.getElementById("ds-follow-row").style.display=(dsOutcome==="followup")?"block":"none";
-});
-// GPS check-in
-document.getElementById("ds-checkin").addEventListener("click",function(){
-  var btn=this,txt=document.getElementById("ds-checkin-txt"),ic=document.getElementById("ds-checkin-ic");
-  if(dsCheckIn){ // toggle off
-    dsCheckIn=null;btn.classList.remove("done");txt.textContent="Check in with GPS";ic.className="ti ti-map-pin";
-    return;
-  }
-  if(!navigator.geolocation){showToast("Location not supported on this device","danger","ti-map-pin-x");return;}
-  btn.disabled=true;ic.className="ti ti-loader-2 spin";txt.textContent="Getting location...";
-  navigator.geolocation.getCurrentPosition(
-    function(pos){
-      dsCheckIn={lat:pos.coords.latitude.toFixed(6),lng:pos.coords.longitude.toFixed(6)};
-      btn.disabled=false;btn.classList.add("done");ic.className="ti ti-map-pin-check";txt.textContent="Checked in \u2713";
-      showToast("Location captured","success","ti-map-pin-check");
-    },
-    function(err){
-      btn.disabled=false;ic.className="ti ti-map-pin";txt.textContent="Check in with GPS";
-      showToast(err&&err.code===1?"Location permission denied":"Couldn't get location","danger","ti-map-pin-x");
-    },
-    {enableHighAccuracy:true,timeout:10000,maximumAge:0}
-  );
-});
-document.getElementById("ds-vadd").addEventListener("click",function(){
-  if(!curDetail)return;
-  var custRef=curDetail;
-  var note=document.getElementById("ds-vnote").value;
-  var followDate=(dsOutcome==="followup")?document.getElementById("ds-follow-date").value:"";
-  addVisitDetailed(custRef.n,{note:note,outcome:dsOutcome,followUpDate:followDate,checkIn:dsCheckIn});
-  document.getElementById("ds-vnote").value="";
-  resetVisitBox();
-  renderVisitLog(custRef.n);
-  renderList();
-  showToast("Visit logged for "+custRef.name,"success","ti-circle-check");
-});
+/* Visit logging (outcome, notes, GPS check-in) lives in the Visit
+   Planner only — the customer detail sheet is read-only reference. */
 
 document.getElementById("hdate").textContent=new Date().toLocaleDateString("en-GB",{weekday:"short",month:"short",day:"numeric"});
 
@@ -4825,6 +4805,15 @@ var CURRENT_PHOTO="";
 var BOOT_TIME=null;
 
 function isAdmin(){return CURRENT_ROLE==="admin";}
+/* Team Manager: identical access to a Sales Executive everywhere in the
+   app, with one addition — they can see and edit their team's visit plans
+   in the Visit Planner, the same way an admin can. They deliberately do NOT
+   get the admin-only Areas, Users or Tracking screens. */
+function isManager(){return CURRENT_ROLE==="manager";}
+function canViewTeamPlans(){return isAdmin()||isManager();}
+/* Only Team Managers and Admins can change an action item's status —
+   Sales Executives see their own items but can't update them. */
+function canUpdateActionPlan(){return isAdmin()||isManager();}
 
 function formatSessionTime(ts){
   if(!ts)return"";
@@ -4979,14 +4968,49 @@ document.getElementById("l-user").addEventListener("keydown",function(e){if(e.ke
 // Eye toggle
 document.getElementById("eye-btn").addEventListener("click",function(){
   var inp=document.getElementById("l-pass");
-  var ico=document.getElementById("eye-icon");
-  if(inp.type==="password"){
-    inp.type="text";
-    ico.className="ti ti-eye-off";
-  } else {
-    inp.type="password";
-    ico.className="ti ti-eye";
-  }
+  var showIco=document.getElementById("eye-svg-show");
+  var hideIco=document.getElementById("eye-svg-hide");
+  var revealing=(inp.type==="password");
+  inp.type=revealing?"text":"password";
+  showIco.style.display=revealing?"none":"block";
+  hideIco.style.display=revealing?"block":"none";
+  this.setAttribute("aria-label",revealing?"Hide password":"Show password");
+});
+
+/* ---- Forgot password ----
+   Sends Firebase's own password-reset email. We always show the same
+   confirmation whether or not the address is registered, so this can't be
+   used to discover which emails have accounts. */
+document.getElementById("login-forgot-btn").addEventListener("click",function(){
+  var typed=document.getElementById("l-user").value.trim();
+  showConfirm({
+    title:t("loginForgotTitle"),
+    message:t("loginForgotMsg"),
+    icon:"ti-mail-forward",
+    showNote:true,
+    prefill:typed,
+    noteInputMode:"email",
+    notePlaceholder:t("loginForgotPlaceholder"),
+    confirmLabel:t("loginForgotSend"),
+    onConfirm:function(email){
+      email=(email||"").replace(/\s+/g,"");
+      if(!email||email.indexOf("@")<1){
+        showToast(t("loginForgotInvalid"),"danger","ti-alert-triangle");
+        return;
+      }
+      if(!(window.FB&&window.FB.resetUserPassword)){
+        showToast(t("loginForgotOffline"),"danger","ti-cloud-off");
+        return;
+      }
+      window.FB.resetUserPassword(email).then(function(){
+        showToast(t("loginForgotSent"),"success","ti-mail-check");
+      }).catch(function(){
+        // Same message on failure so a wrong address can't be distinguished
+        // from a valid one.
+        showToast(t("loginForgotSent"),"success","ti-mail-check");
+      });
+    }
+  });
 });
 
 // Logout
@@ -5082,7 +5106,8 @@ function renderSettingsScreen(){
   var subEl=document.getElementById("settings-session-sub");
   if(lineEl){
     var name=CURRENT_USER||CURRENT_USERNAME||"—";
-    lineEl.textContent=t("signedInAs")+" "+name+" ("+(CURRENT_ROLE==="admin"?t("roleAdmin"):t("roleRep"))+")";
+    var roleLbl=CURRENT_ROLE==="admin"?t("roleAdmin"):CURRENT_ROLE==="manager"?t("roleManager"):t("roleRep");
+    lineEl.textContent=t("signedInAs")+" "+name+" ("+roleLbl+")";
   }
   if(subEl){
     subEl.textContent=BOOT_TIME?(t("sessionStarted")+" "+formatSessionTime(BOOT_TIME)):t("sessionUnavailable");
@@ -5317,7 +5342,7 @@ function vpEffectiveUid(){ return vpContextUid||CURRENT_UID; }
 function renderRepPicker(){
   var pickerEl=document.getElementById("vp-rep-picker");
   var bannerEl=document.getElementById("vp-viewing-banner");
-  if(!isAdmin()){
+  if(!canViewTeamPlans()){
     pickerEl.style.display="none";
     bannerEl.style.display="none";
     return;
@@ -5753,21 +5778,33 @@ var apStFilter="all",apAreaFilter="",apRepFilter="";
 function loadApStatus(){
   try{var raw=localStorage.getItem(AP_KEY);return raw?JSON.parse(raw):{};}catch(e){return {};}
 }
-function saveApStatus(m){
-  try{localStorage.setItem(AP_KEY,JSON.stringify(m));}catch(e){}
+async function saveApStatus(m){
+  if(!(window.FB && window.FB.saveActionStatus)){
+    try{localStorage.setItem(AP_KEY,JSON.stringify(m));}catch(e){}
+    throw new Error("offline");
+  }
+  await window.FB.saveActionStatus(m);
 }
 function vpGetActionItems(){
   var store=loadVisitStore();
   var stMap=loadApStatus();
   var items=[];
+  var seeAll=canViewTeamPlans();
   Object.keys(store).forEach(function(sno){
     var c=getCustomerByNumber(parseInt(sno,10));
     if(!c)return;
     (store[sno]||[]).forEach(function(v){
       if(!v.note)return;
+      /* Everyone sees their own action items; Team Managers and Admins see
+         the whole team's. Older visits recorded before user IDs were saved
+         fall back to matching on display name. */
+      if(!seeAll){
+        var mine = v.uid ? (v.uid===CURRENT_UID) : ((v.user||"")===CURRENT_USER);
+        if(!mine) return;
+      }
       var key=sno+"_"+v.ts;
       var st=(stMap[key]&&stMap[key].st)||"pending";
-      items.push({n:parseInt(sno,10),cust:c,ts:v.ts,note:v.note,user:v.user||"\u2014",key:key,st:st});
+      items.push({n:parseInt(sno,10),cust:c,ts:v.ts,note:v.note,user:v.user||"\u2014",uid:v.uid||"",key:key,st:st});
     });
   });
   items.sort(function(a,b){return b.ts-a.ts;});
@@ -5789,6 +5826,9 @@ function renderActionPlan(){
   });
   var areaSel=document.getElementById("vp-ap-area");
   var repSel=document.getElementById("vp-ap-rep");
+  // A Sales Executive only ever sees their own items, so a "filter by rep"
+  // control would be meaningless for them.
+  repSel.style.display=canViewTeamPlans()?"":"none";
   areaSel.innerHTML="<option value=''>All Areas</option>"+Object.keys(areas).sort().map(function(a){return "<option value=\""+escapeHtml(a)+"\""+(a===apAreaFilter?" selected":"")+">"+escapeHtml(a)+"</option>";}).join("");
   repSel.innerHTML="<option value=''>All Reps</option>"+Object.keys(reps).sort().map(function(r){return "<option value=\""+escapeHtml(r)+"\""+(r===apRepFilter?" selected":"")+">"+escapeHtml(r)+"</option>";}).join("");
   // filter
@@ -5822,28 +5862,39 @@ function renderActionPlan(){
       +"<div class='vp-ap-cust-meta'>"+escapeHtml(g.cust.area||"")+(g.cust.ph?" \u2022 "+escapeHtml(g.cust.ph):"")+"</div></div>"
       +"</div>";
     g.items.forEach(function(it){
+      var stLabel=it.st==="done"?"Done":it.st==="progress"?"In Progress":"Pending";
       html+="<div class='vp-ap-item st-"+it.st+"' data-key='"+it.key+"'>"
         +"<div class='vp-ap-item-top'>"
         +"<span class='vp-ap-item-date'><i class='ti ti-calendar'></i> "+escapeHtml(formatDMY(it.ts))+"</span>"
         +"<span class='vp-ap-item-user'><i class='ti ti-user'></i>"+escapeHtml(it.user)+"</span>"
         +"</div>"
-        +"<div class='vp-ap-item-note'>"+escapeHtml(it.note)+"</div>"
-        +"<div class='vp-ap-sts'>"
-        +"<button class='vp-ap-st pending"+(it.st==="pending"?" on":"")+"' data-key='"+it.key+"' data-st='pending'><i class='ti ti-clock'></i>Pending</button>"
-        +"<button class='vp-ap-st progress"+(it.st==="progress"?" on":"")+"' data-key='"+it.key+"' data-st='progress'><i class='ti ti-progress'></i>Progress</button>"
-        +"<button class='vp-ap-st done"+(it.st==="done"?" on":"")+"' data-key='"+it.key+"' data-st='done'><i class='ti ti-check'></i>Done</button>"
-        +"</div></div>";
+        +"<div class='vp-ap-item-note'>"+escapeHtml(it.note)+"</div>";
+      if(canUpdateActionPlan()){
+        html+="<div class='vp-ap-sts'>"
+          +"<button class='vp-ap-st pending"+(it.st==="pending"?" on":"")+"' data-key='"+it.key+"' data-st='pending'><i class='ti ti-clock'></i>Pending</button>"
+          +"<button class='vp-ap-st progress"+(it.st==="progress"?" on":"")+"' data-key='"+it.key+"' data-st='progress'><i class='ti ti-progress'></i>Progress</button>"
+          +"<button class='vp-ap-st done"+(it.st==="done"?" on":"")+"' data-key='"+it.key+"' data-st='done'><i class='ti ti-check'></i>Done</button>"
+          +"</div>";
+      } else {
+        html+="<div class='vp-ap-sts'><span class='vp-ap-st-ro "+it.st+"'>"+stLabel+"</span></div>";
+      }
+      html+="</div>";
     });
     html+="</div>";
   });
   listEl.innerHTML=html;
   listEl.querySelectorAll(".vp-ap-st").forEach(function(btn){
     btn.addEventListener("click",function(){
+      if(!canUpdateActionPlan()) return;
       var key=this.getAttribute("data-key"),st=this.getAttribute("data-st");
       var m=loadApStatus();
       m[key]={st:st,by:CURRENT_USER||"Unknown",up:Date.now()};
-      saveApStatus(m);
-      renderActionPlan();
+      saveApStatus(m).then(function(){
+        renderActionPlan();
+        updateApBadge();
+      }).catch(function(){
+        showToast("Couldn't save — check your connection and try again","danger","ti-alert-triangle");
+      });
     });
   });
 }
@@ -6036,7 +6087,7 @@ document.addEventListener("visibilitychange",function(){
 /* ===== Fastrack — Admin Team panel (Firebase-backed user management) ===== */
 (function(){
   function ready(fn){ if(document.readyState!=="loading"){ fn(); } else { document.addEventListener("DOMContentLoaded", fn); } }
-  var ROLES=[{v:"rep",label:"Sales Executive"},{v:"admin",label:"Admin"}];
+  var ROLES=[{v:"rep",label:"Sales Executive"},{v:"manager",label:"Team Manager"},{v:"admin",label:"Admin"}];
   function roleLabel(v){ for(var i=0;i<ROLES.length;i++){ if(ROLES[i].v===v) return ROLES[i].label; } return "Sales Executive"; }
   ready(function(){
     try{
@@ -6072,6 +6123,7 @@ document.addEventListener("visibilitychange",function(){
         + ".fbt-em{font-size:12px;color:var(--muted,#5a6b8a);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}"
         + ".fbt-badge{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}"
         + ".fbt-badge.admin{background:#e6f6ec;color:#0d7a40}"
+        + ".fbt-badge.mgr{background:#e8f0ff;color:#1e5bbf}"
         + ".fbt-badge.rep{background:#eef1f7;color:#5a6b8a}"
         + ".fbt-badge.off{background:#fdecec;color:#dc2626}"
         + ".fbt-acts{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}"
@@ -6291,7 +6343,9 @@ document.addEventListener("visibilitychange",function(){
           var initial = (u.name||u.email||"?").trim().charAt(0).toUpperCase();
           var avInner = u.photo ? ("<img src='"+u.photo+"' alt=''>") : esc(initial);
           var badge = u.disabled ? "<span class='fbt-badge off'>Disabled</span>"
-                    : (u.role==="admin" ? "<span class='fbt-badge admin'>Admin</span>" : "<span class='fbt-badge rep'>Sales Executive</span>");
+                    : (u.role==="admin" ? "<span class='fbt-badge admin'>Admin</span>"
+                    : u.role==="manager" ? "<span class='fbt-badge mgr'>Team Manager</span>"
+                    : "<span class='fbt-badge rep'>Sales Executive</span>");
           html += "<div class='fbt-cell' data-uid='"+esc(u.uid)+"' data-email='"+esc(u.email)+"' data-role='"+esc(u.role)+"' data-name='"+esc(u.name||"")+"' data-disabled='"+(u.disabled?1:0)+"'>"
                 +   "<div class='fbt-top'>"
                 +     "<div class='fbt-av'>"+avInner+"</div>"
@@ -6411,7 +6465,8 @@ document.addEventListener("visibilitychange",function(){
         editState.uid = cell.getAttribute("data-uid");
         editState.email = cell.getAttribute("data-email");
         editState.disabled = cell.getAttribute("data-disabled")==="1";
-        editState.role = cell.getAttribute("data-role")==="admin" ? "admin" : "rep";
+        var _r = cell.getAttribute("data-role");
+        editState.role = (_r==="admin"||_r==="manager") ? _r : "rep";
         document.getElementById("fbt-edit-email").value = editState.email;
         document.getElementById("fbt-edit-name").value = cell.getAttribute("data-name")||"";
         editRoleDD.setValue(editState.role);
@@ -6765,7 +6820,7 @@ if(db){
   /* --- Admin user management (all from the app) --- */
   async function createUser(email, password, name, role, photo){
     email = (email||"").trim().toLowerCase();
-    role = (role==="admin") ? "admin" : "rep";
+    role = (role==="admin"||role==="manager") ? role : "rep";
     var secApp = initializeApp(firebaseConfig, "afSec_"+Date.now());
     try{
       var secAuth = getAuth(secApp);
@@ -6961,11 +7016,16 @@ if(db){
     DATA["af_visit_plans"] = JSON.stringify(plansObj);
   }
 
+  async function saveActionStatusDirect(mapObj){
+    await setDoc(doc(db, COLLECTION, "af_action_status"), { v: JSON.stringify(mapObj), at: serverTimestamp() });
+    afData()["af_action_status"] = JSON.stringify(mapObj);
+  }
+
   window.FB = {
     ready:true,
     signIn:signIn, signOutUser:signOutUser, pushKey:pushKey, runBoot:runBoot,
     refreshAppState:fetchAppStateIntoMemory,
-    saveAreas:saveAreasDirect, saveVisitPlans:saveVisitPlansDirect,
+    saveAreas:saveAreasDirect, saveVisitPlans:saveVisitPlansDirect, saveActionStatus:saveActionStatusDirect,
     createUser:createUser, listUsers:listUsers, updateUserProfile:updateUserProfile, resetUserPassword:resetUserPassword,
     createNotification:createNotification, watchNotifications:watchNotifications,
     markNotificationRead:markNotificationRead, markAllNotificationsRead:markAllNotificationsRead,
