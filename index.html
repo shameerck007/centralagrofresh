@@ -666,10 +666,6 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .tab.tab-due.active{background:linear-gradient(135deg,#c2410c,#ea580c);border-color:transparent;color:#fff}
 .ccard.overdue::before{background:#f97316!important}
 .visited-tag i{font-size:11px}
-.abtn-visit{background:var(--bg);border:1.5px solid var(--border);box-shadow:none}
-.abtn-visit i{color:var(--light)}
-.abtn-visit.done{background:linear-gradient(135deg,var(--gr1),var(--gr3));box-shadow:0 3px 10px rgba(13,122,64,0.28);border-color:transparent}
-.abtn-visit.done i{color:#fff}
 
 /* ===== EMPTY ===== */
 .empty{text-align:center;padding:60px 24px;color:var(--muted)}
@@ -1246,6 +1242,13 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .cf-icon.warn{background:linear-gradient(135deg,var(--go1),var(--go2));box-shadow:0 6px 18px rgba(200,134,10,0.3)}
 .cf-title{font-size:16px;font-weight:800;color:var(--text);text-align:center;letter-spacing:-0.2px}
 .cf-msg{font-size:13px;color:var(--muted);text-align:center;margin-top:6px;line-height:1.5;font-weight:500;white-space:pre-line}
+.cf-quick{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:9px}
+.cf-quick-chip{
+  padding:7px 12px;border-radius:18px;border:1.5px solid var(--border);
+  background:var(--bg);color:var(--muted);font-family:inherit;
+  font-size:12px;font-weight:700;cursor:pointer;
+}
+.cf-quick-chip.on{background:linear-gradient(135deg,var(--gr1),var(--gr3));border-color:transparent;color:#fff}
 .cf-note-wrap{margin-top:14px}
 .cf-note-wrap textarea{
   width:100%;border:1.5px solid var(--border);background:var(--bg);border-radius:12px;
@@ -1555,6 +1558,44 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     padding:0 1px;
   }
   .nbtn i{font-size:19px}
+
+  /* --- Page headers: reclaim vertical space on phones ---
+     Every screen stacks an app header, a coloured hero, and often filters
+     and stat cards before any actual content appears. On a phone that was
+     consuming roughly a third of the display, so the hero blocks shrink
+     and the stat cards become slim pills. */
+  .areas-hero{padding:12px 16px 13px}
+  .areas-eyebrow{font-size:9px;letter-spacing:1.2px}
+  .areas-title{font-size:16.5px;margin-top:1px}
+  /* The page titles are self-explanatory; the descriptive subtitle costs a
+     whole line on every screen, which is worth more than the explanation. */
+  .areas-sub{display:none}
+
+  /* Planner: put the two primary actions side by side instead of stacking
+     them, and tighten the rep picker row. */
+  .vp-section{padding:10px 12px 0;display:flex;gap:8px}
+  .vp-section .areas-add-btn{margin:0;padding:11px 8px!important;font-size:12.5px;width:auto!important;flex:1}
+  .vp-ap-btn{width:auto;flex:1;margin-top:0;padding:11px 8px;font-size:12.5px;white-space:nowrap}
+  .vp-ap-btn i{font-size:15px}
+  .vp-rep-picker{padding:8px 12px 8px}
+  .vp-rep-chip{padding:6px 11px;font-size:12px}
+  .vp-viewing-banner{margin:0 12px 9px;padding:8px 11px;font-size:11.5px}
+
+  .rpt-hero{padding:11px 14px 12px}
+  .rpt-eyebrow{font-size:9px;letter-spacing:1.2px}
+  .rpt-title{font-size:16.5px;margin-top:1px}
+  .rpt-filters{gap:6px;margin-bottom:10px}
+  .rpt-chip{padding:6px 12px;font-size:11.5px}
+  .rpt-stats{gap:7px}
+  .rpt-stat{
+    padding:7px 5px;border-radius:11px;
+    display:flex;align-items:center;justify-content:center;gap:6px;
+  }
+  .rpt-stat-n{font-size:15px;line-height:1}
+  .rpt-stat-l{font-size:8.5px;letter-spacing:0.3px;margin-top:0;line-height:1.1}
+  .rpt-daysep{margin:10px 0 7px}
+
+  .vsec{padding-top:12px}
 
   /* --- Live Tracking: fleet-management layout on phones ---
      The map is the point of this screen, so give it the space. The header
@@ -2409,6 +2450,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <button class="sbtn dis" id="ds-call"><i class="ti ti-phone-call"></i> Call Customer</button>
     <a class="sbtn se" id="ds-nav" href="#" target="_blank"><i class="ti ti-navigation"></i> Navigate</a>
   </div>
+  <div class="sacts" id="ds-complete-wrap">
+    <button class="sbtn edit" id="ds-complete" style="display:none"><i class="ti ti-pencil-plus"></i> Complete Missing Details</button>
+  </div>
   <div class="sacts admin-only" id="ds-admin-acts" style="display:none">
     <button class="sbtn edit" id="ds-edit"><i class="ti ti-edit"></i> Edit</button>
     <button class="sbtn danger" id="ds-delete"><i class="ti ti-trash"></i> Delete</button>
@@ -2431,6 +2475,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <div class="cf-title" id="cf-title">Confirm</div>
     <div class="cf-msg" id="cf-msg">Are you sure?</div>
     <div class="cf-note-wrap" id="cf-note-wrap" style="display:none">
+      <div class="cf-quick" id="cf-quick" style="display:none"></div>
       <textarea id="cf-note" placeholder="Add a note (optional)..."></textarea>
     </div>
     <div class="cf-btns">
@@ -2668,7 +2713,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r29";
+var APP_VERSION = "2026-07-29-r32";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -3950,6 +3995,11 @@ async function saveAppSettings(obj){
   }
   await window.FB.saveAppSettings(obj);
 }
+var DEFAULT_QUICK_NOTES=["Order placed","Not interested","Follow up later","Owner not available","Asked for price list","Closed / shut"];
+function getQuickNotes(){
+  var cfg=loadAppSettings();
+  return (Array.isArray(cfg.quickNotes)&&cfg.quickNotes.length)?cfg.quickNotes:DEFAULT_QUICK_NOTES;
+}
 function isTrackingEnabled(){
   var s=loadAppSettings();
   return s.trackingEnabled!==false;   // on unless explicitly disabled
@@ -4032,7 +4082,6 @@ function renderList(){
     html+="<div class='ph'><i class='ti ti-phone'></i>&nbsp;"+(c.ph||"Phone to verify")+"</div>";
     html+="</div>";
     html+="<div class='cacts'>";
-    html+="<button class='abtn abtn-visit"+(isVisited?" done":"")+" ' data-sno='"+c.n+"' title='Mark visited'><i class='ti ti-check'></i></button>";
     html+="<button class='abtn abtn-call"+(noPhone?" off":"")+" ' data-ph='"+c.ph+"'>​<i class='ti ti-phone-call'></i></button>";
     html+="<button class='abtn abtn-wa"+(noPhone?" off":"")+" ' data-ph='"+c.ph+"' title='WhatsApp'><i class='ti ti-brand-whatsapp'></i></button>";
     html+="<a class='abtn abtn-nav' href='"+c.maps+"' target='_blank'><i class='ti ti-navigation'></i></a>";
@@ -4069,29 +4118,6 @@ function renderList(){
       }
       var navBtn=card.querySelector(".abtn-nav");
       if(navBtn){navBtn.addEventListener("click",function(e){e.stopPropagation();});}
-      var visitBtn=card.querySelector(".abtn-visit");
-      if(visitBtn){
-        visitBtn.addEventListener("click",function(e){
-          e.stopPropagation();
-          showConfirm({
-            title:"Mark as Visited?",
-            message:"Log a visit for "+cust.name+" right now.",
-            icon:"ti-map-pin-check",
-            iconType:"success",
-            showNote:true,
-            notePlaceholder:"Add a note (optional)...",
-            confirmLabel:"Confirm Visit",
-            onConfirm:function(note){
-              addVisit(sno,note).then(function(){
-                renderList();
-                showToast("Visit logged for "+cust.name,"success","ti-circle-check");
-              }).catch(function(){
-                showToast("Couldn't save the visit — check your connection","danger","ti-alert-triangle");
-              });
-            }
-          });
-        });
-      }
     })(cards[j]);
   }
   updateStatsBar();
@@ -4182,6 +4208,30 @@ function showConfirm(opts){
     // Allow this shared dialog to collect a single-line email as well as a
     // multi-line note, so mobile shows the right keyboard and doesn't
     // auto-capitalise an address.
+    /* Quick-comment chips: tapping one drops that phrase into the note so
+       a rep can log the common outcomes without typing. Tapping again
+       removes it, and free text can still be added around them. */
+    var quickWrap=document.getElementById("cf-quick");
+    if(opts.quickNotes && opts.quickNotes.length){
+      quickWrap.style.display="flex";
+      quickWrap.innerHTML=opts.quickNotes.map(function(q){
+        return "<button type='button' class='cf-quick-chip' data-q='"+escapeHtml(q)+"'>"+escapeHtml(q)+"</button>";
+      }).join("");
+      quickWrap.querySelectorAll(".cf-quick-chip").forEach(function(chip){
+        chip.addEventListener("click",function(){
+          var phrase=chip.getAttribute("data-q");
+          var cur=noteInput.value;
+          var parts=cur.split(/\s*\u2022\s*/).map(function(x){return x.trim();}).filter(Boolean);
+          var at=parts.indexOf(phrase);
+          if(at>=0){ parts.splice(at,1); chip.classList.remove("on"); }
+          else { parts.push(phrase); chip.classList.add("on"); }
+          noteInput.value=parts.join(" \u2022 ");
+        });
+      });
+    } else {
+      quickWrap.style.display="none";
+      quickWrap.innerHTML="";
+    }
     var isEmail=(opts.noteInputMode==="email");
     noteInput.rows=opts.noteRows||(isEmail?1:3);
     noteInput.setAttribute("inputmode",isEmail?"email":"text");
@@ -4278,11 +4328,34 @@ function openDetail(c){
         }
       });
     };
+    document.getElementById("ds-complete").style.display="none";
   } else {
     adminActs.style.display="none";
+    /* Sales Executives can't edit customer records, but they're the ones
+       out in the field who discover a missing phone number or location.
+       Let them fill in blanks only — existing values stay locked. */
+    var completeBtn=document.getElementById("ds-complete");
+    var missing=customerMissingFields(c);
+    if(missing.length){
+      completeBtn.style.display="";
+      completeBtn.onclick=function(){
+        closeSheet();
+        setTimeout(function(){openAddCustomerSheet(c,true);},350);
+      };
+    } else {
+      completeBtn.style.display="none";
+    }
   }
   document.getElementById("overlay").classList.add("open");
   document.getElementById("sheet").classList.add("open");
+}
+/* Which fields a rep is allowed to fill in because they're currently empty. */
+function customerMissingFields(c){
+  var out=[];
+  if(!c.ph) out.push("phone");
+  if(!(c.lat&&c.lng)) out.push("coords");
+  if(!c.maps) out.push("maps");
+  return out;
 }
 
 function closeSheet(){
@@ -4292,6 +4365,7 @@ function closeSheet(){
 
 // ===== ADD CUSTOMER SHEET =====
 var acEditingN=null;
+var acCompleteOnly=false;
 var acSelectedArea="";
 
 function renderAreaDropdown(filterText){
@@ -4332,12 +4406,13 @@ document.addEventListener("click",function(e){
   }
 });
 
-function openAddCustomerSheet(editCust){
+function openAddCustomerSheet(editCust,completeOnly){
   if(typeof hideInstallBanner==="function")hideInstallBanner();
   var areas=loadAreas();
 
   acEditingN=editCust?editCust.n:null;
-  document.getElementById("ac-title").textContent=editCust?"Edit Customer":"Add New Customer";
+  acCompleteOnly=!!completeOnly;
+  document.getElementById("ac-title").textContent=completeOnly?"Complete Missing Details":(editCust?"Edit Customer":"Add New Customer");
   document.getElementById("ac-save-btn").textContent=editCust?"Save Changes":"Add Customer";
 
   document.getElementById("ac-name").value=editCust?editCust.name:"";
@@ -4377,7 +4452,32 @@ function openAddCustomerSheet(editCust){
     findBtnText.textContent="Use My Current Location";
   }
 
-  setTimeout(function(){document.getElementById("ac-name").focus();},300);
+  /* In "complete missing details" mode a rep may only fill blanks — name
+     and area are locked, and any field that already has a value is
+     read-only so existing data can't be altered. */
+  var lockName=document.getElementById("ac-name");
+  var lockArea=document.getElementById("ac-area-search");
+  var lockPhone=document.getElementById("ac-phone");
+  var lockLat=document.getElementById("ac-lat");
+  var lockLng=document.getElementById("ac-lng");
+  function setLocked(el,locked){
+    if(!el) return;
+    el.readOnly=!!locked;
+    el.style.opacity=locked?"0.6":"";
+    el.style.cursor=locked?"not-allowed":"";
+  }
+  if(acCompleteOnly && editCust){
+    setLocked(lockName,true);
+    setLocked(lockArea,true);
+    setLocked(lockPhone,!!editCust.ph);
+    setLocked(lockLat,!!(editCust.lat&&editCust.lng));
+    setLocked(lockLng,!!(editCust.lat&&editCust.lng));
+    var firstEmpty = !editCust.ph ? lockPhone : (!(editCust.lat&&editCust.lng) ? lockLat : document.getElementById("ac-mapslink"));
+    setTimeout(function(){ if(firstEmpty) firstEmpty.focus(); },300);
+  } else {
+    [lockName,lockArea,lockPhone,lockLat,lockLng].forEach(function(el){ setLocked(el,false); });
+    setTimeout(function(){document.getElementById("ac-name").focus();},300);
+  }
 }
 function closeAddCustomerSheet(){
   document.getElementById("add-overlay").classList.remove("open");
@@ -5190,11 +5290,22 @@ document.getElementById("ac-save-btn").addEventListener("click",function(){
   }
 
   if(acEditingN){
-    var updated=updateCustomer(acEditingN,{name:name,area:area,phone:phone,lat:lat,lng:lng,mapsLink:mapsLink});
+    var payload={name:name,area:area,phone:phone,lat:lat,lng:lng,mapsLink:mapsLink};
+    if(acCompleteOnly){
+      /* Reps may only fill blanks — re-assert the original values for
+         anything that already had one, so nothing existing can be
+         overwritten even if the form were tampered with. */
+      var orig=getCustomerByNumber(acEditingN)||{};
+      payload.name=orig.name;
+      payload.area=orig.area;
+      if(orig.ph) payload.phone=orig.ph;
+      if(orig.lat&&orig.lng){ payload.lat=orig.lat; payload.lng=orig.lng; }
+    }
+    var updated=updateCustomer(acEditingN,payload);
     closeAddCustomerSheet();
     renderTabs();
     renderList();
-    showToast("Customer updated: "+updated.name,"success","ti-user-check");
+    showToast(acCompleteOnly?"Details updated: "+updated.name:"Customer updated: "+updated.name,"success","ti-user-check");
   } else {
     var cust=addCustomer({name:name,area:area,phone:phone,lat:lat,lng:lng,mapsLink:mapsLink});
     closeAddCustomerSheet();
@@ -6423,6 +6534,7 @@ function vpAddComment(n){
       icon:"ti-message-2",
       showNote:true,
       prefill:latest.note||"",
+      quickNotes:getQuickNotes(),
       notePlaceholder:"Customer comments / feedback...",
       confirmLabel:"Save",
       onConfirm:function(note){
@@ -6450,13 +6562,17 @@ function vpAddComment(n){
       message:c.name+" \u2014 mark as visited and add the customer's comments.",
       icon:"ti-checkup-list",
       showNote:true,
+      quickNotes:getQuickNotes(),
       notePlaceholder:"Customer comments / feedback...",
       confirmLabel:"Save Visit",
       onConfirm:function(note){
-        vpAddVisitOn(n,note,dateStr);
-        showToast("Visit recorded","success","ti-circle-check");
-        openPlanDetail(dateStr);
-        if(typeof renderList==="function")try{renderList();}catch(e){}
+        vpAddVisitOn(n,note,dateStr).then(function(){
+          showToast("Visit recorded","success","ti-circle-check");
+          openPlanDetail(dateStr);
+          if(typeof renderList==="function")try{renderList();}catch(e){}
+        }).catch(function(){
+          showToast("Couldn't record the visit — check your connection","danger","ti-alert-triangle");
+        });
       }
     });
   }
