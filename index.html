@@ -2501,7 +2501,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r3-diag";
+var APP_VERSION = "2026-07-29-r4";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -6372,6 +6372,19 @@ var ADMIN_EMAILS = ["shameerck007@gmail.com"];
 var COLLECTION = "appState";
 var NO_SYNC = (window.__AF_SYNC__ && window.__AF_SYNC__.NO_SYNC) || {};
 
+/* Returns THE shared in-memory data store — the exact same object the
+   localStorage shim reads from when the app calls localStorage.getItem().
+   This previously fell back to a fresh `{}` if the wiring wasn't in place,
+   which silently sent everything loaded from Firestore into a throwaway
+   object the app could never read — making the app look empty even though
+   the cloud data was perfectly fine. */
+function afData(){
+  if(!window.__AF_DATA__) window.__AF_DATA__ = {};
+  window.__AF_SYNC__ = window.__AF_SYNC__ || {};
+  if(window.__AF_SYNC__.data !== window.__AF_DATA__) window.__AF_SYNC__.data = window.__AF_DATA__;
+  return window.__AF_DATA__;
+}
+
 var app, auth, db;
 try{
   app = initializeApp(firebaseConfig);
@@ -6440,7 +6453,7 @@ if(db){
      there's nothing local that Firestore wouldn't already have. */
   async function fetchAppStateIntoMemory(){
     if(!db) return;
-    var DATA = (window.__AF_SYNC__ && window.__AF_SYNC__.data) || {};
+    var DATA = afData();
     var lastErr = null;
     for(var attempt=0; attempt<3; attempt++){
       try{
@@ -6458,6 +6471,9 @@ if(db){
           var v = d.data() && d.data().v;
           if(v!=null) DATA[d.id] = v;
         });
+        console.log("[DIAG-BOOT] loaded",snap.size,"appState docs. keys now in memory:",Object.keys(DATA),
+                    "| shim can read af_visit_plans:", localStorage.getItem("af_visit_plans")!=null,
+                    "| shim can read af_areas:", localStorage.getItem("af_areas")!=null);
         return;
       }catch(e){
         lastErr = e;
@@ -6469,7 +6485,7 @@ if(db){
 
   function startListening(){
     try{
-      var DATA = (window.__AF_SYNC__ && window.__AF_SYNC__.data) || {};
+      var DATA = afData();
       onSnapshot(collection(db, COLLECTION), function(snap){
         var changed = false;
         snap.docChanges().forEach(function(ch){
@@ -6742,7 +6758,7 @@ if(db){
      reached the database — not several seconds later in the background. */
   async function saveAreasDirect(list){
     await setDoc(doc(db, COLLECTION, "af_areas"), { v: JSON.stringify(list), at: serverTimestamp() });
-    var DATA = (window.__AF_SYNC__ && window.__AF_SYNC__.data) || {};
+    var DATA = afData();
     DATA["af_areas"] = JSON.stringify(list);
   }
 
@@ -6751,7 +6767,7 @@ if(db){
      checking moments later needs to be able to trust what they see. */
   async function saveVisitPlansDirect(plansObj){
     await setDoc(doc(db, COLLECTION, "af_visit_plans"), { v: JSON.stringify(plansObj), at: serverTimestamp() });
-    var DATA = (window.__AF_SYNC__ && window.__AF_SYNC__.data) || {};
+    var DATA = afData();
     DATA["af_visit_plans"] = JSON.stringify(plansObj);
   }
 
