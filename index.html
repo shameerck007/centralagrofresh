@@ -2153,6 +2153,11 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
           <span class="about-row-label"><i class="ti ti-cloud-check"></i> <span data-i18n="aboutStatus">Status</span></span>
           <span class="about-row-value" id="about-status"><span class="about-status-dot"></span> <span data-i18n="aboutUpToDate">Up to date</span></span>
         </div>
+        <div class="about-row">
+          <span class="about-row-label"><i class="ti ti-database"></i> <span data-i18n="aboutData">Cloud data</span></span>
+          <span class="about-row-value" id="about-data">—</span>
+        </div>
+        <button class="about-check-btn" id="about-reload-data-btn"><i class="ti ti-cloud-download"></i> <span data-i18n="aboutReloadData">Reload Data from Cloud</span></button>
         <button class="about-check-btn" id="about-check-update-btn"><i class="ti ti-refresh"></i> <span data-i18n="aboutCheckUpdate">Check for Updates</span></button>
       </div>
     </div>
@@ -2501,7 +2506,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r4";
+var APP_VERSION = "2026-07-29-r6";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -2610,7 +2615,10 @@ var TRANSLATIONS = {
     aboutCheckUpdate: "Check for Updates",
     aboutUpdateAvailable: "Update available",
     aboutLatestToast: "You're on the latest version",
-    aboutUpdateToast: "A new version is available — tap the banner to refresh"
+    aboutUpdateToast: "A new version is available — tap the banner to refresh",
+    aboutData: "Cloud data",
+    aboutReloadData: "Reload Data from Cloud",
+    aboutReloadedToast: "Data reloaded from the cloud"
   },
   ar: {
     appTagline: "نظام إدارة مسار المبيعات الكامل",
@@ -2709,7 +2717,10 @@ var TRANSLATIONS = {
     aboutCheckUpdate: "التحقق من التحديثات",
     aboutUpdateAvailable: "يتوفر تحديث",
     aboutLatestToast: "أنت تستخدم أحدث إصدار",
-    aboutUpdateToast: "يتوفر إصدار جديد — اضغط على الشريط للتحديث"
+    aboutUpdateToast: "يتوفر إصدار جديد — اضغط على الشريط للتحديث",
+    aboutData: "بيانات السحابة",
+    aboutReloadData: "إعادة تحميل البيانات",
+    aboutReloadedToast: "تم إعادة تحميل البيانات"
   }
 };
 var CURRENT_LANG = "en";
@@ -4582,7 +4593,13 @@ function switchView(v){
 
 document.getElementById("nb-cust").addEventListener("click",function(){switchView("cust");});
 document.getElementById("nb-report").addEventListener("click",function(){switchView("report");renderReport();});
-document.getElementById("nb-areas").addEventListener("click",function(){switchView("areas");renderAreasScreen();});
+document.getElementById("nb-areas").addEventListener("click",function(){
+  switchView("areas");
+  renderAreasScreen();
+  if(window.FB && window.FB.refreshAppState){
+    window.FB.refreshAppState().then(function(){ renderAreasScreen(); }).catch(function(){});
+  }
+});
 document.getElementById("nb-tracking").addEventListener("click",function(){switchView("tracking");renderTrackingScreen();});
 document.getElementById("area-add-btn").addEventListener("click",function(){
   var input=document.getElementById("area-new-input");
@@ -4972,6 +4989,15 @@ function renderSettingsScreen(){
     var vm=APP_VERSION.match(/^(\d{4})-(\d{2})-(\d{2})-(.+)$/);
     verEl.textContent=vm?(vm[1]+"."+vm[2]+"."+vm[3]+" ("+vm[4]+")"):APP_VERSION;
   }
+  renderAboutDataRow();
+}
+function renderAboutDataRow(){
+  var dataEl=document.getElementById("about-data");
+  if(!dataEl) return;
+  var d=window.__AF_DIAG__;
+  if(!d){ dataEl.textContent="—"; return; }
+  var ok=d.areasOk&&d.plansOk;
+  dataEl.innerHTML="<span class='about-status-dot' style='background:"+(ok?"#16a34a":"#d97706")+";box-shadow:0 0 0 3px "+(ok?"rgba(22,163,74,0.15)":"rgba(217,119,6,0.15)")+"'></span> "+d.keys+" records";
 }
 document.getElementById("profile-dd-settings").addEventListener("click",function(){
   document.getElementById("profile-dropdown").classList.remove("open");
@@ -5199,7 +5225,14 @@ function renderRepPicker(){
         var uid=chip.getAttribute("data-uid");
         vpContextUid=(uid===CURRENT_UID)?null:uid;
         renderRepPicker();
-        renderPlansList();
+        // Pull the latest data straight from the database before showing it.
+        // An admin checking a rep's plans needs the current truth, not
+        // whatever happened to be in memory from when this page was opened.
+        if(window.FB && window.FB.refreshAppState){
+          window.FB.refreshAppState().then(function(){ renderPlansList(); }).catch(function(){ renderPlansList(); });
+        } else {
+          renderPlansList();
+        }
       });
     });
     if(vpContextUid && vpContextUid!==CURRENT_UID){
@@ -5221,7 +5254,8 @@ function renderPlansList(){
   var listEl=document.getElementById("vp-plans-list");
   var plans=loadPlans();
   var ctxUid=vpEffectiveUid();
-  console.log("[DIAG-RENDER] ctxUid=",ctxUid,"CURRENT_UID=",CURRENT_UID,"vpContextUid=",vpContextUid,"allPlans=",JSON.parse(JSON.stringify(plans)));
+  console.log("[DIAG-RENDER] ctxUid=",ctxUid,"CURRENT_UID=",CURRENT_UID,"vpContextUid=",vpContextUid,
+              "| uids that own plans per date:",Object.keys(plans).map(function(d){return d+" -> "+Object.keys(plans[d]||{}).join(",");}));
   var dates=Object.keys(plans).filter(function(d){return plans[d]&&plans[d][ctxUid]&&plans[d][ctxUid].length;});
   console.log("[DIAG-RENDER] matching dates for ctxUid:",dates);
   if(!dates.length){
@@ -5605,6 +5639,9 @@ document.getElementById("nb-planner").addEventListener("click",function(){
   vpContextUid=null;
   renderRepPicker();
   renderPlansList();
+  if(window.FB && window.FB.refreshAppState){
+    window.FB.refreshAppState().then(function(){ renderPlansList(); }).catch(function(){});
+  }
 });
 
 // ===== ACTION PLAN =====
@@ -5847,10 +5884,44 @@ function showUpdateBanner(){
 document.getElementById("about-check-update-btn").addEventListener("click",function(){
   checkForAppUpdate(true);
 });
+document.getElementById("about-reload-data-btn").addEventListener("click",function(){
+  var btn=this;
+  if(!(window.FB && window.FB.refreshAppState)){
+    showToast("Can't reach the server right now","danger","ti-alert-triangle");
+    return;
+  }
+  btn.disabled=true;
+  window.FB.refreshAppState().then(function(){
+    btn.disabled=false;
+    try{ rebuildCustomers(); renderTabs(); renderList(); }catch(e){}
+    renderAboutDataRow();
+    showToast(t("aboutReloadedToast"),"success","ti-cloud-check");
+  }).catch(function(){
+    btn.disabled=false;
+    showToast("Couldn't reload — check your connection","danger","ti-alert-triangle");
+  });
+});
 setTimeout(checkForAppUpdate,15000);
 setInterval(checkForAppUpdate,5*60*1000);
 document.addEventListener("visibilitychange",function(){
-  if(!document.hidden) checkForAppUpdate();
+  if(document.hidden) return;
+  checkForAppUpdate();
+  /* iOS in particular suspends web apps hard when backgrounded, which can
+     silently drop the live Firestore listener — leaving the app showing
+     whatever it had in memory when it was last active. Re-pull on return
+     so coming back to the app always shows current data. */
+  if(window.FB && window.FB.refreshAppState){
+    window.FB.refreshAppState().then(function(){
+      try{ rebuildCustomers(); renderTabs(); renderList(); }catch(e){}
+      try{
+        var av=document.getElementById("v-areas");
+        if(av && av.classList.contains("active")) renderAreasScreen();
+        var pv=document.getElementById("v-planner");
+        var vpHome=document.getElementById("vp-home");
+        if(pv && pv.classList.contains("active") && vpHome && vpHome.style.display!=="none") renderPlansList();
+      }catch(e){}
+    }).catch(function(){});
+  }
 });
 
 // Init: app boot (deciding between login screen / offline screen / the app
@@ -6474,6 +6545,15 @@ if(db){
         console.log("[DIAG-BOOT] loaded",snap.size,"appState docs. keys now in memory:",Object.keys(DATA),
                     "| shim can read af_visit_plans:", localStorage.getItem("af_visit_plans")!=null,
                     "| shim can read af_areas:", localStorage.getItem("af_areas")!=null);
+        try{
+          window.__AF_DIAG__ = {
+            docs: snap.size,
+            keys: Object.keys(DATA).length,
+            areasOk: localStorage.getItem("af_areas")!=null,
+            plansOk: localStorage.getItem("af_visit_plans")!=null,
+            at: Date.now()
+          };
+        }catch(e){}
         return;
       }catch(e){
         lastErr = e;
@@ -6774,6 +6854,7 @@ if(db){
   window.FB = {
     ready:true,
     signIn:signIn, signOutUser:signOutUser, pushKey:pushKey, runBoot:runBoot,
+    refreshAppState:fetchAppStateIntoMemory,
     saveAreas:saveAreasDirect, saveVisitPlans:saveVisitPlansDirect,
     createUser:createUser, listUsers:listUsers, updateUserProfile:updateUserProfile, resetUserPassword:resetUserPassword,
     createNotification:createNotification, watchNotifications:watchNotifications,
