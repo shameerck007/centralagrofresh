@@ -2592,7 +2592,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r14";
+var APP_VERSION = "2026-07-29-r15";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -4511,6 +4511,58 @@ function extractNameFromMapsUrl(url){
     return raw||null;
   }catch(e){ return null; }
 }
+/* Google's mobile "Share" text includes the place name, e.g.
+   "Take a look at MeNa Restaurant on Google Maps. https://maps.app.goo.gl/..."
+   That name is far more useful than the short link itself: we can look it
+   up through our own Places API and get exact coordinates, the official
+   name and the phone number — without ever needing to unwrap the short URL
+   (which Google's anti-bot system frequently blocks). */
+function extractPlaceNameFromShareText(pasted){
+  if(!pasted) return "";
+  var txt=pasted.replace(/https?:\/\/\S+/ig," ").replace(/\s+/g," ").trim();
+  if(!txt) return "";
+  txt=txt.replace(/^take a look at\s+/i,"");
+  txt=txt.replace(/\s+on google maps\.?$/i,"");
+  txt=txt.replace(/^ألق نظرة على\s+/,"");
+  txt=txt.replace(/\s+على خرائط Google\.?$/,"");
+  txt=txt.replace(/^[\s"'\u201c\u201d]+|[\s"'\u201c\u201d.]+$/g,"");
+  return (txt.length>1 && txt.length<120) ? txt : "";
+}
+var _lookupPlacesService=null;
+function placesServiceForLookup(){
+  if(!_lookupPlacesService){
+    _lookupPlacesService=new google.maps.places.PlacesService(document.createElement("div"));
+  }
+  return _lookupPlacesService;
+}
+function findPlaceByName(query){
+  return loadGoogleMapsScript().then(function(){
+    return new Promise(function(resolve,reject){
+      placesServiceForLookup().findPlaceFromQuery(
+        {query:query, fields:["place_id","name","geometry"]},
+        function(results,status){
+          if(status===google.maps.places.PlacesServiceStatus.OK && results && results.length){
+            resolve(results[0]);
+          } else {
+            reject(new Error("place-not-found ("+status+")"));
+          }
+        }
+      );
+    });
+  });
+}
+function getPlaceDetailsById(placeId){
+  return new Promise(function(resolve,reject){
+    placesServiceForLookup().getDetails(
+      {placeId:placeId, fields:["place_id","name","formatted_phone_number","international_phone_number","geometry"]},
+      function(place,status){
+        if(status===google.maps.places.PlacesServiceStatus.OK && place && place.geometry){ resolve(place); }
+        else { reject(new Error("details-failed ("+status+")")); }
+      }
+    );
+  });
+}
+
 function fillInExtractedCoords(coords,name,phone){
   document.getElementById("ac-lat").value=coords.lat;
   document.getElementById("ac-lng").value=coords.lng;
@@ -4605,21 +4657,48 @@ document.getElementById("ac-find-from-link").addEventListener("click",function()
 
   if(isShort){
     btn.disabled=true;
-    textEl.textContent="Resolving short link...";
-    resolveShortMapsLink(url).then(function(result){
-      btn.disabled=false;
-      var coords=extractCoordsFromMapsUrl(result.finalUrl);
-      if(coords){
-        fillInExtractedCoords(coords,extractNameFromMapsUrl(result.finalUrl),result.phone);
-      } else {
+    var nameGuess=extractPlaceNameFromShareText(pasted);
+    var hasPlacesApi=GOOGLE_MAPS_API_KEY && GOOGLE_MAPS_API_KEY.indexOf("YOUR_")!==0;
+
+    /* Preferred path: Google's share text usually includes the place name.
+       Looking that up through the Places API is far more reliable than
+       trying to unwrap the short link, which Google's anti-bot system
+       often blocks. Falls back to link resolution if there's no usable
+       name or the lookup finds nothing. */
+    var tryLinkResolution=function(reasonPrefix){
+      textEl.textContent="Resolving short link...";
+      resolveShortMapsLink(url).then(function(result){
+        btn.disabled=false;
+        var coords=extractCoordsFromMapsUrl(result.finalUrl);
+        if(coords){
+          fillInExtractedCoords(coords,extractNameFromMapsUrl(result.finalUrl),result.phone);
+        } else {
+          textEl.textContent=originalText;
+          showShortLinkDialog(url,"resolved but no coordinates found in the result");
+        }
+      }).catch(function(e){
+        btn.disabled=false;
         textEl.textContent=originalText;
-        showShortLinkDialog(url,"resolved to "+result.finalUrl.slice(0,150)+" but no coordinates pattern was found in it");
-      }
-    }).catch(function(e){
-      btn.disabled=false;
-      textEl.textContent=originalText;
-      showShortLinkDialog(url,(e&&e.message)||String(e));
-    });
+        showShortLinkDialog(url,(reasonPrefix||"")+((e&&e.message)||String(e)));
+      });
+    };
+
+    if(nameGuess && hasPlacesApi){
+      textEl.textContent="Looking up \""+(nameGuess.length>22?nameGuess.slice(0,22)+"\u2026":nameGuess)+"\"...";
+      findPlaceByName(nameGuess).then(function(found){
+        return getPlaceDetailsById(found.place_id);
+      }).then(function(place){
+        btn.disabled=false;
+        var lat=place.geometry.location.lat();
+        var lng=place.geometry.location.lng();
+        var phone=place.formatted_phone_number||place.international_phone_number||"";
+        fillInExtractedCoords({lat:lat.toFixed(6),lng:lng.toFixed(6)},place.name||nameGuess,phone);
+      }).catch(function(){
+        tryLinkResolution("name lookup failed, then ");
+      });
+      return;
+    }
+    tryLinkResolution("");
     return;
   }
 
