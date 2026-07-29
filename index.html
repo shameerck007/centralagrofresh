@@ -2668,7 +2668,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r28";
+var APP_VERSION = "2026-07-29-r29";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -4062,7 +4062,7 @@ function renderList(){
         waBtn.addEventListener("click",function(e){
           e.stopPropagation();
           var ph=(waBtn.getAttribute("data-ph")||"").replace(/[^\d]/g,"");
-          if(ph){ window.open("https://wa.me/"+ph,"_blank"); }
+          if(ph){ openExternal("https://wa.me/"+ph); }
         });
       } else if(waBtn){
         waBtn.addEventListener("click",function(e){e.stopPropagation();});
@@ -5016,7 +5016,7 @@ function showShortLinkDialog(url,reason){
     confirmLabel:"Open Link Now",
     cancelLabel:"OK, Got It",
     onConfirm:function(){
-      window.open(url,"_blank");
+      openExternal(url);
     }
   });
 }
@@ -5316,6 +5316,23 @@ var CURRENT_UID="";
 var CURRENT_PHOTO="";
 var BOOT_TIME=null;
 
+/* ===== Opening external links =====
+   On phones, links that launch another app (WhatsApp, Google Maps, the
+   dialer) should navigate in the SAME tab. The operating system takes
+   over and opens that app, leaving this page intact underneath — so
+   coming back lands the user right where they were. Opening a new tab
+   instead leaves an empty tab behind, which is what produced the blank
+   page after returning from WhatsApp. On desktop a new tab is still the
+   right behaviour, since nothing takes over the window there. */
+function isMobileDevice(){
+  return /android|iphone|ipad|ipod|iemobile|blackberry|opera mini/i.test(navigator.userAgent);
+}
+function openExternal(url){
+  if(!url) return;
+  if(isMobileDevice()){ window.location.href=url; return; }
+  var w=window.open(url,"_blank","noopener");
+  if(!w) window.location.href=url;   // popup blocked — fall back
+}
 function isAdmin(){return CURRENT_ROLE==="admin";}
 /* Team Manager: identical access to a Sales Executive everywhere in the
    app, with one addition — they can see and edit their team's visit plans
@@ -6321,7 +6338,7 @@ function startPlanRoute(dateStr){
     url+="&waypoints="+encodeURIComponent(wp);
   }
   url+="&travelmode=driving";
-  window.open(url,"_blank");
+  openExternal(url);
 }
 
 // ---- Detail view ----
@@ -6769,6 +6786,19 @@ document.getElementById("about-reload-data-btn").addEventListener("click",functi
 });
 setTimeout(checkForAppUpdate,15000);
 setInterval(checkForAppUpdate,5*60*1000);
+/* Navigate buttons and other external links are plain anchors with
+   target="_blank". On phones that leaves a blank tab behind once the maps
+   app takes over, so intercept them and navigate in place instead. */
+document.addEventListener("click",function(e){
+  if(!isMobileDevice()) return;
+  var a=e.target&&e.target.closest?e.target.closest('a[target="_blank"]'):null;
+  if(!a) return;
+  var href=a.getAttribute("href")||"";
+  if(!href||href==="#"||href.charAt(0)==="#") return;
+  e.preventDefault();
+  window.location.href=href;
+},true);
+
 document.addEventListener("visibilitychange",function(){
   if(document.hidden) return;
   checkForAppUpdate();
