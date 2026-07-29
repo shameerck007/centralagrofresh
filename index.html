@@ -2464,22 +2464,30 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 
     var PREF_KEYS = { "af_notif_enabled":1, "af_install_dismissed":1, "af_language":1 };
 
-    var realGetItem = Storage.prototype.getItem.bind(localStorage);
-    var realSetItem = Storage.prototype.setItem.bind(localStorage);
-    var realRemoveItem = Storage.prototype.removeItem.bind(localStorage);
+    /* IMPORTANT: patch Storage.prototype, NOT the localStorage instance.
+       Safari (iOS especially) refuses to let scripts replace methods
+       directly on the localStorage object — the assignment silently does
+       nothing, so the app ends up reading real (empty) browser storage
+       instead of the data loaded from Firestore, and looks empty even
+       though the cloud data is perfectly fine. Patching the prototype
+       works consistently across browsers. */
+    var proto = Storage.prototype;
+    var realGetItem = proto.getItem;
+    var realSetItem = proto.setItem;
+    var realRemoveItem = proto.removeItem;
 
-    localStorage.getItem = function(k){
-      if(typeof k==="string" && k.indexOf("af_")===0){
+    proto.getItem = function(k){
+      if(this===window.localStorage && typeof k==="string" && k.indexOf("af_")===0){
         if(PREF_KEYS[k]){
           try{ if(window.__AF_SYNC__.getPref) return window.__AF_SYNC__.getPref(k); }catch(e){}
           return null;
         }
         return (k in DATA) ? DATA[k] : null;
       }
-      return realGetItem(k);
+      return realGetItem.call(this,k);
     };
-    localStorage.setItem = function(k, v){
-      if(typeof k!=="string" || k.indexOf("af_")!==0){ realSetItem(k, v); return; }
+    proto.setItem = function(k, v){
+      if(!(this===window.localStorage && typeof k==="string" && k.indexOf("af_")===0)){ return realSetItem.call(this,k,v); }
       if(PREF_KEYS[k]){
         try{ if(window.__AF_SYNC__.setPref) window.__AF_SYNC__.setPref(k, v); }catch(e){}
         return;
@@ -2487,12 +2495,24 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
       DATA[k] = String(v);
       try{ if(window.__AF_SYNC__.pushKey) window.__AF_SYNC__.pushKey(k, v); }catch(e){}
     };
-    localStorage.removeItem = function(k){
-      if(typeof k!=="string" || k.indexOf("af_")!==0){ realRemoveItem(k); return; }
+    proto.removeItem = function(k){
+      if(!(this===window.localStorage && typeof k==="string" && k.indexOf("af_")===0)){ return realRemoveItem.call(this,k); }
       delete DATA[k];
       try{ if(window.__AF_SYNC__.pushKey) window.__AF_SYNC__.pushKey(k, ""); }catch(e){}
     };
-  }catch(e){}
+
+    /* Self-test: prove the patch actually took effect on this browser
+       rather than assuming it did. If it didn't, record that loudly so the
+       Settings screen can report it instead of the app mysteriously
+       appearing to have lost data. */
+    DATA["af__shimcheck"] = "ok";
+    window.__AF_SHIM_OK__ = (localStorage.getItem("af__shimcheck") === "ok");
+    delete DATA["af__shimcheck"];
+    if(!window.__AF_SHIM_OK__) console.error("[Fastrack] storage shim did NOT take effect on this browser");
+  }catch(e){
+    window.__AF_SHIM_OK__ = false;
+    console.error("[Fastrack] storage shim failed to install", e);
+  }
 })();
 </script>
 <script>
@@ -2506,7 +2526,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r7";
+var APP_VERSION = "2026-07-29-r8";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -5004,6 +5024,10 @@ function renderSettingsScreen(){
 function renderAboutDataRow(){
   var dataEl=document.getElementById("about-data");
   if(!dataEl) return;
+  if(window.__AF_SHIM_OK__===false){
+    dataEl.innerHTML="<span class='about-status-dot' style='background:#dc2626;box-shadow:0 0 0 3px rgba(220,38,38,0.15)'></span> storage blocked";
+    return;
+  }
   var d=window.__AF_DIAG__;
   if(!d){ dataEl.textContent="—"; return; }
   var ok=d.areasOk&&d.plansOk&&!d.err;
