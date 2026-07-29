@@ -931,9 +931,11 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .rpt-daysep::after{content:"";flex:1;height:1px;background:var(--border)}
 .rpt-entry{
   background:var(--card);border:1.5px solid var(--border);border-radius:16px;
-  padding:12px 13px;margin-bottom:8px;display:flex;gap:11px;
+  padding:12px 13px;margin-bottom:8px;display:flex;gap:11px;align-items:flex-start;
   box-shadow:var(--sh1);cursor:pointer;transition:transform 0.13s;
 }
+.rpt-entry-body{flex:1;min-width:0}
+.rpt-entry-name{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .rpt-entry:active{transform:scale(0.98)}
 .rpt-entry-badge{
   width:36px;height:36px;border-radius:11px;flex-shrink:0;
@@ -949,9 +951,13 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .rpt-entry-meta{display:flex;align-items:center;gap:10px;margin-top:2px;flex-wrap:wrap}
 .rpt-entry-meta span{font-size:10.5px;color:var(--muted);font-weight:600;display:flex;align-items:center;gap:3px}
 .rpt-entry-meta i{font-size:12px;color:var(--light)}
-.rpt-entry-sno{font-size:9px;color:var(--light);font-weight:800;letter-spacing:0.4px;text-transform:uppercase}
-.rpt-entry-note{font-size:12px;color:var(--muted);margin-top:4px;line-height:1.4;font-weight:500}
-.rpt-entry-note.empty{color:var(--light);font-style:italic;font-weight:400}
+.rpt-entry-note{
+  font-size:12px;color:var(--muted);margin-top:7px;line-height:1.45;font-weight:500;
+  background:var(--bg);border-radius:9px;padding:7px 10px;
+  border-left:3px solid rgba(13,122,64,0.25);
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+[dir="rtl"] .rpt-entry-note{border-left:none;border-right:3px solid rgba(13,122,64,0.25)}
 .rpt-empty{text-align:center;padding:60px 24px;color:var(--muted)}
 .rpt-empty i{font-size:44px;display:block;margin-bottom:12px;opacity:0.2;color:var(--gr3)}
 .rpt-empty p{font-size:14px;font-weight:600;color:var(--text)}
@@ -2272,7 +2278,24 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
           <span class="cycle-unit" data-i18n="settingsVisitCycleDays">days</span>
           <button class="cycle-save" id="cycle-save-btn" type="button" data-i18n="settingsVisitCycleSave">Save</button>
         </div>
+        <div class="about-divider" style="margin:16px 0 12px"></div>
+        <div class="logo-settings-title"><i class="ti ti-map-pin-search"></i> <span data-i18n="settingsTrackingTitle">Live Tracking</span></div>
+        <div class="logo-settings-sub" data-i18n="settingsTrackingSub">Record team members' location while they're using the app. Turn this off if your company doesn't track staff locations.</div>
+        <label style="display:flex;align-items:center;gap:10px;margin-top:10px;cursor:pointer">
+          <input type="checkbox" id="settings-tracking-toggle" style="width:18px;height:18px;accent-color:#0d7a40">
+          <span style="font-size:13.5px;font-weight:600;color:var(--text)" data-i18n="settingsTrackingToggle">Enable live tracking</span>
+        </label>
       </div>
+
+      <div class="logo-settings-card admin-only" id="settings-data-card" style="margin:14px 16px 0;display:none">
+        <div class="logo-settings-title"><i class="ti ti-file-spreadsheet"></i> <span data-i18n="settingsDataTitle">Customer Data</span></div>
+        <div class="logo-settings-sub" data-i18n="settingsDataSub">Export your customers to a spreadsheet, or import them in bulk. Matching names in the same area are updated rather than duplicated.</div>
+        <button class="about-check-btn" id="csv-export-btn" style="margin-top:12px"><i class="ti ti-file-download"></i> <span data-i18n="settingsDataExport">Export Customers (CSV)</span></button>
+        <label class="about-check-btn" for="csv-import-input" style="margin-top:8px;cursor:pointer"><i class="ti ti-file-upload"></i> <span data-i18n="settingsDataImport">Import Customers (CSV)</span></label>
+        <input type="file" id="csv-import-input" accept=".csv,text/csv" style="display:none">
+        <button class="about-check-btn" id="gps-backfill-btn" style="margin-top:8px"><i class="ti ti-map-pin-search"></i> <span id="gps-backfill-text" data-i18n="settingsFillGps">Fill Missing GPS Coordinates</span></button>
+      </div>
+
 
       <div class="about-card" style="margin:14px 16px 20px">
         <div class="about-icon-wrap"><i class="ti ti-route-2"></i></div>
@@ -2645,7 +2668,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-29-r18";
+var APP_VERSION = "2026-07-29-r28";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -2763,6 +2786,14 @@ var TRANSLATIONS = {
     settingsVisitCycleSub: "How many days before a customer counts as due for another visit. Applies to the whole team.",
     settingsVisitCycleDays: "days",
     settingsVisitCycleSave: "Save",
+    settingsTrackingTitle: "Live Tracking",
+    settingsTrackingSub: "Record team members' location while they're using the app. Turn this off if your company doesn't track staff locations.",
+    settingsTrackingToggle: "Enable live tracking",
+    settingsDataTitle: "Customer Data",
+    settingsDataSub: "Export your customers to a spreadsheet, or import them in bulk. Matching names in the same area are updated rather than duplicated.",
+    settingsDataExport: "Export Customers (CSV)",
+    settingsDataImport: "Import Customers (CSV)",
+    settingsFillGps: "Fill Missing GPS Coordinates",
     loginForgot: "Forgot your password?",
     loginForgotTitle: "Reset your password",
     loginForgotMsg: "Enter your account email and we'll send you a link to set a new password.",
@@ -2878,6 +2909,14 @@ var TRANSLATIONS = {
     settingsVisitCycleSub: "عدد الأيام قبل أن يصبح العميل مستحقًا لزيارة جديدة. يطبق على الفريق بالكامل.",
     settingsVisitCycleDays: "يوم",
     settingsVisitCycleSave: "حفظ",
+    settingsTrackingTitle: "التتبع المباشر",
+    settingsTrackingSub: "تسجيل مواقع أعضاء الفريق أثناء استخدامهم للتطبيق. أوقفه إذا كانت شركتك لا تتبع مواقع الموظفين.",
+    settingsTrackingToggle: "تفعيل التتبع المباشر",
+    settingsDataTitle: "بيانات العملاء",
+    settingsDataSub: "صدّر عملاءك إلى ملف جدول بيانات، أو استوردهم دفعة واحدة. سيتم تحديث الأسماء المطابقة في نفس المنطقة بدلاً من تكرارها.",
+    settingsDataExport: "تصدير العملاء (CSV)",
+    settingsDataImport: "استيراد العملاء (CSV)",
+    settingsFillGps: "تعبئة إحداثيات GPS الناقصة",
     loginForgot: "نسيت كلمة المرور؟",
     loginForgotTitle: "إعادة تعيين كلمة المرور",
     loginForgotMsg: "أدخل بريدك الإلكتروني وسنرسل لك رابطًا لتعيين كلمة مرور جديدة.",
@@ -3017,11 +3056,214 @@ function addCustomer(data){
     ak:0,
     maps:buildMapsLinkFromInput(data.lat,data.lng,data.mapsLink,data.name,data.area)
   };
-  if(data.lat&&data.lng){cust.lat=parseFloat(data.lat);cust.lng=parseFloat(data.lng);}
+  var _co=coordsFromDataOrLink(data);
+  if(_co){cust.lat=_co.lat;cust.lng=_co.lng;}
   CUSTS.push(cust);
   saveCustomCustomer(cust);
   return cust;
 }
+/* ===== Customer CSV import / export (admin only) =====
+   Column order is fixed and documented so exported files can be edited in
+   Excel/Sheets and re-imported without surprises. */
+var CSV_HEADERS=["StopNumber","CustomerName","Phone","Area","Latitude","Longitude","MapsLink"];
+function csvEscape(v){
+  v=(v===undefined||v===null)?"":String(v);
+  return /[",\n\r]/.test(v) ? '"'+v.replace(/"/g,'""')+'"' : v;
+}
+/* Excel and Sheets treat "+966568065187" as a number and mangle it into
+   scientific notation (9.66568E+11), destroying the phone number if the
+   file is re-saved. Wrapping it as ="..." forces both apps to keep it as
+   literal text. The import side unwraps this again. */
+function csvPhoneCell(v){
+  v=(v===undefined||v===null)?"":String(v).trim();
+  if(!v) return "";
+  return '="'+v.replace(/"/g,'""')+'"';
+}
+function csvUnwrap(v){
+  v=(v===undefined||v===null)?"":String(v).trim();
+  var m=v.match(/^="(.*)"$/s);
+  return m?m[1].replace(/""/g,'"').trim():v;
+}
+function buildCustomersCsv(){
+  var rows=[CSV_HEADERS.join(",")];
+  var sorted=CUSTS.slice().sort(function(a,b){return a.n-b.n;});
+  sorted.forEach(function(c){
+    rows.push([
+      csvEscape(c.n), csvEscape(c.name), csvPhoneCell(c.ph||""), csvEscape(c.area||""),
+      csvEscape(c.lat!==undefined?c.lat:""), csvEscape(c.lng!==undefined?c.lng:""),
+      csvEscape(c.maps||"")
+    ].join(","));
+  });
+  return rows.join("\r\n");
+}
+function exportCustomersCsv(){
+  try{
+    // Leading BOM so Excel opens Arabic names correctly instead of mojibake.
+    var blob=new Blob(["\ufeff"+buildCustomersCsv()],{type:"text/csv;charset=utf-8;"});
+    var url=URL.createObjectURL(blob);
+    var a=document.createElement("a");
+    var d=new Date();
+    var stamp=d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0");
+    a.href=url; a.download="fastrack-customers-"+stamp+".csv";
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function(){URL.revokeObjectURL(url);},1000);
+    showToast("Exported "+CUSTS.length+" customers","success","ti-file-download");
+  }catch(e){
+    showToast("Couldn't export right now","danger","ti-alert-triangle");
+  }
+}
+/* Minimal but correct CSV parser — handles quoted fields, embedded commas,
+   escaped quotes and both line-ending styles. */
+function parseCsv(text){
+  text=text.replace(/^\ufeff/,"");
+  var rows=[],row=[],field="",inQ=false,i=0;
+  while(i<text.length){
+    var ch=text[i];
+    if(inQ){
+      if(ch==='"'){
+        if(text[i+1]==='"'){field+='"';i+=2;continue;}
+        inQ=false;i++;continue;
+      }
+      field+=ch;i++;continue;
+    }
+    if(ch==='"'){inQ=true;i++;continue;}
+    if(ch===","){row.push(field);field="";i++;continue;}
+    if(ch==="\r"){i++;continue;}
+    if(ch==="\n"){row.push(field);rows.push(row);row=[];field="";i++;continue;}
+    field+=ch;i++;
+  }
+  if(field.length||row.length){row.push(field);rows.push(row);}
+  return rows.filter(function(r){return r.some(function(x){return String(x).trim()!=="";});});
+}
+function analyseCustomerCsv(text){
+  var rows=parseCsv(text);
+  if(!rows.length) return {error:"That file appears to be empty."};
+  var header=rows[0].map(function(h){return String(h).trim().toLowerCase().replace(/\s+/g,"");});
+  var idx={};
+  CSV_HEADERS.forEach(function(h){ idx[h]=header.indexOf(h.toLowerCase()); });
+  if(idx.CustomerName<0||idx.Area<0){
+    return {error:"Missing required columns. The file needs at least CustomerName and Area. Export a file first to see the expected format."};
+  }
+  var areas=loadAreas();
+  var areaLower={}; areas.forEach(function(a){areaLower[a.toLowerCase()]=a;});
+  var byName={};
+  CUSTS.forEach(function(c){ byName[(c.name||"").trim().toLowerCase()+"|"+(c.area||"").trim().toLowerCase()]=c; });
+
+  var toAdd=[],toUpdate=[],problems=[],newAreas={};
+  for(var r=1;r<rows.length;r++){
+    var row=rows[r];
+    var get=function(k){ return idx[k]>=0 ? csvUnwrap(row[idx[k]]) : ""; };
+    var name=get("CustomerName"), area=get("Area");
+    if(!name){ problems.push("Row "+(r+1)+": missing customer name"); continue; }
+    if(!area){ problems.push("Row "+(r+1)+": missing area for \""+name+"\""); continue; }
+    var phoneVal=get("Phone");
+    /* If a spreadsheet already mangled the number into scientific notation
+       (9.66568E+11) the digits are gone for good — better to flag it than
+       to silently import a broken number. */
+    if(phoneVal && /e\+?\d+$/i.test(phoneVal.replace(/\s/g,""))){
+      problems.push("Row "+(r+1)+": phone for \""+name+"\" was damaged by the spreadsheet (shows as "+phoneVal+") — imported without a phone number");
+      phoneVal="";
+    }
+    /* Areas that don't exist yet are created on import. Matching is
+       case-insensitive so "malaz" and "Malaz" don't become two areas, and
+       the first spelling seen in the file wins for any genuinely new one. */
+    var realArea=areaLower[area.toLowerCase()];
+    if(!realArea){
+      realArea=area;
+      areaLower[area.toLowerCase()]=area;
+      newAreas[area]=true;
+    }
+    var rec={
+      name:name, area:realArea,
+      phone:phoneVal,
+      lat:get("Latitude"), lng:get("Longitude"),
+      mapsLink:get("MapsLink")
+    };
+    var existing=byName[name.toLowerCase()+"|"+realArea.toLowerCase()];
+    if(existing){ rec.n=existing.n; toUpdate.push(rec); }
+    else { toAdd.push(rec); }
+  }
+  return {toAdd:toAdd,toUpdate:toUpdate,problems:problems,newAreas:Object.keys(newAreas),total:rows.length-1};
+}
+async function applyCustomerCsv(result){
+  // Create any brand-new areas first, so imported customers always land in
+  // an area that actually exists.
+  if(result.newAreas && result.newAreas.length){
+    var list=loadAreas().slice();
+    var lower={}; list.forEach(function(a){lower[a.toLowerCase()]=true;});
+    result.newAreas.forEach(function(a){ if(!lower[a.toLowerCase()]){ list.push(a); lower[a.toLowerCase()]=true; } });
+    if(!(window.FB && window.FB.saveAreas)) throw new Error("offline");
+    await window.FB.saveAreas(list);
+  }
+  result.toUpdate.forEach(function(rec){ updateCustomer(rec.n,rec); });
+  result.toAdd.forEach(function(rec){ addCustomer(rec); });
+  rebuildCustomers();
+  renderTabs();
+  renderList();
+}
+/* If coordinates weren't entered directly but the maps link contains them,
+   pull them out automatically — otherwise the GPS fields sit empty even
+   though the location is right there in the link. Short links
+   (maps.app.goo.gl) don't contain coordinates, so those still come back
+   empty and need the Extract button or "Add from Google". */
+function coordsFromDataOrLink(data){
+  if(data.lat&&data.lng) return {lat:parseFloat(data.lat),lng:parseFloat(data.lng)};
+  var link=data.mapsLink||"";
+  if(link){
+    var c=extractCoordsFromMapsUrl(link);
+    if(c) return {lat:parseFloat(c.lat),lng:parseFloat(c.lng)};
+  }
+  return null;
+}
+/* ===== Bulk GPS backfill (admin) =====
+   Looks up customers that have no coordinates by name + area through the
+   Places API. Matching by name is a best guess, not a guarantee — the
+   preview reports what was found so it can be spot-checked before saving. */
+function customersMissingCoords(){
+  return CUSTS.filter(function(c){ return !(c.lat&&c.lng); });
+}
+async function backfillMissingCoords(onProgress){
+  var targets=customersMissingCoords();
+  var found=[],notFound=[];
+  for(var i=0;i<targets.length;i++){
+    var c=targets[i];
+    if(onProgress) onProgress(i+1,targets.length);
+    try{
+      var q=c.name+(c.area?(", "+c.area):"")+", Riyadh, Saudi Arabia";
+      var place=await findPlaceByName(q);
+      var lat=place.geometry.location.lat();
+      var lng=place.geometry.location.lng();
+      var rec={cust:c,lat:lat.toFixed(6),lng:lng.toFixed(6),matchedName:place.name||"",phone:""};
+      if(!c.ph && place.place_id){
+        try{
+          var det=await getPlaceDetailsById(place.place_id);
+          rec.phone=det.formatted_phone_number||det.international_phone_number||"";
+        }catch(e){}
+      }
+      found.push(rec);
+    }catch(e){
+      notFound.push(c);
+    }
+    // Small pause so we don't hammer the Places API in a tight loop.
+    await new Promise(function(r){ setTimeout(r,220); });
+  }
+  return {found:found,notFound:notFound,total:targets.length};
+}
+function applyCoordBackfill(found){
+  found.forEach(function(rec){
+    var c=rec.cust;
+    updateCustomer(c.n,{
+      name:c.name, area:c.area,
+      phone:c.ph||rec.phone||"",
+      lat:rec.lat, lng:rec.lng,
+      mapsLink:"https://www.google.com/maps?q="+rec.lat+","+rec.lng
+    });
+  });
+  rebuildCustomers();
+  renderTabs();
+  renderList();
+}
+
 function updateCustomer(n,data){
   var cust=getCustomerByNumber(n);
   if(!cust)return null;
@@ -3031,7 +3273,8 @@ function updateCustomer(n,data){
     area:data.area,
     maps:buildMapsLinkFromInput(data.lat,data.lng,data.mapsLink,data.name,data.area)
   };
-  if(data.lat&&data.lng){updated.lat=parseFloat(data.lat);updated.lng=parseFloat(data.lng);}
+  var _cu=coordsFromDataOrLink(data);
+  if(_cu){updated.lat=_cu.lat;updated.lng=_cu.lng;}
   for(var k in updated)cust[k]=updated[k];
   try{
     var overrides=JSON.parse(localStorage.getItem(CUSTOMER_OVERRIDES_KEY)||"{}");
@@ -3185,11 +3428,17 @@ var curDetail=null;
    reset any more. */
 
 function loadVisitStore(){
+  /* Visits now live as one Firestore document each, held in memory here.
+     Falls back to the old single-document format only if the new store
+     hasn't loaded yet (e.g. a very early render during boot). */
+  if(window.__AF_VISITS__) return window.__AF_VISITS__;
   try{
     var raw=localStorage.getItem(VISIT_KEY);
     return raw?JSON.parse(raw):{};
   }catch(e){return {};}
 }
+/* Legacy writer kept only so any old code path can't crash; visits are
+   now written one document at a time via window.FB.addVisitDoc. */
 function saveVisitStore(store){
   try{localStorage.setItem(VISIT_KEY,JSON.stringify(store));}catch(e){}
 }
@@ -3205,29 +3454,44 @@ function getVisits(sno){
   return arr.slice().sort(function(a,b){return b.ts-a.ts;});
 }
 function addVisit(sno,note){
-  var store=loadVisitStore();
-  if(!store[sno])store[sno]=[];
-  store[sno].push({ts:Date.now(),note:(note||"").trim(),user:CURRENT_USER||"Unknown",uid:CURRENT_UID||""});
-  saveVisitStore(store);
-  updateStatsBar();
+  var v={sno:sno,ts:Date.now(),note:(note||"").trim(),user:CURRENT_USER||"Unknown",uid:CURRENT_UID||""};
+  if(!(window.FB && window.FB.addVisitDoc)) return Promise.reject(new Error("offline"));
+  return window.FB.addVisitDoc(v).then(function(id){
+    var store=loadVisitStore();
+    if(!store[sno]) store[sno]=[];
+    store[sno].unshift({id:id,ts:v.ts,note:v.note,user:v.user,uid:v.uid});
+    updateStatsBar();
+    return id;
+  });
 }
 function deleteVisit(sno,ts){
   var store=loadVisitStore();
-  if(!store[sno])return;
-  store[sno]=store[sno].filter(function(v){return v.ts!==ts;});
-  saveVisitStore(store);
-  updateStatsBar();
+  if(!store[sno]) return Promise.resolve();
+  var target=null;
+  store[sno].forEach(function(v){ if(v.ts===ts) target=v; });
+  if(!target||!target.id||!(window.FB&&window.FB.deleteVisitDoc)) return Promise.reject(new Error("offline"));
+  return window.FB.deleteVisitDoc(target.id).then(function(){
+    store[sno]=store[sno].filter(function(v){return v.ts!==ts;});
+    updateStatsBar();
+  });
 }
 function addVisitDetailed(sno,data){
-  var store=loadVisitStore();
-  if(!store[sno])store[sno]=[];
-  var v={ts:Date.now(),note:(data.note||"").trim(),user:CURRENT_USER||"Unknown",uid:CURRENT_UID||""};
+  var v={sno:sno,ts:Date.now(),note:(data.note||"").trim(),user:CURRENT_USER||"Unknown",uid:CURRENT_UID||""};
   if(data.outcome)v.outcome=data.outcome;
   if(data.followUpDate)v.followUpDate=data.followUpDate;
   if(data.checkIn)v.checkIn=data.checkIn;
-  store[sno].push(v);
-  saveVisitStore(store);
-  updateStatsBar();
+  if(!(window.FB && window.FB.addVisitDoc)) return Promise.reject(new Error("offline"));
+  return window.FB.addVisitDoc(v).then(function(id){
+    var store=loadVisitStore();
+    if(!store[sno]) store[sno]=[];
+    var rec={id:id,ts:v.ts,note:v.note,user:v.user,uid:v.uid};
+    if(v.outcome)rec.outcome=v.outcome;
+    if(v.followUpDate)rec.followUpDate=v.followUpDate;
+    if(v.checkIn)rec.checkIn=v.checkIn;
+    store[sno].unshift(rec);
+    updateStatsBar();
+    return id;
+  });
 }
 var VISIT_OUTCOMES={
   order:{ic:"ti-shopping-cart",lbl:"Order"},
@@ -3292,6 +3556,12 @@ function getReportEntries(range){
   return entries;
 }
 
+/* Entries are grouped under day headings, so showing the clock time is
+   more useful here than repeating the date on every row. */
+function timeLabel(ts){
+  try{ return new Date(ts).toLocaleTimeString("en-GB",{hour:"2-digit",minute:"2-digit"}); }
+  catch(e){ return formatDMY(ts); }
+}
 function dayLabel(ts){
   var d=new Date(ts);
   var today=new Date();today.setHours(0,0,0,0);
@@ -3340,10 +3610,9 @@ function renderReport(){
     html+="<div class='rpt-entry' data-sno='"+e.cust.n+"'>";
     html+="<div class='rpt-entry-badge'>"+(k+1)+"</div>";
     html+="<div class='rpt-entry-body'>";
-    html+="<div class='rpt-entry-sno'>S.No "+(k+1)+"</div>";
-    html+="<div class='rpt-entry-top'><div class='rpt-entry-name'>"+e.cust.name+"</div><div class='rpt-entry-time'>"+formatDMY(e.ts)+"</div></div>";
-    html+="<div class='rpt-entry-meta'><span><i class='ti ti-map-pin'></i>"+e.cust.area+"</span>"+(e.cust.ph?"<span><i class='ti ti-phone'></i>"+e.cust.ph+"</span>":"")+"<span><i class='ti ti-user'></i>"+escapeHtml(e.user)+"</span></div>";
-    html+="<div class='rpt-entry-note"+(e.note?"":" empty")+"'>"+(e.note?escapeHtml(e.note):"No comments added")+"</div>";
+    html+="<div class='rpt-entry-top'><div class='rpt-entry-name'>"+escapeHtml(e.cust.name)+"</div><div class='rpt-entry-time'>"+timeLabel(e.ts)+"</div></div>";
+    html+="<div class='rpt-entry-meta'><span><i class='ti ti-map-pin'></i>"+escapeHtml(e.cust.area)+"</span><span><i class='ti ti-user'></i>"+escapeHtml(e.user)+"</span></div>";
+    if(e.note){ html+="<div class='rpt-entry-note'>"+escapeHtml(e.note)+"</div>"; }
     html+="</div></div>";
   }
   body.innerHTML=html;
@@ -3544,9 +3813,10 @@ function exportReportPDF(range){
 
 function renderTabs(){
   var tabsEl=document.getElementById("tabs");
-  var areas=loadAreas();
+  var areas=visibleAreas();
+  var mine=visibleCustomers();
   var due=countDueCustomers();
-  var html="<button class='tab"+(curFilter==="all"?" active":"")+"' data-f='all'>All <span class='tcnt'>"+CUSTS.length+"</span></button>";
+  var html="<button class='tab"+(curFilter==="all"?" active":"")+"' data-f='all'>All <span class='tcnt'>"+mine.length+"</span></button>";
   html+="<button class='tab tab-due"+(curFilter==="__due"?" active":"")+"' data-f='__due'><i class='ti ti-alarm'></i> Due <span class='tcnt'>"+due+"</span></button>";
   for(var j=0;j<areas.length;j++){
     var area=areas[j];
@@ -3680,6 +3950,10 @@ async function saveAppSettings(obj){
   }
   await window.FB.saveAppSettings(obj);
 }
+function isTrackingEnabled(){
+  var s=loadAppSettings();
+  return s.trackingEnabled!==false;   // on unless explicitly disabled
+}
 function getVisitDueDays(){
   var s=loadAppSettings();
   var n=parseInt(s.visitDueDays,10);
@@ -3695,14 +3969,14 @@ function isDueForVisit(sno){
   return (d===null)||(d>=getVisitDueDays());
 }
 function countDueCustomers(){
-  var n=0;
-  for(var i=0;i<CUSTS.length;i++){ if(isDueForVisit(CUSTS[i].n)) n++; }
+  var list=visibleCustomers(),n=0;
+  for(var i=0;i<list.length;i++){ if(isDueForVisit(list[i].n)) n++; }
   return n;
 }
 
 function getFiltered(){
   var s=curSearch.toLowerCase();
-  var list=CUSTS.filter(function(c){
+  var list=visibleCustomers().filter(function(c){
     var mA;
     if(curFilter==="all") mA=true;
     else if(curFilter==="__due") mA=isDueForVisit(c.n);
@@ -3808,9 +4082,12 @@ function renderList(){
             notePlaceholder:"Add a note (optional)...",
             confirmLabel:"Confirm Visit",
             onConfirm:function(note){
-              addVisit(sno,note);
-              renderList();
-              showToast("Visit logged for "+cust.name,"success","ti-circle-check");
+              addVisit(sno,note).then(function(){
+                renderList();
+                showToast("Visit logged for "+cust.name,"success","ti-circle-check");
+              }).catch(function(){
+                showToast("Couldn't save the visit — check your connection","danger","ti-alert-triangle");
+              });
             }
           });
         });
@@ -3859,10 +4136,13 @@ function renderVisitLog(sno){
         cancelLabel:"Keep It",
         danger:true,
         onConfirm:function(){
-          deleteVisit(sno,ts);
-          renderVisitLog(sno);
-          renderList();
-          showToast("Visit entry deleted","danger","ti-trash");
+          deleteVisit(sno,ts).then(function(){
+            renderVisitLog(sno);
+            renderList();
+            showToast("Visit entry deleted","danger","ti-trash");
+          }).catch(function(){
+            showToast("Couldn't delete — check your connection","danger","ti-alert-triangle");
+          });
         }
       });
     });
@@ -4141,6 +4421,7 @@ function loadGoogleMapsScript(){
    location once it's no longer the active tab, unlike a native phone app. */
 var _liveTrackingInterval=null;
 function startLiveLocationTracking(){
+  if(!isTrackingEnabled()) return;   // company has tracking switched off
   if(!("geolocation" in navigator)) return;
   if(_liveTrackingInterval) return;
   function captureOnce(){
@@ -5042,6 +5323,27 @@ function isAdmin(){return CURRENT_ROLE==="admin";}
    get the admin-only Areas, Users or Tracking screens. */
 function isManager(){return CURRENT_ROLE==="manager";}
 function canViewTeamPlans(){return isAdmin()||isManager();}
+/* ===== Area assignment =====
+   Sales Executives only see customers in the areas assigned to them by an
+   admin. Admins and Team Managers always see everything. A rep with no
+   areas assigned yet sees nothing, which makes an unfinished setup obvious
+   rather than silently exposing the whole customer base. */
+var CURRENT_AREAS=[];
+function seesAllAreas(){ return isAdmin()||isManager(); }
+function myAreas(){ return Array.isArray(CURRENT_AREAS)?CURRENT_AREAS:[]; }
+function canSeeArea(area){
+  if(seesAllAreas()) return true;
+  return myAreas().indexOf(area)>=0;
+}
+function visibleAreas(){
+  var all=loadAreas();
+  if(seesAllAreas()) return all;
+  return all.filter(function(a){ return myAreas().indexOf(a)>=0; });
+}
+function visibleCustomers(){
+  if(seesAllAreas()) return CUSTS.slice();
+  return CUSTS.filter(function(c){ return canSeeArea(c.area); });
+}
 /* Only Team Managers and Admins can change an action item's status —
    Sales Executives see their own items but can't update them. */
 function canUpdateActionPlan(){return isAdmin()||isManager();}
@@ -5078,6 +5380,7 @@ function showApp(profile){
     CURRENT_USERNAME=profile.username||"";
     CURRENT_UID=profile.uid||"";
     CURRENT_PHOTO=profile.photo||"";
+    CURRENT_AREAS=Array.isArray(profile.areas)?profile.areas:[];
   }
   BOOT_TIME=Date.now();
   var savedLang=null;
@@ -5105,7 +5408,7 @@ function updateAdminUI(){
   var ul=document.getElementById("nb-users");
   if(ul)ul.style.display=isAdmin()?"":"none";
   var tl=document.getElementById("nb-tracking");
-  if(tl)tl.style.display=isAdmin()?"":"none";
+  if(tl)tl.style.display=(isAdmin()&&isTrackingEnabled())?"":"none";
 }
 
 /* Bridges the Firebase module script calls into once it knows whether
@@ -5356,11 +5659,118 @@ function renderSettingsScreen(){
     teamCard.style.display=isAdmin()?"":"none";
     if(isAdmin()) renderCycleCard();
   }
+  var dataCard=document.getElementById("settings-data-card");
+  if(dataCard) dataCard.style.display=isAdmin()?"":"none";
 }
+document.getElementById("csv-export-btn").addEventListener("click",exportCustomersCsv);
+document.getElementById("gps-backfill-btn").addEventListener("click",function(){
+  var btn=this, txt=document.getElementById("gps-backfill-text");
+  var original=txt.textContent;
+  var missing=customersMissingCoords();
+  if(!missing.length){
+    showToast("All customers already have GPS coordinates","success","ti-circle-check");
+    return;
+  }
+  if(!GOOGLE_MAPS_API_KEY||GOOGLE_MAPS_API_KEY.indexOf("YOUR_")===0){
+    showToast("Google Places isn't set up — can't look up locations","danger","ti-map-off");
+    return;
+  }
+  showConfirm({
+    title:"Look up missing coordinates?",
+    message:missing.length+" customer"+(missing.length===1?"":"s")+" have no GPS coordinates.\n\nThis searches Google by customer name and area. Matches are a best guess — you'll see what was found before anything is saved.",
+    icon:"ti-map-pin-search",
+    confirmLabel:"Start Lookup",
+    onConfirm:function(){
+      btn.disabled=true;
+      backfillMissingCoords(function(done,total){
+        txt.textContent="Looking up "+done+" of "+total+"\u2026";
+      }).then(function(res){
+        btn.disabled=false;
+        txt.textContent=original;
+        if(!res.found.length){
+          showConfirm({title:"Nothing found",message:"Google couldn't match any of those customers by name. They'll need coordinates added manually.",icon:"ti-map-off",iconType:"warn",confirmLabel:"OK",cancelLabel:"Close"});
+          return;
+        }
+        var sample=res.found.slice(0,6).map(function(r){
+          var differs=(r.matchedName||"").toLowerCase()!==(r.cust.name||"").toLowerCase();
+          return "\u2022 "+r.cust.name+(differs?("  \u2192 matched \""+r.matchedName+"\""):"");
+        }).join("\n");
+        var msg="Found coordinates for "+res.found.length+" of "+res.total+" customers.";
+        if(res.notFound.length) msg+="\n"+res.notFound.length+" couldn't be matched and will be left unchanged.";
+        msg+="\n\n"+sample;
+        if(res.found.length>6) msg+="\n\u2026and "+(res.found.length-6)+" more";
+        msg+="\n\nCheck any renamed matches above look right before saving.";
+        showConfirm({
+          title:"Save these coordinates?",
+          message:msg,
+          icon:"ti-map-pin-check",
+          confirmLabel:"Save "+res.found.length,
+          onConfirm:function(){
+            applyCoordBackfill(res.found);
+            showToast("GPS added for "+res.found.length+" customers","success","ti-map-pin-check");
+          }
+        });
+      }).catch(function(){
+        btn.disabled=false;
+        txt.textContent=original;
+        showToast("Lookup failed — check your connection and Google billing","danger","ti-alert-triangle");
+      });
+    }
+  });
+});
+document.getElementById("csv-import-input").addEventListener("change",function(){
+  var file=this.files&&this.files[0];
+  var inputEl=this;
+  if(!file) return;
+  var reader=new FileReader();
+  reader.onload=function(){
+    inputEl.value="";  // let the same file be picked again later
+    var res=analyseCustomerCsv(String(reader.result||""));
+    if(res.error){
+      showConfirm({title:"Can't read that file",message:res.error,icon:"ti-file-alert",iconType:"danger",confirmLabel:"OK",cancelLabel:"Close"});
+      return;
+    }
+    if(!res.toAdd.length && !res.toUpdate.length){
+      var msg="Nothing can be imported from this file.";
+      if(res.problems.length) msg+="\n\n"+res.problems.slice(0,6).join("\n");
+      showConfirm({title:"Nothing to import",message:msg,icon:"ti-file-alert",iconType:"warn",confirmLabel:"OK",cancelLabel:"Close"});
+      return;
+    }
+    var summary=res.toAdd.length+" new customer"+(res.toAdd.length===1?"":"s")+" will be added.\n"
+      +res.toUpdate.length+" existing customer"+(res.toUpdate.length===1?"":"s")+" will be updated.";
+    if(res.newAreas.length){
+      summary+="\n\n"+res.newAreas.length+" new area"+(res.newAreas.length===1?"":"s")+" will be created:\n"
+        +res.newAreas.join(", ")
+        +"\n(Check these for typos before continuing.)";
+    }
+    if(res.problems.length){
+      summary+="\n\n"+res.problems.length+" row"+(res.problems.length===1?"":"s")+" will be skipped:\n"+res.problems.slice(0,5).join("\n");
+      if(res.problems.length>5) summary+="\n…and "+(res.problems.length-5)+" more";
+    }
+    showConfirm({
+      title:"Import these customers?",
+      message:summary,
+      icon:"ti-file-upload",
+      confirmLabel:"Import",
+      onConfirm:function(){
+        applyCustomerCsv(res).then(function(){
+          var extra=res.newAreas.length?(", created "+res.newAreas.length+" area"+(res.newAreas.length===1?"":"s")):"";
+          showToast("Imported "+res.toAdd.length+" new, updated "+res.toUpdate.length+extra,"success","ti-file-check");
+        }).catch(function(){
+          showToast("Import failed — check your connection and try again","danger","ti-alert-triangle");
+        });
+      }
+    });
+  };
+  reader.onerror=function(){ inputEl.value=""; showToast("Couldn't read that file","danger","ti-alert-triangle"); };
+  reader.readAsText(file);
+});
 function renderCycleCard(){
   var cur=getVisitDueDays();
   var input=document.getElementById("cycle-input");
   if(input) input.value=cur;
+  var trk=document.getElementById("settings-tracking-toggle");
+  if(trk) trk.checked=isTrackingEnabled();
   document.querySelectorAll("#cycle-presets .cycle-chip").forEach(function(chip){
     chip.classList.toggle("on", parseInt(chip.getAttribute("data-days"),10)===cur);
   });
@@ -5393,6 +5803,23 @@ document.getElementById("cycle-presets").addEventListener("click",function(e){
 });
 document.getElementById("cycle-save-btn").addEventListener("click",function(){
   applyVisitCycle(document.getElementById("cycle-input").value);
+});
+document.getElementById("settings-tracking-toggle").addEventListener("change",function(){
+  var on=this.checked, box=this;
+  box.disabled=true;
+  var cfg=loadAppSettings();
+  cfg.trackingEnabled=on;
+  saveAppSettings(cfg).then(function(){
+    box.disabled=false;
+    updateAdminUI();
+    if(on){ startLiveLocationTracking(); }
+    else if(_liveTrackingInterval){ clearInterval(_liveTrackingInterval); _liveTrackingInterval=null; }
+    showToast(on?"Live tracking enabled for the team":"Live tracking turned off for the team","success",on?"ti-map-pin-check":"ti-map-pin-off");
+  }).catch(function(){
+    box.disabled=false;
+    box.checked=!on;
+    showToast("Couldn't save — check your connection and try again","danger","ti-alert-triangle");
+  });
 });
 function renderAboutDataRow(){
   var dataEl=document.getElementById("about-data");
@@ -5721,7 +6148,7 @@ function updateVpCount(){
 function renderPlanCustList(){
   var listEl=document.getElementById("vp-cust-list");
   var q=vpSearch.trim().toLowerCase();
-  var list=CUSTS.slice().sort(function(a,b){
+  var list=visibleCustomers().sort(function(a,b){
     return (a.area||"").localeCompare(b.area||"")||(a.name||"").localeCompare(b.name||"");
   }).filter(function(c){
     if(!q)return true;
@@ -5808,17 +6235,21 @@ function vpVisitsOn(custNo,dateStr){
   return arr.filter(function(v){return vpTsToDateStr(v.ts)===dateStr;});
 }
 function vpAddVisitOn(sno,note,dateStr){
-  var store=loadVisitStore();
-  if(!store[sno])store[sno]=[];
   var ts;
   if(dateStr===vpTodayStr()){ts=Date.now();}
   else{
     var p=dateStr.split("-");
     ts=new Date(parseInt(p[0],10),parseInt(p[1],10)-1,parseInt(p[2],10),12,0,0).getTime();
   }
-  store[sno].push({ts:ts,note:(note||"").trim(),user:CURRENT_USER||"Unknown"});
-  saveVisitStore(store);
-  if(typeof updateStatsBar==="function")try{updateStatsBar();}catch(e){}
+  var v={sno:sno,ts:ts,note:(note||"").trim(),user:CURRENT_USER||"Unknown",uid:CURRENT_UID||""};
+  if(!(window.FB && window.FB.addVisitDoc)) return Promise.reject(new Error("offline"));
+  return window.FB.addVisitDoc(v).then(function(id){
+    var store=loadVisitStore();
+    if(!store[sno]) store[sno]=[];
+    store[sno].unshift({id:id,ts:v.ts,note:v.note,user:v.user,uid:v.uid});
+    if(typeof updateStatsBar==="function")try{updateStatsBar();}catch(e){}
+    return id;
+  });
 }
 
 // ---- Route optimization + navigation ----
@@ -5980,12 +6411,20 @@ function vpAddComment(n){
       onConfirm:function(note){
         var store=loadVisitStore();
         var arr=store[n]||[];
-        for(var i=arr.length-1;i>=0;i--){
-          if(arr[i].ts===latest.ts){arr[i].note=(note||"").trim();break;}
+        var target=null;
+        for(var i=arr.length-1;i>=0;i--){ if(arr[i].ts===latest.ts){ target=arr[i]; break; } }
+        if(!target||!target.id||!(window.FB&&window.FB.updateVisitDoc)){
+          showToast("Couldn't save the comment — check your connection","danger","ti-alert-triangle");
+          return;
         }
-        saveVisitStore(store);
-        showToast("Comments saved","success","ti-message-check");
-        openPlanDetail(dateStr);
+        var txt=(note||"").trim();
+        window.FB.updateVisitDoc(target.id,{note:txt}).then(function(){
+          target.note=txt;
+          showToast("Comments saved","success","ti-message-check");
+          openPlanDetail(dateStr);
+        }).catch(function(){
+          showToast("Couldn't save the comment — check your connection","danger","ti-alert-triangle");
+        });
       }
     });
   } else {
@@ -6397,6 +6836,10 @@ document.addEventListener("visibilitychange",function(){
         + ".fbt-badge{font-size:10.5px;font-weight:700;padding:3px 8px;border-radius:20px;white-space:nowrap}"
         + ".fbt-badge.admin{background:#e6f6ec;color:#0d7a40}"
         + ".fbt-badge.mgr{background:#e8f0ff;color:#1e5bbf}"
+        + ".fbt-areas{display:flex;flex-wrap:wrap;gap:6px}"
+        + ".fbt-area-chip{padding:7px 12px;border-radius:18px;border:1.5px solid var(--border,#e4e9f4);background:#fff;color:#5a6b8a;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit}"
+        + ".fbt-area-chip.on{background:#0d7a40;border-color:#0d7a40;color:#fff}"
+        + ".fbt-areas-hint{font-size:11px;color:#8494ad;margin-top:7px;line-height:1.5}"
         + ".fbt-badge.rep{background:#eef1f7;color:#5a6b8a}"
         + ".fbt-badge.off{background:#fdecec;color:#dc2626}"
         + ".fbt-acts{display:flex;flex-wrap:wrap;gap:7px;margin-top:8px}"
@@ -6517,6 +6960,10 @@ document.addEventListener("visibilitychange",function(){
         +       "<div class='fbt-drop-list' id='fbt-edit-role-list'></div>"
         +     "</div>"
         +   "</div>"
+        +   "<div class='fbt-field' id='fbt-edit-areas-field'><label class='fbt-label'>Assigned areas</label>"
+        +     "<div class='fbt-areas' id='fbt-edit-areas'></div>"
+        +     "<div class='fbt-areas-hint' id='fbt-edit-areas-hint'></div>"
+        +   "</div>"
         +   "<button class='fbt-btn' id='fbt-edit-save'><i class='ti ti-device-floppy'></i> Save changes</button>"
         +   "<div class='fbt-div'></div>"
         +   "<div class='fbt-sec-title'>Other actions</div>"
@@ -6575,6 +7022,9 @@ document.addEventListener("visibilitychange",function(){
           hidden.value=it.getAttribute("data-v");
           input.value=it.getAttribute("data-label");
           list.classList.remove("open");
+          // Area assignment only applies to Sales Executives, so refresh
+          // that section whenever the chosen role changes.
+          try{ if(hiddenId==="fbt-edit-role" && typeof renderEditAreas==="function") renderEditAreas(); }catch(e){}
         });
         document.addEventListener("click",function(e){ if(drop && !drop.contains(e.target)) closeRoles(); });
         return {
@@ -6746,6 +7196,8 @@ document.addEventListener("visibilitychange",function(){
         setToggleBtnLabel();
         editMsg("","");
         var cached = _usersCache[editState.uid] || {};
+        editState.areas = Array.isArray(cached.areas) ? cached.areas.slice() : [];
+        renderEditAreas();
         var existingPhoto = cached.photo || "";
         document.getElementById("fbt-edit-photo-data").value = existingPhoto;
         var previewEl = document.getElementById("fbt-edit-photo-preview");
@@ -6791,7 +7243,7 @@ document.addEventListener("visibilitychange",function(){
         var photo = document.getElementById("fbt-edit-photo-data").value || "";
         if(!fbReady()){ editMsg("Still connecting to the server \u2014 try again in a moment.","err"); return; }
         btn.disabled = true;
-        window.FB.updateUserProfile(editState.uid, { name:name, role:role, photo:photo }).then(function(){
+        window.FB.updateUserProfile(editState.uid, { name:name, role:role, photo:photo, areas:(editState.areas||[]) }).then(function(){
           btn.disabled = false;
           editMsg("Changes saved.","ok");
           if(role !== editState.role && window.FB.createNotification){
@@ -6804,6 +7256,43 @@ document.addEventListener("visibilitychange",function(){
           editMsg("Couldn't save changes. Please try again.","err");
         });
       });
+
+      /* Area assignment chips. Admins and Team Managers see every area by
+         design, so the picker is only meaningful for Sales Executives. */
+      function renderEditAreas(){
+        var wrap = document.getElementById("fbt-edit-areas");
+        var hint = document.getElementById("fbt-edit-areas-hint");
+        var field = document.getElementById("fbt-edit-areas-field");
+        if(!wrap) return;
+        var role = editRoleDD.getValue();
+        if(role === "admin" || role === "manager"){
+          field.style.display = "none";
+          return;
+        }
+        field.style.display = "";
+        var areas = (typeof loadAreas === "function") ? loadAreas() : [];
+        if(!areas.length){
+          wrap.innerHTML = "";
+          hint.textContent = "No areas exist yet — create them on the Areas screen first.";
+          return;
+        }
+        var sel = editState.areas || [];
+        wrap.innerHTML = areas.map(function(a){
+          var on = sel.indexOf(a) >= 0;
+          return "<button type='button' class='fbt-area-chip"+(on?" on":"")+"' data-area='"+esc(a)+"'>"+esc(a)+"</button>";
+        }).join("");
+        hint.textContent = sel.length
+          ? ("This person sees customers in: "+sel.join(", "))
+          : "No areas selected — this person will see no customers until you assign at least one.";
+        wrap.querySelectorAll(".fbt-area-chip").forEach(function(chip){
+          chip.addEventListener("click", function(){
+            var a = chip.getAttribute("data-area");
+            var i = (editState.areas||[]).indexOf(a);
+            if(i >= 0) editState.areas.splice(i,1); else (editState.areas = editState.areas||[]).push(a);
+            renderEditAreas();
+          });
+        });
+      }
 
       document.getElementById("fbt-edit-reset").addEventListener("click", function(){
         var btn = this;
@@ -6857,7 +7346,7 @@ document.addEventListener("visibilitychange",function(){
    app falls back to the local login + local storage it has always used. */
 import { initializeApp, deleteApp } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-app.js";
 import { getAuth, setPersistence, browserLocalPersistence, signInWithEmailAndPassword, createUserWithEmailAndPassword, sendPasswordResetEmail, signOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-auth.js";
-import { initializeFirestore, collection, doc, getDoc, getDocs, setDoc, onSnapshot, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
+import { initializeFirestore, collection, doc, getDoc, getDocs, setDoc, addDoc, deleteDoc, writeBatch, onSnapshot, serverTimestamp, query, where } from "https://www.gstatic.com/firebasejs/12.1.0/firebase-firestore.js";
 
 var firebaseConfig = {
   apiKey: "AIzaSyCH6pU237U2wBW6EqY9TYKM1OTeLls619s",
@@ -7057,6 +7546,7 @@ if(db){
     var role = "rep";
     var name = (email.indexOf("@")>0) ? email.split("@")[0] : email;
     var photo = "";
+    var assignedAreas = [];
     var existing = null;
     PREFS = {};
     var usnap = await withTimeout(getDoc(doc(db, "users", user.uid)), 8000);
@@ -7065,6 +7555,7 @@ if(db){
       if(existing.role) role = existing.role;
       if(existing.name) name = existing.name;
       if(existing.photo) photo = existing.photo;
+      if(Array.isArray(existing.areas)) assignedAreas = existing.areas;
       if(existing.prefs){
         if(typeof existing.prefs.notifEnabled==="boolean") PREFS.notifEnabled = existing.prefs.notifEnabled;
         if(typeof existing.prefs.installDismissed==="boolean") PREFS.installDismissed = existing.prefs.installDismissed;
@@ -7082,7 +7573,7 @@ if(db){
       try{ setDoc(doc(db, "users", user.uid), { lastLoginAt: serverTimestamp() }, { merge:true }).catch(function(){}); }catch(e){}
     }
     CURRENT_UID_MOD = user.uid;
-    return { role: role, name: name, username: email, uid: user.uid, photo: photo };
+    return { role: role, name: name, username: email, uid: user.uid, photo: photo, areas: assignedAreas };
   }
 
   function signOutUser(){
@@ -7113,7 +7604,7 @@ if(db){
     var snap = await getDocs(collection(db, "users"));
     snap.forEach(function(d){
       var x = d.data() || {};
-      out.push({ uid: d.id, email: x.email||"", name: x.name||"", role: x.role||"rep", disabled: x.disabled===true, photo: x.photo||"" });
+      out.push({ uid: d.id, email: x.email||"", name: x.name||"", role: x.role||"rep", disabled: x.disabled===true, photo: x.photo||"", areas: Array.isArray(x.areas)?x.areas:[] });
     });
     out.sort(function(a,b){ return (a.name||a.email).localeCompare(b.name||b.email); });
     return out;
@@ -7251,6 +7742,11 @@ if(db){
       }
 
       await fetchAppStateIntoMemory();
+      try{
+        var mig = await migrateVisitsIfNeeded();
+        if(mig && mig.migrated) console.info("[Fastrack] migrated "+mig.migrated+" visits to per-visit storage");
+      }catch(e){ console.warn("[Fastrack] visit migration skipped", e); }
+      try{ await fetchVisitsIntoMemory(); }catch(e){ console.warn("[Fastrack] couldn't load visits", e); }
       var profile = await fetchUserProfile(user);
       if(!profile){
         if(window.afShowLogin) window.afShowLogin();
@@ -7294,6 +7790,68 @@ if(db){
     afData()["af_action_status"] = JSON.stringify(mapObj);
   }
 
+  /* ===== Visits: one Firestore document per visit =====
+     Visits used to live in a single appState document, which Firestore
+     caps at 1MB — roughly 7,000 visits, i.e. only a few months of real
+     use before saving would start failing. Each visit is now its own
+     document in a "visits" collection, which has no practical ceiling. */
+  async function fetchVisitsIntoMemory(){
+    if(!db) return {};
+    var store={};
+    var snap=await getDocs(collection(db,"visits"));
+    snap.forEach(function(d){
+      var v=d.data()||{};
+      var sno=v.sno;
+      if(sno===undefined||sno===null) return;
+      if(!store[sno]) store[sno]=[];
+      store[sno].push({id:d.id,ts:v.ts||0,note:v.note||"",user:v.user||"",uid:v.uid||""});
+    });
+    Object.keys(store).forEach(function(k){
+      store[k].sort(function(a,b){return b.ts-a.ts;});
+    });
+    window.__AF_VISITS__=store;
+    return store;
+  }
+  async function addVisitDoc(v){
+    var ref=await addDoc(collection(db,"visits"),{
+      sno:v.sno, ts:v.ts, note:v.note||"", user:v.user||"", uid:v.uid||"", at:serverTimestamp()
+    });
+    return ref.id;
+  }
+  async function updateVisitDoc(id,patch){
+    if(!id) return;
+    await setDoc(doc(db,"visits",id),patch,{merge:true});
+  }
+  async function deleteVisitDoc(id){
+    if(!id) return;
+    await deleteDoc(doc(db,"visits",id));
+  }
+  /* One-time migration of any visits still held in the old single-document
+     format. Runs in batches and only when the new collection is empty, so
+     it can't duplicate anything if interrupted and retried. */
+  async function migrateVisitsIfNeeded(){
+    var existing=await getDocs(collection(db,"visits"));
+    if(existing.size>0) return {migrated:0,skipped:true};
+    var raw=afData()["af_visit_log"];
+    if(!raw) return {migrated:0,skipped:false};
+    var legacy;
+    try{ legacy=JSON.parse(raw); }catch(e){ return {migrated:0,skipped:false}; }
+    var jobs=[];
+    Object.keys(legacy||{}).forEach(function(sno){
+      (legacy[sno]||[]).forEach(function(v){
+        jobs.push({sno:parseInt(sno,10),ts:v.ts||0,note:v.note||"",user:v.user||"",uid:v.uid||""});
+      });
+    });
+    if(!jobs.length) return {migrated:0,skipped:false};
+    for(var i=0;i<jobs.length;i+=400){
+      var batch=writeBatch(db);
+      jobs.slice(i,i+400).forEach(function(j){
+        batch.set(doc(collection(db,"visits")),{sno:j.sno,ts:j.ts,note:j.note,user:j.user,uid:j.uid,at:serverTimestamp()});
+      });
+      await batch.commit();
+    }
+    return {migrated:jobs.length,skipped:false};
+  }
   async function saveAppSettingsDirect(obj){
     await setDoc(doc(db, COLLECTION, "af_app_settings"), { v: JSON.stringify(obj), at: serverTimestamp() });
     afData()["af_app_settings"] = JSON.stringify(obj);
@@ -7302,9 +7860,11 @@ if(db){
   window.FB = {
     ready:true,
     signIn:signIn, signOutUser:signOutUser, pushKey:pushKey, runBoot:runBoot,
-    refreshAppState:fetchAppStateIntoMemory,
+    refreshAppState:async function(){ await fetchAppStateIntoMemory(); try{ await fetchVisitsIntoMemory(); }catch(e){} },
     saveAreas:saveAreasDirect, saveVisitPlans:saveVisitPlansDirect, saveActionStatus:saveActionStatusDirect,
     saveAppSettings:saveAppSettingsDirect,
+    fetchVisits:fetchVisitsIntoMemory, addVisitDoc:addVisitDoc, deleteVisitDoc:deleteVisitDoc, updateVisitDoc:updateVisitDoc,
+    migrateVisits:migrateVisitsIfNeeded,
     createUser:createUser, listUsers:listUsers, updateUserProfile:updateUserProfile, resetUserPassword:resetUserPassword,
     createNotification:createNotification, watchNotifications:watchNotifications,
     markNotificationRead:markNotificationRead, markAllNotificationsRead:markAllNotificationsRead,
