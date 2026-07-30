@@ -1067,6 +1067,26 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* ===== AREAS ADMIN SCREEN ===== */
 .areas-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 calc(88px + var(--safe-bottom))}
 .areas-scroll::-webkit-scrollbar{display:none}
+/* ===== Shared page header =====
+   Every screen uses the same band: optional back button, title, optional
+   badge, optional right-hand actions. Keeping one structure means the
+   headers stop looking like five different designs. */
+.page-hero-row{
+  display:flex;align-items:center;gap:10px;
+  position:relative;z-index:1;min-height:34px;
+}
+.page-hero-row .areas-title,
+.page-hero-row .rpt-title{margin:0;flex:1;min-width:0}
+.page-hero-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+.page-badge{
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
+  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
+  letter-spacing:0.6px;text-transform:uppercase;
+}
+.page-badge i{font-size:11px}
+
 .areas-hero{
   background:linear-gradient(150deg,var(--nb2) 0%,var(--gr1) 45%,var(--gr2) 100%);
   padding:13px 18px 14px;position:relative;overflow:hidden;
@@ -1573,12 +1593,29 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
      and stat cards before any actual content appears. On a phone that was
      consuming roughly a third of the display, so the hero blocks shrink
      and the stat cards become slim pills. */
-  .areas-hero{padding:12px 16px 13px}
+  /* ===== Shared page header =====
+   Every screen uses the same band: optional back button, title, optional
+   badge, optional right-hand actions. Keeping one structure means the
+   headers stop looking like five different designs. */
+.page-hero-row{
+  display:flex;align-items:center;gap:10px;
+  position:relative;z-index:1;min-height:34px;
+}
+.page-hero-row .areas-title,
+.page-hero-row .rpt-title{margin:0;flex:1;min-width:0}
+.page-hero-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+.page-badge{
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
+  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
+  letter-spacing:0.6px;text-transform:uppercase;
+}
+.page-badge i{font-size:11px}
+
+.areas-hero{padding:12px 16px 13px}
   .areas-eyebrow{font-size:9px;letter-spacing:1.2px}
   .areas-title{font-size:16.5px;margin-top:1px}
-  /* The page titles are self-explanatory; the descriptive subtitle costs a
-     whole line on every screen, which is worth more than the explanation. */
-  .areas-sub{display:none}
 
   /* Planner: put the two primary actions side by side instead of stacking
      them, and tighten the rep picker row. */
@@ -1623,10 +1660,29 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
      The map is the point of this screen, so give it the space. The header
      shrinks to a single compact line and the KPI cards become slim pills
      instead of tall boxes. */
-  #v-tracking .areas-hero{padding:12px 16px 12px}
+  #v-tracking /* ===== Shared page header =====
+   Every screen uses the same band: optional back button, title, optional
+   badge, optional right-hand actions. Keeping one structure means the
+   headers stop looking like five different designs. */
+.page-hero-row{
+  display:flex;align-items:center;gap:10px;
+  position:relative;z-index:1;min-height:34px;
+}
+.page-hero-row .areas-title,
+.page-hero-row .rpt-title{margin:0;flex:1;min-width:0}
+.page-hero-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+.page-badge{
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
+  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
+  letter-spacing:0.6px;text-transform:uppercase;
+}
+.page-badge i{font-size:11px}
+
+.areas-hero{padding:12px 16px 12px}
   #v-tracking .areas-eyebrow{font-size:9px;letter-spacing:1.2px}
   #v-tracking .areas-title{font-size:16px;margin-top:1px}
-  #v-tracking .areas-sub{display:none}
 
   #v-tracking .tracking-stats{gap:7px;margin:10px 12px 0}
   #v-tracking .tracking-stat-card{
@@ -1684,10 +1740,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     border-top:none;border-right:1.5px solid var(--border);
     box-shadow:none;background:var(--card);
   }
-  .bnav::before{
-    content:"Fastrack";display:block;font-size:15px;font-weight:900;color:var(--nb1);
-    letter-spacing:-0.3px;padding:6px 12px 16px;
-  }
+  .bnav{padding-top:16px}
   .nbtn{
     flex:0 0 auto;flex-direction:row;justify-content:flex-start;align-items:center;gap:12px;
     padding:11px 13px;border-radius:13px;color:var(--muted);font-size:13px;
@@ -1739,7 +1792,27 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
   .rpt-stat-n{font-size:19px;line-height:1}
   .rpt-stat-l{font-size:9.5px;margin-top:0;letter-spacing:0.5px}
 
-  .areas-hero{padding:16px 24px 18px}
+  /* ===== Shared page header =====
+   Every screen uses the same band: optional back button, title, optional
+   badge, optional right-hand actions. Keeping one structure means the
+   headers stop looking like five different designs. */
+.page-hero-row{
+  display:flex;align-items:center;gap:10px;
+  position:relative;z-index:1;min-height:34px;
+}
+.page-hero-row .areas-title,
+.page-hero-row .rpt-title{margin:0;flex:1;min-width:0}
+.page-hero-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
+.page-badge{
+  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
+  padding:3px 9px;border-radius:20px;
+  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
+  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
+  letter-spacing:0.6px;text-transform:uppercase;
+}
+.page-badge i{font-size:11px}
+
+.areas-hero{padding:16px 24px 18px}
   .areas-title{font-size:20px}
   .areas-sub{font-size:12px;margin-top:3px}
 
@@ -2124,15 +2197,10 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <div class="rpt-scroll">
       <div class="rpt-hero">
         <div class="rpt-hero-pattern"></div>
-        <div class="rpt-hero-top">
-          <div style="display:flex;align-items:center;gap:10px">
-            <button class="rpt-back-btn" id="rpt-back-btn" title="Back to Customers"><i class="ti ti-arrow-left"></i></button>
-            <div>
-              <div class="rpt-eyebrow"><i class="ti ti-leaf"></i> <span data-i18n="reportEyebrow">Fastrack</span></div>
-              <div class="rpt-title" data-i18n="reportTitle">Customer Visit</div>
-            </div>
-          </div>
-          <div style="display:flex;gap:8px;position:relative;z-index:1">
+        <div class="page-hero-row">
+          <button class="rpt-back-btn" id="rpt-back-btn" title="Back to Customers"><i class="ti ti-arrow-left"></i></button>
+          <div class="rpt-title" data-i18n="reportTitle">Customer Visit</div>
+          <div class="page-hero-actions">
             <button class="rpt-share" id="rpt-export-btn" title="Export PDF"><i class="ti ti-file-download"></i></button>
             <button class="rpt-share" id="rpt-share-btn" title="Share report"><i class="ti ti-share-3"></i></button>
           </div>
@@ -2159,9 +2227,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <div class="areas-scroll">
       <div class="areas-hero">
         <div class="areas-hero-pattern"></div>
-        <div class="areas-eyebrow"><i class="ti ti-shield-lock"></i> <span data-i18n="areasEyebrow">Admin Only</span></div>
-        <div class="areas-title" data-i18n="areasTitle">Manage Areas</div>
-        <div class="areas-sub" data-i18n="areasSub">Define the areas reps can assign customers to</div>
+        <div class="page-hero-row">
+          <div class="areas-title" data-i18n="areasTitle">Manage Areas</div><span class="page-badge"><i class="ti ti-shield-lock"></i> Admin</span>
+        </div>
       </div>
       <div class="areas-add-box">
         <input type="text" id="area-new-input" placeholder="e.g. Rabwah" data-i18n-placeholder="areasPlaceholder">
@@ -2176,9 +2244,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <div class="areas-scroll">
       <div class="areas-hero">
         <div class="areas-hero-pattern"></div>
-        <div class="areas-eyebrow"><i class="ti ti-shield-lock"></i> <span data-i18n="usersEyebrow">Admin Only</span></div>
-        <div class="areas-title" data-i18n="usersTitle">Manage Users</div>
-        <div class="areas-sub" data-i18n="usersSub">Create accounts and reset passwords</div>
+        <div class="page-hero-row">
+          <div class="areas-title" data-i18n="usersTitle">Manage Users</div><span class="page-badge"><i class="ti ti-shield-lock"></i> Admin</span>
+        </div>
       </div>
       <div class="logo-settings-card">
         <div class="logo-settings-title"><i class="ti ti-photo"></i> <span data-i18n="logoTitle">Company Logo</span></div>
@@ -2199,9 +2267,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <div class="areas-scroll">
       <div class="areas-hero">
         <div class="areas-hero-pattern"></div>
-        <div class="areas-eyebrow"><i class="ti ti-shield-lock"></i> <span data-i18n="trackingEyebrow">Admin Only</span></div>
-        <div class="areas-title" data-i18n="trackingTitle">Live Tracking</div>
-        <div class="areas-sub" data-i18n="trackingSub">See where your team is right now</div>
+        <div class="page-hero-row">
+          <div class="areas-title" data-i18n="trackingTitle">Live Tracking</div><span class="page-badge"><i class="ti ti-shield-lock"></i> Admin</span>
+        </div>
       </div>
       <div class="tracking-stats" id="tracking-stats">
         <div class="tracking-stat-card live">
@@ -2231,9 +2299,9 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <div class="areas-scroll">
       <div class="areas-hero">
         <div class="areas-hero-pattern"></div>
-        <div class="areas-eyebrow"><i class="ti ti-calendar-time"></i> <span data-i18n="plannerEyebrow">Plan Ahead</span></div>
-        <div class="areas-title" data-i18n="plannerTitle">Visit Planner</div>
-        <div class="areas-sub" data-i18n="plannerSub">Pick a date, select customers, and save your visit plan</div>
+        <div class="page-hero-row">
+          <div class="areas-title" data-i18n="plannerTitle">Visit Planner</div>
+        </div>
       </div>
 
       <!-- Saved plans (home) -->
@@ -2325,14 +2393,10 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
     <div class="areas-scroll">
       <div class="areas-hero">
         <div class="areas-hero-pattern"></div>
-        <div style="display:flex;align-items:center;gap:10px;position:relative;z-index:1">
+        <div class="page-hero-row">
           <button class="rpt-back-btn" id="settings-back-btn" title="Back"><i class="ti ti-arrow-left"></i></button>
-          <div>
-            <div class="areas-eyebrow"><i class="ti ti-settings"></i> <span data-i18n="settingsEyebrow">Account</span></div>
-            <div class="areas-title" data-i18n="settingsTitle">Settings</div>
-          </div>
+          <div class="areas-title" data-i18n="settingsTitle">Settings</div>
         </div>
-        <div class="areas-sub" style="margin-left:44px" data-i18n="settingsSub">Your account and app preferences</div>
       </div>
 
       <div class="session-info-card" style="margin:14px 16px 0">
@@ -2772,7 +2836,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-30-r38";
+var APP_VERSION = "2026-07-30-r39";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -2802,9 +2866,7 @@ var TRANSLATIONS = {
     offlineTitle: "You're offline",
     offlineMessage: "Fastrack needs an internet connection to load your data. Reconnect and this will pick back up automatically.",
     offlineRetry: "Try Again",
-    settingsEyebrow: "Account",
     settingsTitle: "Settings",
-    settingsSub: "Your account and app preferences",
     settingsNotifTitle: "Notifications",
     settingsNotifSub: "Show a badge on the bell icon when you get a new notification.",
     settingsNotifToggle: "Enable notification badge",
@@ -2826,24 +2888,17 @@ var TRANSLATIONS = {
     bellMarkAll: "Mark all read",
     bellEmpty: "No notifications yet",
     accountTitle: "Account",
-    areasEyebrow: "Admin Only",
     areasTitle: "Manage Areas",
-    areasSub: "Define the areas reps can assign customers to",
     areasPlaceholder: "e.g. Rabwah",
     areasAddBtn: "Add",
-    usersEyebrow: "Admin Only",
     usersTitle: "Manage Users",
-    usersSub: "Create accounts and reset passwords",
     logoTitle: "Company Logo",
     logoSub: "Shown on the login screen, header, PDF exports, and install prompt.",
     logoUpload: "Upload New Logo",
     logoReset: "Reset to Default",
-    plannerEyebrow: "Plan Ahead",
     plannerTitle: "Visit Planner",
-    plannerSub: "Pick a date, select customers, and save your visit plan",
     plannerNewBtn: "New Visit Plan",
     plannerActionPlan: "Action Plan",
-    reportEyebrow: "Fastrack",
     reportTitle: "Customer Visit",
     reportToday: "Today",
     reportWeek: "This Week",
@@ -2864,9 +2919,7 @@ var TRANSLATIONS = {
     gplacesFreeMsg: "This opens Google Maps in a new tab. Search for the business there, then long-press its pin to drop a marker showing the exact coordinates as plain numbers — copy those. Come back here, paste them into the Latitude/Longitude fields (or paste a full share link into \"Google Maps Link\" and tap \"Extract Coordinates from Link\"). Type the name and phone number in yourself from the listing.",
     gplacesFreeBtn: "Open Google Maps",
     navTracking: "Tracking",
-    trackingEyebrow: "Admin Only",
     trackingTitle: "Live Tracking",
-    trackingSub: "See where your team is right now",
     trackingEmpty: "No one is currently sharing their location",
     trackingLive: "Active now",
     trackingStaleMinutes: "Last seen {n} min ago",
@@ -2924,9 +2977,7 @@ var TRANSLATIONS = {
     offlineTitle: "أنت غير متصل",
     offlineMessage: "يحتاج فاست تراك إلى اتصال بالإنترنت لتحميل بياناتك. أعد الاتصال وسيتابع العمل تلقائيًا.",
     offlineRetry: "إعادة المحاولة",
-    settingsEyebrow: "الحساب",
     settingsTitle: "الإعدادات",
-    settingsSub: "إعدادات حسابك والتطبيق",
     settingsNotifTitle: "الإشعارات",
     settingsNotifSub: "إظهار شارة على أيقونة الجرس عند وصول إشعار جديد.",
     settingsNotifToggle: "تفعيل شارة الإشعارات",
@@ -2948,24 +2999,17 @@ var TRANSLATIONS = {
     bellMarkAll: "تعليم الكل كمقروء",
     bellEmpty: "لا توجد إشعارات بعد",
     accountTitle: "الحساب",
-    areasEyebrow: "للمسؤول فقط",
     areasTitle: "إدارة المناطق",
-    areasSub: "حدد المناطق التي يمكن للمندوبين تعيين العملاء لها",
     areasPlaceholder: "مثال: الروابي",
     areasAddBtn: "إضافة",
-    usersEyebrow: "للمسؤول فقط",
     usersTitle: "إدارة المستخدمين",
-    usersSub: "إنشاء الحسابات وإعادة تعيين كلمات المرور",
     logoTitle: "شعار الشركة",
     logoSub: "يظهر في شاشة تسجيل الدخول والرأس وملفات PDF ورسالة التثبيت.",
     logoUpload: "رفع شعار جديد",
     logoReset: "إعادة التعيين للافتراضي",
-    plannerEyebrow: "خطط مسبقًا",
     plannerTitle: "مخطط الزيارات",
-    plannerSub: "اختر تاريخًا وحدد العملاء واحفظ خطة الزيارة",
     plannerNewBtn: "خطة زيارة جديدة",
     plannerActionPlan: "خطة العمل",
-    reportEyebrow: "فاست تراك",
     reportTitle: "زيارة العميل",
     reportToday: "اليوم",
     reportWeek: "هذا الأسبوع",
@@ -2986,9 +3030,7 @@ var TRANSLATIONS = {
     gplacesFreeMsg: "سيتم فتح خرائط Google في تبويب جديد. ابحث عن النشاط التجاري هناك، ثم اضغط مطولاً على العلامة لإسقاط دبوس يعرض الإحداثيات كأرقام مباشرة — انسخها. عد إلى هنا والصقها في حقلي خط العرض وخط الطول (أو الصق رابط مشاركة كامل في \"رابط خرائط Google\" واضغط \"استخراج الإحداثيات من الرابط\"). أدخل الاسم ورقم الهاتف يدويًا من القائمة.",
     gplacesFreeBtn: "فتح خرائط Google",
     navTracking: "التتبع",
-    trackingEyebrow: "للمسؤول فقط",
     trackingTitle: "التتبع المباشر",
-    trackingSub: "تعرّف على مواقع فريقك الآن",
     trackingEmpty: "لا أحد يشارك موقعه حاليًا",
     trackingLive: "نشط الآن",
     trackingStaleMinutes: "آخر ظهور قبل {n} دقيقة",
