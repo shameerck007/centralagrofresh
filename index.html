@@ -877,33 +877,24 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .rpt-scroll{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 calc(72px + var(--safe-bottom))}
 .rpt-scroll::-webkit-scrollbar{display:none}
 .rpt-hero{
-  background:linear-gradient(150deg,var(--nb2) 0%,var(--gr1) 45%,var(--gr2) 100%);
-  padding:13px 18px 14px;position:relative;overflow:hidden;
+  background:var(--card);border-bottom:1.5px solid var(--border);
+  padding:11px 16px;position:relative;
 }
-.rpt-hero::before{
-  content:"";position:absolute;width:220px;height:220px;border-radius:50%;
-  background:radial-gradient(circle,rgba(61,214,140,0.35) 0%,transparent 70%);
-  top:-70px;right:-50px;pointer-events:none;
-}
-.rpt-hero-pattern{
-  position:absolute;inset:0;pointer-events:none;opacity:0.5;
-  background-image:radial-gradient(rgba(255,255,255,0.07) 1px,transparent 1px);
-  background-size:20px 20px;
-}
+.rpt-hero::before{content:none}
+.rpt-hero-pattern{display:none}
 .rpt-hero-top{display:flex;align-items:center;justify-content:space-between;position:relative;z-index:1;margin-bottom:14px}
-.rpt-eyebrow{font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1.6px;font-weight:800;display:flex;align-items:center;gap:6px}
 .rpt-eyebrow i{font-size:13px;color:var(--go3)}
-.rpt-title{font-size:19px;font-weight:900;color:#fff;letter-spacing:-0.4px;margin-top:3px}
+.rpt-title{font-size:17px;font-weight:900;color:var(--text);letter-spacing:-0.3px;position:relative;z-index:1}
 .rpt-share{
-  width:36px;height:36px;border-radius:11px;flex-shrink:0;
-  background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);
-  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  width:32px;height:32px;border-radius:10px;flex-shrink:0;
+  background:var(--bg);border:1.5px solid var(--border);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;
 }
 .rpt-share i{font-size:16px}
 .rpt-back-btn{
-  width:34px;height:34px;border-radius:10px;flex-shrink:0;position:relative;z-index:1;
-  background:rgba(255,255,255,0.14);border:1px solid rgba(255,255,255,0.2);
-  color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  width:32px;height:32px;border-radius:10px;flex-shrink:0;position:relative;z-index:1;
+  background:var(--bg);border:1.5px solid var(--border);
+  color:var(--muted);display:flex;align-items:center;justify-content:center;cursor:pointer;
   transition:transform 0.13s,background 0.15s;
 }
 .rpt-back-btn:hover{background:rgba(255,255,255,0.22)}
@@ -912,18 +903,18 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .rpt-filters{display:flex;gap:7px;position:relative;z-index:1;margin-bottom:10px}
 .rpt-chip{
   padding:6px 13px;border-radius:20px;font-size:11.5px;font-weight:700;
-  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.16);
-  color:rgba(255,255,255,0.7);cursor:pointer;font-family:inherit;transition:all 0.15s;
+  background:var(--bg);border:1.5px solid var(--border);
+  color:var(--muted);cursor:pointer;font-family:inherit;transition:all 0.15s;
 }
-.rpt-chip.active{background:#fff;color:var(--gr2);border-color:transparent;box-shadow:0 4px 12px rgba(0,0,0,0.18)}
-.rpt-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;position:relative;z-index:1}
+.rpt-chip.active{background:linear-gradient(135deg,var(--gr1),var(--gr3));color:#fff;border-color:transparent}
+.rpt-stats{display:flex;gap:8px;position:relative;z-index:1;flex-wrap:wrap}
 .rpt-stat{
-  background:rgba(255,255,255,0.1);border:1px solid rgba(255,255,255,0.14);
-  border-radius:12px;padding:7px 8px;text-align:center;
-  display:flex;align-items:center;justify-content:center;gap:7px;
+  background:var(--bg);border:1.5px solid var(--border);
+  border-radius:20px;padding:5px 12px;
+  display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
 }
-.rpt-stat-n{font-size:17px;font-weight:900;color:#fff;line-height:1;letter-spacing:-0.5px}
-.rpt-stat-l{font-size:9px;color:rgba(255,255,255,0.55);text-transform:uppercase;letter-spacing:0.7px;margin-top:4px;font-weight:700}
+.rpt-stat-n{font-size:17px;font-weight:900;color:var(--gr2);line-height:1;letter-spacing:-0.5px}
+.rpt-stat-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:0.7px;font-weight:700}
 
 .rpt-body{padding:14px 16px}
 .rpt-daysep{
@@ -1081,25 +1072,19 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 .page-badge{
   display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
   padding:3px 9px;border-radius:20px;
-  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
-  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
+  background:rgba(5,120,220,0.09);border:1px solid rgba(5,120,220,0.2);
+  color:var(--gr2);font-size:9.5px;font-weight:800;
   letter-spacing:0.6px;text-transform:uppercase;
 }
 .page-badge i{font-size:11px}
 
 .areas-hero{
-  background:linear-gradient(150deg,var(--nb2) 0%,var(--gr1) 45%,var(--gr2) 100%);
-  padding:13px 18px 14px;position:relative;overflow:hidden;
+  background:var(--card);border-bottom:1.5px solid var(--border);
+  padding:11px 16px;position:relative;
 }
-.areas-hero-pattern{
-  position:absolute;inset:0;pointer-events:none;opacity:0.5;
-  background-image:radial-gradient(rgba(255,255,255,0.07) 1px,transparent 1px);
-  background-size:20px 20px;
-}
-.areas-eyebrow{font-size:10px;color:rgba(255,255,255,0.6);text-transform:uppercase;letter-spacing:1.6px;font-weight:800;display:flex;align-items:center;gap:6px;position:relative;z-index:1}
+.areas-hero-pattern{display:none}
 .areas-eyebrow i{font-size:13px;color:#fff}
-.areas-title{font-size:19px;font-weight:900;color:#fff;letter-spacing:-0.4px;margin-top:3px;position:relative;z-index:1}
-.areas-sub{font-size:12px;color:rgba(255,255,255,0.65);margin-top:4px;position:relative;z-index:1}
+.areas-title{font-size:17px;font-weight:900;color:var(--text);letter-spacing:-0.3px;position:relative;z-index:1}
 
 .areas-add-box{
   margin:14px 16px 0;background:var(--card);border:1.5px solid var(--border);
@@ -1343,18 +1328,19 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
   border:1.5px solid rgba(5,120,220,0.2);font-size:12.5px;font-weight:600;color:var(--gr2);
   display:flex;align-items:center;gap:8px;
 }
-.tracking-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 16px 0}
+.tracking-stats{display:flex;flex-wrap:wrap;gap:8px;margin:12px 16px 0}
 .tracking-stat-card{
-  border-radius:14px;padding:12px 8px;text-align:center;border:1.5px solid var(--border);background:var(--card);
+  border-radius:20px;padding:5px 12px;border:1.5px solid var(--border);background:var(--card);
+  display:inline-flex;align-items:center;gap:6px;flex:0 0 auto;
 }
 .tracking-stat-card.live{border-color:rgba(22,163,74,0.3);background:rgba(22,163,74,0.06)}
 .tracking-stat-card.away{border-color:rgba(217,119,6,0.3);background:rgba(217,119,6,0.06)}
 .tracking-stat-card.offline{border-color:rgba(107,114,128,0.3);background:rgba(107,114,128,0.06)}
-.tracking-stat-n{font-size:22px;font-weight:800;color:var(--text)}
+.tracking-stat-n{font-size:16px;font-weight:900;line-height:1;color:var(--text)}
 .tracking-stat-card.live .tracking-stat-n{color:#16a34a}
 .tracking-stat-card.away .tracking-stat-n{color:#d97706}
 .tracking-stat-card.offline .tracking-stat-n{color:#6b7280}
-.tracking-stat-l{font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.3px;margin-top:2px}
+.tracking-stat-l{font-size:9px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px}
 .tracking-avatar-wrap{position:relative;flex-shrink:0}
 .tracking-avatar{
   width:44px;height:44px;border-radius:50%;background:var(--gr2) center/cover no-repeat;
@@ -1593,28 +1579,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
      and stat cards before any actual content appears. On a phone that was
      consuming roughly a third of the display, so the hero blocks shrink
      and the stat cards become slim pills. */
-  /* ===== Shared page header =====
-   Every screen uses the same band: optional back button, title, optional
-   badge, optional right-hand actions. Keeping one structure means the
-   headers stop looking like five different designs. */
-.page-hero-row{
-  display:flex;align-items:center;gap:10px;
-  position:relative;z-index:1;min-height:34px;
-}
-.page-hero-row .areas-title,
-.page-hero-row .rpt-title{margin:0;flex:1;min-width:0}
-.page-hero-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
-.page-badge{
-  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
-  padding:3px 9px;border-radius:20px;
-  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
-  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
-  letter-spacing:0.6px;text-transform:uppercase;
-}
-.page-badge i{font-size:11px}
-
-.areas-hero{padding:12px 16px 13px}
-  .areas-eyebrow{font-size:9px;letter-spacing:1.2px}
+  .areas-hero,.rpt-hero{padding:9px 14px}
   .areas-title{font-size:16.5px;margin-top:1px}
 
   /* Planner: put the two primary actions side by side instead of stacking
@@ -1640,16 +1605,12 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
   .vp-rep-chip{padding:6px 11px;font-size:12px}
   .vp-viewing-banner{margin:0 12px 9px;padding:8px 11px;font-size:11.5px}
 
-  .rpt-hero{padding:9px 14px 11px}
-  .rpt-eyebrow{font-size:9px;letter-spacing:1.2px}
+
   .rpt-title{font-size:16.5px;margin-top:1px}
   .rpt-filters{gap:6px;margin-bottom:10px}
   .rpt-chip{padding:6px 12px;font-size:11.5px}
-  .rpt-stats{gap:7px}
-  .rpt-stat{
-    padding:7px 5px;border-radius:11px;
-    display:flex;align-items:center;justify-content:center;gap:6px;
-  }
+  .rpt-stats{gap:6px}
+  .rpt-stat{padding:4px 10px;border-radius:18px;gap:5px}
   .rpt-stat-n{font-size:15px;line-height:1}
   .rpt-stat-l{font-size:8.5px;letter-spacing:0.3px;margin-top:0;line-height:1.1}
   .rpt-daysep{margin:10px 0 7px}
@@ -1660,37 +1621,8 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
      The map is the point of this screen, so give it the space. The header
      shrinks to a single compact line and the KPI cards become slim pills
      instead of tall boxes. */
-  #v-tracking /* ===== Shared page header =====
-   Every screen uses the same band: optional back button, title, optional
-   badge, optional right-hand actions. Keeping one structure means the
-   headers stop looking like five different designs. */
-.page-hero-row{
-  display:flex;align-items:center;gap:10px;
-  position:relative;z-index:1;min-height:34px;
-}
-.page-hero-row .areas-title,
-.page-hero-row .rpt-title{margin:0;flex:1;min-width:0}
-.page-hero-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
-.page-badge{
-  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
-  padding:3px 9px;border-radius:20px;
-  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
-  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
-  letter-spacing:0.6px;text-transform:uppercase;
-}
-.page-badge i{font-size:11px}
 
-.areas-hero{padding:12px 16px 12px}
-  #v-tracking .areas-eyebrow{font-size:9px;letter-spacing:1.2px}
   #v-tracking .areas-title{font-size:16px;margin-top:1px}
-
-  #v-tracking .tracking-stats{gap:7px;margin:10px 12px 0}
-  #v-tracking .tracking-stat-card{
-    padding:7px 4px;border-radius:11px;
-    display:flex;align-items:center;justify-content:center;gap:6px;
-  }
-  #v-tracking .tracking-stat-n{font-size:15px;line-height:1}
-  #v-tracking .tracking-stat-l{font-size:9px;letter-spacing:0.2px;margin-top:0;line-height:1.1}
 
   #tracking-map{
     height:44vh!important;min-height:240px;
@@ -1779,42 +1711,16 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
      full width, which wasted a lot of vertical space before any content
      appeared. Titles, filters and stats now sit in a single compact band
      with the stats as fixed-width pills rather than stretched boxes. */
-  .rpt-hero{padding:14px 24px 16px}
+
   .rpt-title{font-size:20px}
-  .rpt-eyebrow{font-size:9.5px}
   .rpt-filters{margin-bottom:12px;gap:7px}
   .rpt-chip{padding:6px 14px;font-size:12px}
-  .rpt-stats{gap:10px;max-width:600px}
-  .rpt-stat{
-    padding:9px 16px;border-radius:12px;
-    display:flex;align-items:center;justify-content:center;gap:9px;
-  }
+  .rpt-stats{gap:9px}
   .rpt-stat-n{font-size:19px;line-height:1}
   .rpt-stat-l{font-size:9.5px;margin-top:0;letter-spacing:0.5px}
 
-  /* ===== Shared page header =====
-   Every screen uses the same band: optional back button, title, optional
-   badge, optional right-hand actions. Keeping one structure means the
-   headers stop looking like five different designs. */
-.page-hero-row{
-  display:flex;align-items:center;gap:10px;
-  position:relative;z-index:1;min-height:34px;
-}
-.page-hero-row .areas-title,
-.page-hero-row .rpt-title{margin:0;flex:1;min-width:0}
-.page-hero-actions{display:flex;gap:8px;margin-left:auto;flex-shrink:0}
-.page-badge{
-  display:inline-flex;align-items:center;gap:4px;flex-shrink:0;
-  padding:3px 9px;border-radius:20px;
-  background:rgba(255,255,255,0.16);border:1px solid rgba(255,255,255,0.22);
-  color:rgba(255,255,255,0.92);font-size:9.5px;font-weight:800;
-  letter-spacing:0.6px;text-transform:uppercase;
-}
-.page-badge i{font-size:11px}
-
-.areas-hero{padding:16px 24px 18px}
+  .areas-hero,.rpt-hero{padding:12px 24px}
   .areas-title{font-size:20px}
-  .areas-sub{font-size:12px;margin-top:3px}
 
   /* Team pickers and banners align with the content column */
   .vp-rep-picker{padding:12px 24px 10px}
@@ -1822,12 +1728,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
   #rpt-rep-picker{padding:12px 24px 10px}
   #rpt-viewing-banner{margin:0 24px 12px}
 
-  .tracking-stats{max-width:620px;margin:14px 24px 0}
-  .tracking-stat-card{
-    padding:9px 14px;display:flex;align-items:center;justify-content:center;gap:9px;
-  }
-  .tracking-stat-n{font-size:19px;line-height:1}
-  .tracking-stat-l{font-size:9.5px;margin-top:0}
+  .tracking-stats{margin:12px 24px 0}
   #tracking-map{margin:14px 24px 0;max-width:calc(100% - 48px)}
   .tracking-list{margin:14px 24px 20px!important;max-width:820px}
 
@@ -2836,7 +2737,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-30-r39";
+var APP_VERSION = "2026-07-30-r42";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -3685,6 +3586,13 @@ function rangeStart(range){
 
 var reportContextUid=null;   // null = my own visits; otherwise a team member's uid
 function reportEffectiveUid(){ return reportContextUid||CURRENT_UID; }
+function reportScopeLabel(){
+  if(!canViewTeamPlans()) return CURRENT_USER||"My visits";
+  if(reportContextUid==="__all") return "All Team";
+  if(!reportContextUid||reportContextUid===CURRENT_UID) return CURRENT_USER||"My visits";
+  var p=(vpTeamCache||[]).filter(function(u){return u.uid===reportContextUid;})[0];
+  return (p&&(p.name||p.email))||"Team member";
+}
 function renderReportRepPicker(){
   var pickerEl=document.getElementById("rpt-rep-picker");
   var bannerEl=document.getElementById("rpt-viewing-banner");
@@ -3695,7 +3603,8 @@ function renderReportRepPicker(){
     return;
   }
   function draw(team){
-    var chips="<div class=\"vp-rep-chip"+(!reportContextUid||reportContextUid===CURRENT_UID?" active":"")+"\" data-uid=\""+CURRENT_UID+"\"><i class=\"ti ti-user\"></i> My Visits</div>";
+    var chips="<div class=\"vp-rep-chip"+(!reportContextUid||reportContextUid===CURRENT_UID?" active":"")+"\" data-uid=\""+CURRENT_UID+"\"><i class=\"ti ti-user\"></i> My Visits</div>"
+      +"<div class=\"vp-rep-chip"+(reportContextUid==="__all"?" active":"")+"\" data-uid=\"__all\"><i class=\"ti ti-users\"></i> All Team</div>";
     team.forEach(function(u){
       if(u.uid===CURRENT_UID) return;
       chips+="<div class=\"vp-rep-chip"+(reportContextUid===u.uid?" active":"")+"\" data-uid=\""+u.uid+"\">"+escapeHtml(u.name||u.email||"\u2014")+"</div>";
@@ -3709,7 +3618,10 @@ function renderReportRepPicker(){
         renderReport();
       });
     });
-    if(reportContextUid&&reportContextUid!==CURRENT_UID){
+    if(reportContextUid==="__all"){
+      bannerEl.innerHTML="<i class=\"ti ti-users\"></i> Showing visits from the <b>whole team</b>";
+      bannerEl.style.display="flex";
+    } else if(reportContextUid&&reportContextUid!==CURRENT_UID){
       var person=team.filter(function(u){return u.uid===reportContextUid;})[0];
       bannerEl.innerHTML="<i class=\"ti ti-eye\"></i> Showing <b>"+escapeHtml((person&&person.name)||"this team member")+"</b>'s visits";
       bannerEl.style.display="flex";
@@ -3819,7 +3731,7 @@ function renderReport(){
 function buildReportText(range){
   var entries=getReportEntries(range);
   var label=range==="today"?"Today":range==="week"?"This Week":"All Time";
-  var lines=["Fastrack Customer Visit ("+label+")",""];
+  var lines=["Fastrack Customer Visit — "+reportScopeLabel()+" ("+label+")",""];
   if(!entries.length){
     lines.push("No visits logged.");
   } else {
@@ -3891,7 +3803,7 @@ function exportReportPDF(range){
     doc.setFont("helvetica","normal");
     doc.setFontSize(9);
     doc.setTextColor(90,107,138);
-    doc.text("Range: "+label+"  •  Generated "+new Date().toLocaleString("en-GB",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"}),pageW-marginX,y+11,{align:"right"});
+    doc.text(reportScopeLabel()+"  •  "+label+"  •  Generated "+new Date().toLocaleString("en-GB",{month:"short",day:"numeric",year:"numeric",hour:"2-digit",minute:"2-digit"}),pageW-marginX,y+11,{align:"right"});
     y+=42;
     doc.setDrawColor(228,233,244);
     doc.setLineWidth(1);
@@ -4000,7 +3912,8 @@ function exportReportPDF(range){
     doc.text("Page "+p+" of "+pageCount,pageW-marginX,pageH-24,{align:"right"});
   }
 
-  var fname="Fastrack-Customer-Visit-"+label.replace(/\s+/g,"")+"-"+new Date().toISOString().slice(0,10)+".pdf";
+  var _scope=reportScopeLabel().replace(/[^\w\u0600-\u06FF]+/g,"-").replace(/^-|-$/g,"");
+  var fname="Fastrack-Customer-Visit-"+_scope+"-"+label.replace(/\s+/g,"")+"-"+new Date().toISOString().slice(0,10)+".pdf";
   doc.save(fname);
 }
 
