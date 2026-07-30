@@ -2333,6 +2333,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
           <span style="font-size:13.5px;font-weight:600;color:var(--text)" data-i18n="settingsPushToggle">Send alerts to this device</span>
         </label>
         <div class="logo-settings-sub" id="settings-push-hint" style="margin-top:7px" data-i18n="settingsPushHint">Get visit plan reminders even when the app is closed.</div>
+        <button class="about-check-btn" id="settings-install-btn" style="margin-top:12px;display:none"><i class="ti ti-device-mobile-down"></i> <span data-i18n="settingsInstall">Add to Home Screen</span></button>
       </div>
 
       <div class="logo-settings-card" style="margin:14px 16px 0">
@@ -2643,7 +2644,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 <!-- ===== iOS MANUAL INSTALL SHEET ===== -->
 <div class="ios-install-sheet" id="ios-install-sheet">
   <div class="ios-install-header">
-    <div class="ios-install-title">Add Fastrack to Home Screen</div>
+    <div class="ios-install-title">Add PilotPro to Home Screen</div>
     <button class="ios-install-close" id="ios-install-close"><i class="ti ti-x"></i></button>
   </div>
   <div class="ios-step">
@@ -2659,7 +2660,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
   <div class="ios-step">
     <div class="ios-step-num">3</div>
     <i class="ti ti-checkbox ios-step-icon"></i>
-    <div class="ios-step-text">Tap <b>Add</b> — Fastrack will appear on your home screen like a real app</div>
+    <div class="ios-step-text">Tap <b>Add</b> — PilotPro will appear on your home screen like a real app</div>
   </div>
 </div>
 
@@ -2749,7 +2750,7 @@ html,body{height:100%;overflow:hidden;font-family:"Inter",system-ui,-apple-syste
 /* Bump this string every time this file is edited/redeployed. The app uses
    it to detect when a device is running an old cached copy and prompt a
    refresh automatically — see checkForAppUpdate() near the bottom. */
-var APP_VERSION = "2026-07-30-r45";
+var APP_VERSION = "2026-07-30-r46";
 
 var GOOGLE_MAPS_API_KEY = "AIzaSyBDJhahNgEXmstacEFYkvOc-qP23yrSxB8";
 
@@ -2785,6 +2786,7 @@ var TRANSLATIONS = {
     settingsNotifToggle: "Enable notification badge",
     settingsPushToggle: "Send alerts to this device",
     settingsPushHint: "Get visit plan reminders even when the app is closed.",
+    settingsInstall: "Add to Home Screen",
     settingsLangTitle: "Language",
     settingsLangSub: "Choose the language for the app interface.",
     settingsLangEnglish: "English",
@@ -2898,6 +2900,7 @@ var TRANSLATIONS = {
     settingsNotifToggle: "تفعيل شارة الإشعارات",
     settingsPushToggle: "إرسال التنبيهات إلى هذا الجهاز",
     settingsPushHint: "استلم تذكيرات خطة الزيارات حتى عندما يكون التطبيق مغلقًا.",
+    settingsInstall: "إضافة إلى الشاشة الرئيسية",
     settingsLangTitle: "اللغة",
     settingsLangSub: "اختر لغة واجهة التطبيق.",
     settingsLangEnglish: "English",
@@ -5969,6 +5972,11 @@ function renderSettingsScreen(){
   }
   var toggle=document.getElementById("settings-notif-toggle");
   if(toggle) toggle.checked=getNotifPref();
+  var installBtn=document.getElementById("settings-install-btn");
+  if(installBtn){
+    // Only worth offering when it isn't already installed
+    installBtn.style.display=isStandalone()?"none":"";
+  }
   var pushBox=document.getElementById("settings-push-toggle");
   var pushHint=document.getElementById("settings-push-hint");
   if(pushBox){
@@ -6138,6 +6146,16 @@ document.getElementById("cycle-presets").addEventListener("click",function(e){
 });
 document.getElementById("cycle-save-btn").addEventListener("click",function(){
   applyVisitCycle(document.getElementById("cycle-input").value);
+});
+document.getElementById("settings-install-btn").addEventListener("click",function(){
+  if(isIOS()){
+    document.getElementById("ios-install-sheet").classList.add("show");
+  } else if(deferredInstallPrompt){
+    deferredInstallPrompt.prompt();
+    deferredInstallPrompt.userChoice.then(function(){ deferredInstallPrompt=null; });
+  } else {
+    showToast("Use your browser menu and choose \"Install app\" or \"Add to Home Screen\"","info","ti-device-mobile-down");
+  }
 });
 document.getElementById("settings-push-toggle").addEventListener("change",function(){
   var box=this, wantOn=box.checked;
